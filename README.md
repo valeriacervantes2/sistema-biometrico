@@ -3,24 +3,24 @@
 Proyecto universitario desarrollado en Python para la detección y reconocimiento facial utilizando visión por computadora.
 
 
-## 📌 Descripción
+## Descripción
 
 Este sistema permite capturar rostros mediante una cámara, procesarlos y almacenarlos en una base de datos para su posterior reconocimiento.
 
 El proyecto está estructurado de forma modular para facilitar su mantenimiento y escalabilidad.
 
-## 🛠 Tecnologías utilizadas
+## Tecnologías utilizadas
 
 - Python 3.x
 - OpenCV
 - SQLite
 - NumPy
 
-## 📂 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 biometrico/
-│
+|
 ├── app/
 │   ├── main.py
 │   ├── camara.py
