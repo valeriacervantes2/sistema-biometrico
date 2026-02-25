@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Base de datos del sistema biometrico
+*.db
+
+# Dataset de imagenes (si en algun momento lo usas)
+dataset/
+
+# Archivos temporales del sistema
+*.sqlite3
