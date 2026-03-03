@@ -18,21 +18,10 @@ def inicializar_bd():
     cursor = conn.cursor()
 
     # =========================
-    # TIPO_USUARIO
+    # USUARIO_ROL
     # =========================
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS tipo_usuario (
-        id_tipo_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT NOT NULL UNIQUE,
-        estado INTEGER DEFAULT 1
-    );
-    """)
-
-    # =========================
-    # ROL
-    # =========================
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS rol (
+    CREATE TABLE IF NOT EXISTS usuario_rol (
         id_rol INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL UNIQUE,
         descripcion TEXT
@@ -76,12 +65,10 @@ def inicializar_bd():
         estado INTEGER DEFAULT 1,
         fecha_registro TEXT NOT NULL,
         fecha_actualizacion TEXT,
-        id_tipo_usuario INTEGER NOT NULL,
         id_rol INTEGER NOT NULL,
         id_facultad INTEGER,
         id_carrera INTEGER,
-        FOREIGN KEY (id_tipo_usuario) REFERENCES tipo_usuario(id_tipo_usuario),
-        FOREIGN KEY (id_rol) REFERENCES rol(id_rol),
+        FOREIGN KEY (id_rol) REFERENCES usuario_rol(id_rol),
         FOREIGN KEY (id_facultad) REFERENCES facultad(id_facultad),
         FOREIGN KEY (id_carrera) REFERENCES carrera(id_carrera)
     );
@@ -116,21 +103,23 @@ def inicializar_bd():
     );
     """)
 
-    # =========================
-    # HISTORIAL_CAMBIOS
-    # =========================
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS historial_cambios (
-        id_cambio INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_usuario_afectado INTEGER,
-        id_usuario_admin INTEGER,
-        accion TEXT NOT NULL,
-        fecha TEXT NOT NULL,
-        FOREIGN KEY (id_usuario_afectado) REFERENCES usuario(id_usuario),
-        FOREIGN KEY (id_usuario_admin) REFERENCES usuario(id_usuario)
-    );
-    """)
-
     conn.commit()
     conn.close()
-    print("Base de datos inicializada correctamente.")
+    print("Base de datos creada correctamente.")
+
+
+
+
+
+
+
+    if __name__ == "__main__":
+        print("Estoy ejecutando database.py")
+        inicializar_bd()
+
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        print("Tablas creadas:")
+        print(cursor.fetchall())
+        conn.close()
