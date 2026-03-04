@@ -1,41 +1,37 @@
 import cv2
+import face_recognition
+import numpy as np
 
-face_cascade = cv2.CascadeClassifier(
-    cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-    )
 
-#Esto es para inicializar la cámara
-cap = cv2.VideoCapture(0)
+def procesar_frame(frame):
+    #Esto convertira el frame de BGR a RGB
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-if not cap.isOpened():
-    print("Cannot open camera")
-    exit()
+    #Este detectara las caras en el frame
+    face_locations = face_recognition.face_locations(rgb)
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Can't receive frame.")
-        break
+    num_faces = len(face_locations)
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #Politicas de deteccion
 
-    #Ajusta los parametros de detección
-    faces = face_cascade.detectMultiScale(
-        gray,
-        scaleFactor=1.3,    #Escala de reducción de la imagen para la detección, en este caso se reduce un 30% cada vez.
-        minNeighbors=5,     #Se usa para confirmar que es realemente una cara, en este caso se verifica 5 veces.
-        minSize=(30, 30)    #Tamaño mínimo de la cara a detectar, en este caso 30x30 píxeles
+    if num_faces == 0:
+        return frame, None, "No se detectó ninguna cara"
     
-    )
+    if num_faces > 1:
+        return frame, None, "Se detectaron múltiples caras"
+    
+    #Puntos clave para la deteccion de rostro
+    face_lankmarks = face_recognition.face_landmarks(rgb, face_locations)
 
-    #Dibuja el rectangulo detector de rostro
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), ( 0, 255, 0), 2)
+    #Vector numérico de la cara
+    face_encoding = face_recognition.face_encodings(rgb, face_locations)[0]
 
-    cv2.imshow('Face Detection', frame)
+    #Dibujar un rectángulo alrededor de la cara detectada
+    top, right, bottom, left = face_locations[0]
+    cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    #Dibujar puntos clave en la cara
+    for (x,y) in face_lankmarks[0]['chin']:
+        cv2.circle(frame, (x,y), 1, (0, 0, 255), -1)
 
-cap.release()
-cv2.destroyAllWindows()
+    return frame, face_encoding, "Cara detectada correctamente"
