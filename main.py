@@ -1,12 +1,9 @@
 import cv2
 from app.camara.camara import iniciar_camara, obtener_frame
 from app.detection.detector_rostro import procesar_frame
-from app.database.database import inicializar_bd
 
 
 def main():
-    #Inicializar la base de datos
-    inicializar_bd()
 
     #Iniciar la cámara
     cap = iniciar_camara()
