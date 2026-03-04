@@ -106,20 +106,4 @@ def inicializar_bd():
     conn.commit()
     conn.close()
     print("Base de datos creada correctamente.")
-
-
-
-
-
-
-
-    if __name__ == "__main__":
-        print("Estoy ejecutando database.py")
-        inicializar_bd()
-
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        print("Tablas creadas:")
-        print(cursor.fetchall())
-        conn.close()
+    
