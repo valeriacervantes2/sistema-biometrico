@@ -97,11 +97,12 @@ def inicializar_bd():
         id_registro INTEGER PRIMARY KEY AUTOINCREMENT,
         id_usuario INTEGER,
         fecha_hora TEXT NOT NULL,
-        resultado TEXT NOT NULL,
+        resultado INTEGER NOT NULL, -- 1 acceso permitido, 0 denegado
         confianza REAL,
+        motivo TEXT, -- baja confianza, no reconocido, liveness fallido
         FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
-    );
-    """)
+);
+""")
 
     conn.commit()
     conn.close()

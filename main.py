@@ -1,9 +1,10 @@
-<<<<<<< Updated upstream
+
 import cv2
 from app.camara.camara import iniciar_camara, obtener_frame
 from app.detection.detector_rostro import procesar_frame
-from app.database.database import inicializar_bd
-=======
+
+
+
 import customtkinter as ctk
 from app.views.login_view import LoginView
 from app.views.landing_view import LandingView
@@ -54,12 +55,10 @@ class AppPrincipal(ctk.CTk):
         self.limpiar_pantalla()
         self.contenedor_vista = TerminalView(self, on_back=self.mostrar_landing)
         self.contenedor_vista.pack(expand=True, fill="both")
->>>>>>> Stashed changes
+
 
 
 def main():
-    #Inicializar la base de datos
-    inicializar_bd()
 
     #Iniciar la cámara
     cap = iniciar_camara()
@@ -88,9 +87,9 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-<<<<<<< Updated upstream
+
     main()
-=======
+
     app = AppPrincipal()
     app.mainloop()
->>>>>>> Stashed changes
+
