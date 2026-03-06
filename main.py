@@ -87,9 +87,6 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-
-    main()
-
+    # Eliminamos el main() que tenía el bucle while de la cámara
     app = AppPrincipal()
     app.mainloop()
-
