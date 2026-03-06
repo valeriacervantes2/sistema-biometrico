@@ -1,5 +1,5 @@
 import customtkinter as ctk
-
+# --- VISTA DE CUENTA PERSONAL (MI CUENTA) ---
 class AccountView(ctk.CTkFrame):
     def __init__(self, master, on_logout):
         super().__init__(master, fg_color="#F8FAFC")
