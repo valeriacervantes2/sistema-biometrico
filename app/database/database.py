@@ -18,21 +18,10 @@ def inicializar_bd():
     cursor = conn.cursor()
 
     # =========================
-    # TIPO_USUARIO
+    # USUARIO_ROL
     # =========================
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS tipo_usuario (
-        id_tipo_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT NOT NULL UNIQUE,
-        estado INTEGER DEFAULT 1
-    );
-    """)
-
-    # =========================
-    # ROL
-    # =========================
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS rol (
+    CREATE TABLE IF NOT EXISTS usuario_rol (
         id_rol INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL UNIQUE,
         descripcion TEXT
@@ -76,12 +65,10 @@ def inicializar_bd():
         estado INTEGER DEFAULT 1,
         fecha_registro TEXT NOT NULL,
         fecha_actualizacion TEXT,
-        id_tipo_usuario INTEGER NOT NULL,
         id_rol INTEGER NOT NULL,
         id_facultad INTEGER,
         id_carrera INTEGER,
-        FOREIGN KEY (id_tipo_usuario) REFERENCES tipo_usuario(id_tipo_usuario),
-        FOREIGN KEY (id_rol) REFERENCES rol(id_rol),
+        FOREIGN KEY (id_rol) REFERENCES usuario_rol(id_rol),
         FOREIGN KEY (id_facultad) REFERENCES facultad(id_facultad),
         FOREIGN KEY (id_carrera) REFERENCES carrera(id_carrera)
     );
@@ -110,27 +97,14 @@ def inicializar_bd():
         id_registro INTEGER PRIMARY KEY AUTOINCREMENT,
         id_usuario INTEGER,
         fecha_hora TEXT NOT NULL,
-        resultado TEXT NOT NULL,
+        resultado INTEGER NOT NULL, -- 1 acceso permitido, 0 denegado
         confianza REAL,
+        motivo TEXT, -- baja confianza, no reconocido, liveness fallido
         FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
-    );
-    """)
-
-    # =========================
-    # HISTORIAL_CAMBIOS
-    # =========================
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS historial_cambios (
-        id_cambio INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_usuario_afectado INTEGER,
-        id_usuario_admin INTEGER,
-        accion TEXT NOT NULL,
-        fecha TEXT NOT NULL,
-        FOREIGN KEY (id_usuario_afectado) REFERENCES usuario(id_usuario),
-        FOREIGN KEY (id_usuario_admin) REFERENCES usuario(id_usuario)
-    );
-    """)
+);
+""")
 
     conn.commit()
     conn.close()
-    print("Base de datos inicializada correctamente.")
+    print("Base de datos creada correctamente.")
+    

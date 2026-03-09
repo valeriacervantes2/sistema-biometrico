@@ -1,21 +1,15 @@
 import cv2
 
-cap = cv2.VideoCapture(0)
+def iniciar_camara():
+    cap = cv2.VideoCapture(0)  # Inicia la cámara (0 es el índice de la cámara predeterminada)
+    if not cap.isOpened():
+        print("No se pudo abrir la cámara")
+        return None         
+    return cap
 
-if not cap.isOpened():
-    print("Cannot open camera")
-    exit()
-
-while True:
-    ret, frame = cap.read()
+def obtener_frame(cap):
+    ret, frame = cap.read()  # Lee un frame de la cámara
     if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
-        break
-
-    cv2.imshow('Camera', frame)
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
+        print("No se pudo leer el frame")
+        return None
+    return frame
