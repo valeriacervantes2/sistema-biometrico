@@ -1,109 +1,162 @@
 import customtkinter as ctk
-# --- VISTA DE CUENTA PERSONAL (MI CUENTA) ---
+from app.theme.theme_manager import ThemeManager, LangManager
+
 class AccountView(ctk.CTkFrame):
-    def __init__(self, master, on_logout):
-        super().__init__(master, fg_color="#F8FAFC")
-        self.on_logout = on_logout
-        self.edit_mode = False  # Estado para controlar si estamos editando
-        self.inputs = {}        # Diccionario para guardar las referencias de los campos
+    def __init__(self, master, on_back):
+        theme = ThemeManager.get()
+        super().__init__(master, fg_color=theme["bg"])
 
-        # --- HEADER CON BOTÓN DE EDITAR ---
-        header = ctk.CTkFrame(self, fg_color="transparent")
-        header.pack(fill="x", padx=40, pady=(40, 20))
+        self.on_back = on_back
+        self.edit_mode = False
+        self.inputs = {}
+
+        # Suscripciones globales
+        ThemeManager.subscribe(self.update_theme)
+        LangManager.subscribe(self.update_language)
+
+        # --- HEADER ---
+        self.header = ctk.CTkFrame(self, fg_color="transparent")
+        self.header.pack(fill="x", padx=40, pady=(30,18))
+
+        left = ctk.CTkFrame(self.header, fg_color="transparent")
+        left.pack(side="left")
+
+        self.title_lbl = ctk.CTkLabel(left, text="Mi Cuenta", font=("Inter", 28, "bold"))
+        self.title_lbl.pack(anchor="w")
+        self.subtitle_lbl = ctk.CTkLabel(left, text="Gestiona tu información personal", font=("Inter", 12))
+        self.subtitle_lbl.pack(anchor="w", pady=(6,0))
+
+        self.btn_edit = ctk.CTkButton(self.header, text="📝 Editar Información", command=self.toggle_edit)
+        self.btn_edit.pack(side="right")
+
+        # --- CONTENEDOR CENTRAL ---
+        self.container = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.container.pack(fill="both", expand=True, padx=28, pady=(6,20))
+
+        # Primera renderización
+        self.refresh_ui()
+
+    def refresh_ui(self, data=None):
+        """Limpia y reconstruye el contenido del scrollable frame"""
+        theme = ThemeManager.get()
         
-        title_cont = ctk.CTkFrame(header, fg_color="transparent")
-        title_cont.pack(side="left")
-        ctk.CTkLabel(title_cont, text="Mi Cuenta", font=("Inter", 28, "bold"), text_color="#1E293B").pack(anchor="w")
-        ctk.CTkLabel(title_cont, text="Gestiona tu información personal", font=("Inter", 15), text_color="#64748B").pack(anchor="w")
+        # 1. Limpiar contenedor
+        for child in self.container.winfo_children():
+            child.destroy()
+        self.inputs = {}
 
-        # Botón Editar Información (Esquina superior derecha)
-        self.btn_edit = ctk.CTkButton(
-            header, text="📝 Editar Información", 
-            fg_color="white", text_color="#1E293B", 
-            border_width=1, border_color="#E2E8F0", 
-            hover_color="#F1F5F9", width=140, height=35,
-            command=self.toggle_edit
-        )
-        self.btn_edit.pack(side="right", anchor="n")
-
-        # Contenedor Central
-        self.container = ctk.CTkScrollableFrame(self, fg_color="transparent", width=700)
-        self.container.pack(expand=True, fill="both", pady=10)
-
-        # 1. Card Apariencia (Modo Oscuro)
+        # 2. Reconstruir Secciones
         self.create_appearance_card()
-
-        # 2. Card de Perfil (Banner Oscuro)
         self.create_profile_banner()
+        
+        # Datos por defecto si no hay previos
+        if not data:
+            data = {
+                "Nombre Completo": "ADMINISTRADOR DEL SISTEMA",
+                "Correo Institucional": "admin@universidad.edu.mx",
+                "Teléfono": "5512345678",
+                "Facultad": "ADMINISTRACIÓN"
+            }
+        
+        # 3. Crear Campos
+        for label, value in data.items():
+            icon = "👤" if "Nombre" in label else ("✉" if "Correo" in label else ("📞" if "Teléfono" in label else "🏛"))
+            self.create_field(label, value, icon)
 
-        # 3. Campos de Datos (Ahora con soporte para edición)
-        self.create_field("Nombre Completo", "ADMINISTRADOR DEL SISTEMA", "👤")
-        self.create_field("Correo Institucional", "admin@universidad.edu.mx", "✉")
-        self.create_field("Teléfono", "5512345678", "📞")
-        self.create_field("Facultad", "ADMINISTRACIÓN", "🏛")
-
-        # 4. Botón Cerrar Sesión
-        btn_out = ctk.CTkButton(
-            self.container, text="↪ Cerrar Sesión", 
-            fg_color="#E11D48", hover_color="#BE123C", 
-            height=45, corner_radius=10, 
-            font=("Inter", 14, "bold"), 
-            command=self.on_logout
+        # 4. Botón Cerrar Sesión (IMPORTANTE: Vincular on_back)
+        self.logout_btn = ctk.CTkButton(
+            self.container, 
+            text="↪ Cerrar Sesión" if LangManager.get() == "ES" else "Logout", 
+            fg_color=theme["accent_red"], 
+            hover_color="#991B1B", 
+            text_color="white",
+            height=45,
+            command=self.on_back # Aquí se asegura el regreso al login
         )
-        btn_out.pack(fill="x", pady=30, padx=100)
+        self.logout_btn.pack(fill="x", padx=100, pady=28)
+        
+        # Aplicar colores de texto/botones según el tema actual
+        self.apply_theme_colors()
 
     def create_appearance_card(self):
-        card = ctk.CTkFrame(self.container, fg_color="white", corner_radius=15, border_width=1, border_color="#E2E8F0")
-        card.pack(fill="x", pady=(0, 20), padx=100)
-        ctk.CTkLabel(card, text="Apariencia", font=("Inter", 14, "bold"), text_color="#1E293B").pack(anchor="w", padx=20, pady=15)
+        theme = ThemeManager.get()
+        card = ctk.CTkFrame(self.container, fg_color=theme["card"], corner_radius=12, border_width=1, border_color=theme["border"])
+        card.pack(fill="x", padx=100, pady=(6,16))
         
-        f1 = ctk.CTkFrame(card, fg_color="transparent")
-        f1.pack(fill="x", padx=20, pady=5)
-        ctk.CTkLabel(f1, text="☼  Modo Oscuro", font=("Inter", 13)).pack(side="left")
-        ctk.CTkSwitch(f1, text="").pack(side="right")
+        ctk.CTkLabel(card, text="Apariencia" if LangManager.get() == "ES" else "Appearance", 
+                     font=("Inter", 14, "bold"), text_color=theme["text"]).pack(anchor="w", padx=18, pady=(12,6))
+
+        # Switch Modo Oscuro
+        row = ctk.CTkFrame(card, fg_color="transparent")
+        row.pack(fill="x", padx=18, pady=(6,8))
+        ctk.CTkLabel(row, text="Modo Oscuro" if LangManager.get() == "ES" else "Dark Mode", text_color=theme["text"]).pack(side="left")
+        
+        self.theme_switch = ctk.CTkSwitch(row, text="", command=ThemeManager.toggle, progress_color=theme["accent_green"])
+        if ThemeManager.current == "dark": self.theme_switch.select()
+        self.theme_switch.pack(side="right")
+
+        # Segmented Idioma
+        row2 = ctk.CTkFrame(card, fg_color="transparent")
+        row2.pack(fill="x", padx=18, pady=(0,12))
+        ctk.CTkLabel(row2, text="Idioma" if LangManager.get() == "ES" else "Language", text_color=theme["text"]).pack(side="left")
+        
+        seg = ctk.CTkSegmentedButton(row2, values=["ES", "EN"], command=LangManager.set)
+        seg.set(LangManager.get())
+        seg.pack(side="right")
 
     def create_profile_banner(self):
-        card = ctk.CTkFrame(self.container, fg_color="#2D2D3A", corner_radius=15, height=160)
-        card.pack(fill="x", pady=10, padx=100)
+        theme = ThemeManager.get()
+        card = ctk.CTkFrame(self.container, fg_color=theme["input"], corner_radius=12, height=120)
+        card.pack(fill="x", padx=100, pady=(6,14))
         card.pack_propagate(False)
-
-        # Foto Circular con borde
-        img_circ = ctk.CTkFrame(card, width=90, height=90, corner_radius=45, fg_color="white", border_width=3, border_color="white")
-        img_circ.place(x=40, rely=0.5, anchor="w")
         
-        ctk.CTkLabel(card, text="ADMINISTRADOR DEL SISTEMA", font=("Inter", 18, "bold"), text_color="white").place(x=150, rely=0.45, anchor="w")
-        ctk.CTkLabel(card, text="ADMINISTRACIÓN", font=("Inter", 13), text_color="#94A3B8").place(x=150, rely=0.55, anchor="w")
+        avatar = ctk.CTkFrame(card, width=70, height=70, corner_radius=35, fg_color=theme["card"])
+        avatar.place(x=30, rely=0.5, anchor="w")
+        
+        ctk.CTkLabel(card, text="K O D A  USER", font=("Inter", 16, "bold"), text_color=theme["text"]).place(x=120, rely=0.4, anchor="w")
+        ctk.CTkLabel(card, text="ADMINISTRADOR", font=("Inter", 11), text_color=theme["text_secondary"]).place(x=120, rely=0.6, anchor="w")
 
     def create_field(self, label, value, icon):
-        f = ctk.CTkFrame(self.container, fg_color="#F1F5F9", height=65, corner_radius=12)
-        f.pack(fill="x", pady=5, padx=100)
+        theme = ThemeManager.get()
+        f = ctk.CTkFrame(self.container, fg_color=theme["card"], corner_radius=10, border_width=1, border_color=theme["border"], height=60)
+        f.pack(fill="x", padx=100, pady=5)
         f.pack_propagate(False)
-
-        ctk.CTkLabel(f, text=f"{icon}  {label}", font=("Inter", 11, "bold"), text_color="#64748B").place(x=20, y=8)
         
-        # Usamos CTkEntry en lugar de Label para poder editar
-        entry = ctk.CTkEntry(
-            f, fg_color="transparent", border_width=0, 
-            font=("Inter", 13, "bold"), text_color="#1E293B"
-        )
+        ctk.CTkLabel(f, text=f"{icon} {label}", font=("Inter", 10, "bold"), text_color=theme["text_secondary"]).place(x=15, y=5)
+        
+        entry = ctk.CTkEntry(f, fg_color="transparent", border_width=0, text_color=theme["text"], font=("Inter", 13))
         entry.insert(0, value)
-        entry.configure(state="readonly") # Bloqueado por defecto
-        entry.place(x=45, y=30, relwidth=0.8)
-        
+        entry.configure(state="normal" if self.edit_mode else "readonly")
+        entry.place(x=45, y=24, relwidth=0.8)
         self.inputs[label] = entry
 
+    def apply_theme_colors(self):
+        theme = ThemeManager.get()
+        self.configure(fg_color=theme["bg"])
+        self.title_lbl.configure(text_color=theme["text"])
+        self.subtitle_lbl.configure(text_color=theme["text_secondary"])
+        self.btn_edit.configure(fg_color=theme["card"], text_color=theme["text"], hover_color=theme["input"])
+
     def toggle_edit(self):
-        """Cambia entre modo lectura y modo edición"""
-        if not self.edit_mode:
-            # ACTIVAR EDICIÓN
-            self.edit_mode = True
-            self.btn_edit.configure(text="💾 Guardar Cambios", fg_color="#10B981", text_color="white", border_width=0)
-            for entry in self.inputs.values():
-                entry.configure(state="normal", fg_color="white", border_width=1)
-        else:
-            # GUARDAR Y BLOQUEAR
-            self.edit_mode = False
-            self.btn_edit.configure(text="📝 Editar Información", fg_color="white", text_color="#1E293B", border_width=1)
-            for entry in self.inputs.values():
-                entry.configure(state="readonly", fg_color="transparent", border_width=0)
-            print("Datos guardados localmente") # Aquí podrías conectar a tu DB
+        self.edit_mode = not self.edit_mode
+        self.update_language() # Para refrescar el texto del botón
+        for e in self.inputs.values():
+            e.configure(state="normal" if self.edit_mode else "readonly")
+
+    def update_theme(self):
+        # Guardar valores actuales para no perder lo escrito al cambiar tema
+        current_data = {k: v.get() for k, v in self.inputs.items()}
+        self.refresh_ui(data=current_data)
+
+    def update_language(self):
+        lang = LangManager.get()
+        is_es = lang == "ES"
+        
+        self.title_lbl.configure(text="Mi Cuenta" if is_es else "My Account")
+        self.subtitle_lbl.configure(text="Gestiona tu información personal" if is_es else "Manage personal info")
+        
+        edit_text = ("💾 Guardar" if self.edit_mode else "📝 Editar") if is_es else ("Save" if self.edit_mode else "Edit")
+        self.btn_edit.configure(text=edit_text)
+        
+        if hasattr(self, 'logout_btn'):
+            self.logout_btn.configure(text="↪ Cerrar Sesión" if is_es else "Logout")

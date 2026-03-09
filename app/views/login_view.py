@@ -1,100 +1,141 @@
 import customtkinter as ctk
+from app.theme.theme_manager import ThemeManager, LangManager
 
 class LoginView(ctk.CTkFrame):
     def __init__(self, master, on_login_success):
-        super().__init__(master, fg_color="#F8F9FA") 
+        # Sincronización inicial con el ThemeManager
+        theme = ThemeManager.get()
+        super().__init__(master, fg_color=theme["bg"]) 
+        
         self.on_login_success = on_login_success
         self.password_visible = False 
+        self.inputs_frames = []
+        self.labels_to_update = []
 
-        # --- BARRA SUPERIOR (SOLO CONTROLES) ---
+        # Suscribirse a cambios globales
+        ThemeManager.subscribe(self.update_theme)
+        LangManager.subscribe(self.update_language)
+
+        # --- BARRA SUPERIOR ---
         self.top_bar = ctk.CTkFrame(self, fg_color="transparent")
-        self.top_bar.pack(side="top", fill="x", padx=30, pady=20)
+        self.top_bar.pack(side="top", fill="x", padx=40, pady=25)
 
-        # Contenedor de botones a la derecha
         self.controls_wrapper = ctk.CTkFrame(self.top_bar, fg_color="transparent")
         self.controls_wrapper.pack(side="right")
 
         # Control de Tema
-        self.theme_control = ctk.CTkFrame(self.controls_wrapper, fg_color="#E2E8F0", corner_radius=20, width=110, height=38)
+        self.theme_control = ctk.CTkFrame(self.controls_wrapper, fg_color=theme["card"], corner_radius=20, width=100, height=38, border_width=1, border_color=theme["border"])
         self.theme_control.pack(side="left", padx=10)
         self.theme_control.pack_propagate(False) 
         
-        self.theme_icon = ctk.CTkLabel(self.theme_control, text="☀️", font=("Inter", 16), text_color="black")
-        self.theme_icon.place(x=22, y=19, anchor="center") 
+        self.theme_icon = ctk.CTkLabel(self.theme_control, text="🌙" if ThemeManager.current == "dark" else "☀️", font=("Inter", 15))
+        self.theme_icon.place(x=20, y=19, anchor="center") 
         
         self.theme_switch = ctk.CTkSwitch(
-            self.theme_control, text="", width=45, progress_color="#1D1D1F",
-            button_color="#1D1D1F", command=self.actualizar_icono_tema 
+            self.theme_control, text="", width=40, 
+            progress_color=theme["text"], button_color=theme["text"], 
+            command=self._toggle_theme_global
         )
-        self.theme_switch.place(x=72, y=19, anchor="center")
+        if ThemeManager.current == "dark": self.theme_switch.select()
+        self.theme_switch.place(x=68, y=19, anchor="center")
 
         # Selector de Idioma
-        self.lang_control = ctk.CTkFrame(self.controls_wrapper, fg_color="#E2E8F0", corner_radius=20, height=38)
+        self.lang_control = ctk.CTkFrame(self.controls_wrapper, fg_color=theme["card"], corner_radius=20, height=38, border_width=1, border_color=theme["border"])
         self.lang_control.pack(side="left", padx=10)
-        ctk.CTkLabel(self.lang_control, text="🌐", font=("Inter", 16), text_color="black").pack(side="left", padx=(12, 5))
         
-        self.es_btn = ctk.CTkButton(self.lang_control, text="ES", width=38, height=28, corner_radius=14, 
-                                   fg_color="#1D1D1F", text_color="white", font=("Inter", 11, "bold"),
-                                   hover_color="#1D1D1F", command=lambda: self.actualizar_idioma("ES"))
+        self.world_icon = ctk.CTkLabel(self.lang_control, text="🌐", font=("Inter", 15), text_color="#A1A1A1")
+        self.world_icon.pack(side="left", padx=(12, 5))
+        
+        self.es_btn = ctk.CTkButton(self.lang_control, text="ES", width=35, height=26, corner_radius=12, font=("Inter", 11, "bold"), command=lambda: LangManager.set("ES"))
         self.es_btn.pack(side="left", padx=2, pady=5)
         
-        self.en_btn = ctk.CTkButton(self.lang_control, text="EN", width=38, height=28, corner_radius=14, 
-                                   fg_color="transparent", text_color="#4A4A4A", font=("Inter", 11, "bold"),
-                                   hover_color="#CBD5E1", command=lambda: self.actualizar_idioma("EN"))
-        self.en_btn.pack(side="left", padx=(2, 10), pady=5)
+        self.en_btn = ctk.CTkButton(self.lang_control, text="EN", width=35, height=26, corner_radius=12, font=("Inter", 11, "bold"), command=lambda: LangManager.set("EN"))
+        self.en_btn.pack(side="left", padx=(2, 12), pady=5)
 
         # --- TARJETA DE LOGIN ---
-        self.card = ctk.CTkFrame(
-            self, 
-            fg_color="white", 
-            width=420, 
-            height=600, 
-            corner_radius=15,
-            border_width=1,          
-            border_color="#E0E0E0"   
-        )
+        self.card = ctk.CTkFrame(self, fg_color=theme["card"], width=420, height=640, corner_radius=28, border_width=1, border_color=theme["border"])
         self.card.place(relx=0.5, rely=0.5, anchor="center")
         self.card.pack_propagate(False) 
+        
         self.create_form()
+        self.update_theme() # Refrescar colores iniciales
+        self.update_language()
 
-    # --- LÓGICA INTERACTIVA ---
-    def actualizar_icono_tema(self):
-        if self.theme_switch.get() == 1:
-            self.theme_icon.configure(text="🌙")
-            self.theme_control.configure(fg_color="#CBD5E1")
-        else:
-            self.theme_icon.configure(text="☀️")
-            self.theme_control.configure(fg_color="#E2E8F0")
-        self.theme_icon.place(x=22, y=19, anchor="center")
+    def _toggle_theme_global(self):
+        ThemeManager.toggle()
 
-    def actualizar_idioma(self, lang):
+    def update_theme(self):
+        theme = ThemeManager.get()
+        is_dark = ThemeManager.current == "dark"
+        
+        # Actualizar contenedores principales
+        self.configure(fg_color=theme["bg"])
+        self.card.configure(fg_color=theme["card"], border_color=theme["border"])
+        self.theme_control.configure(fg_color=theme["input"], border_color=theme["border"])
+        self.lang_control.configure(fg_color=theme["input"], border_color=theme["border"])
+        
+        # Iconos y textos
+        self.theme_icon.configure(text="🌙" if is_dark else "☀️", text_color=theme["text"])
+        self.koda_label.configure(text_color="#FFFFFF" if is_dark else "#000000")
+        self.title_lbl.configure(text_color=theme["text"])
+        
+        # Inputs y Botones
+        input_bg = "#0D0D0D" if is_dark else "#F3F4F6"
+        btn_bg = "#FFFFFF" if is_dark else "#000000"
+        btn_text = "#000000" if is_dark else "#FFFFFF"
+        
+        self.login_btn.configure(fg_color=btn_bg, text_color=btn_text, hover_color="#E5E7EB" if is_dark else "#262626")
+        
+        for frame in self.inputs_frames:
+            frame.configure(fg_color=input_bg, border_color=theme["border"])
+        
+        self.user_entry.configure(text_color=theme["text"])
+        self.pass_entry.configure(text_color=theme["text"])
+        
+        for lbl in self.labels_to_update:
+            lbl.configure(text_color=theme["text_secondary"])
+
+    def update_language(self):
+        lang = LangManager.get()
+        is_dark = ThemeManager.current == "dark"
+        
+        # Estética de botones de idioma
+        active_bg = "#FFFFFF" if is_dark else "#000000"
+        active_text = "#000000" if is_dark else "#FFFFFF"
+        inactive_text = "#FFFFFF" if is_dark else "#000000"
+
         if lang == "ES":
-            self.es_btn.configure(fg_color="#1D1D1F", text_color="white", hover_color="#1D1D1F")
-            self.en_btn.configure(fg_color="transparent", text_color="#4A4A4A", hover_color="#CBD5E1")
+            self.es_btn.configure(fg_color=active_bg, text_color=active_text)
+            self.en_btn.configure(fg_color="transparent", text_color=inactive_text)
+            self.login_btn.configure(text="→   INICIAR SESIÓN")
         else:
-            self.en_btn.configure(fg_color="#1D1D1F", text_color="white", hover_color="#1D1D1F")
-            self.es_btn.configure(fg_color="transparent", text_color="#4A4A4A", hover_color="#CBD5E1")
+            self.en_btn.configure(fg_color=active_bg, text_color=active_text)
+            self.es_btn.configure(fg_color="transparent", text_color=inactive_text)
+            self.login_btn.configure(text="→   LOG IN")
 
     def toggle_password_visibility(self):
-        if self.password_visible:
-            self.pass_entry.configure(show="*")
-            self.eye_btn.configure(text="🔒")
-            self.password_visible = False
-        else:
-            self.pass_entry.configure(show="")
-            self.eye_btn.configure(text="🔓")
-            self.password_visible = True
+        self.password_visible = not self.password_visible
+        self.pass_entry.configure(show="" if self.password_visible else "*")
+        self.eye_btn.configure(text="🔓" if self.password_visible else "👁")
 
     def create_form(self):
-        ctk.CTkLabel(self.card, text="K O D A", font=("Times New Roman", 45, "bold"), text_color="#3C054F").pack(pady=(40, 10))
-        ctk.CTkLabel(self.card, text="Sistema de Reconocimiento\nFacial", 
-                     font=("Inter", 24, "bold"), text_color="#000000", justify="center").pack(pady=10)
-        ctk.CTkLabel(self.card, text="Ingresa tus credenciales para continuar", 
-                     font=("Inter", 13), text_color="#8E8E93").pack(pady=(0, 30))
+        theme = ThemeManager.get()
+        
+        # BRANDING KODA (En lugar del icono de persona)
+        self.koda_label = ctk.CTkLabel(self.card, text="K O D A", font=("Times New Roman", 55, "bold"))
+        self.koda_label.pack(pady=(50, 5))
 
-        self.create_input_group("CORREO ELECTRÓNICO", "Escribe tu correo electrónico")
+        self.title_lbl = ctk.CTkLabel(self.card, text="SISTEMA DE RECONOCIMIENTO\nFACIAL", 
+                     font=("Inter", 20, "bold"), justify="center")
+        self.title_lbl.pack(pady=10)
+        
+        self.desc_lbl = ctk.CTkLabel(self.card, text="Ingresa tus credenciales para continuar", 
+                     font=("Inter", 13), text_color="#555555")
+        self.desc_lbl.pack(pady=(0, 35))
+
+        self.create_input_group("CORREO ELECTRÓNICO", "tu.correo@universidad.edu.mx")
         self.user_entry = self.last_entry
-        self.create_input_group("CONTRASEÑA", "Escribe tu contraseña", is_password=True)
+        self.create_input_group("CONTRASEÑA", "Ingresa tu contraseña", is_password=True)
         self.pass_entry = self.last_entry
 
         self.error_label = ctk.CTkLabel(self.card, text="", text_color="#EF4444", font=("Inter", 12))
@@ -102,40 +143,48 @@ class LoginView(ctk.CTkFrame):
 
         self.login_btn = ctk.CTkButton(
             self.card, text="→   INICIAR SESIÓN", 
-            fg_color="#000000", hover_color="#262626", 
-            width=340, height=50, corner_radius=8,
-            font=("Inter", 14, "bold"), command=self.validar_login
+            width=340, height=54, corner_radius=12, font=("Inter", 14, "bold"), command=self.validar_login
         )
-        self.login_btn.pack(pady=(30, 20))
+        self.login_btn.pack(pady=(35, 20))
+
+        footer = ctk.CTkFrame(self.card, fg_color="transparent")
+        footer.pack(side="bottom", pady=30)
+        ctk.CTkLabel(footer, text="Credenciales de acceso", font=("Inter", 11), text_color="#444444").pack()
+        self.cred1 = ctk.CTkLabel(footer, text="admin@universidad.edu.mx", font=("Inter", 11, "bold"), text_color="#777777")
+        self.cred1.pack()
+        self.cred2 = ctk.CTkLabel(footer, text="admin2026", font=("Inter", 11, "bold"), text_color="#777777")
+        self.cred2.pack()
 
     def create_input_group(self, label_text, placeholder, is_password=False):
+        theme = ThemeManager.get()
         group_frame = ctk.CTkFrame(self.card, fg_color="transparent")
-        group_frame.pack(fill="x", padx=40, pady=8)
+        group_frame.pack(fill="x", padx=40, pady=10)
 
-        lbl = ctk.CTkLabel(group_frame, text=label_text, font=("Inter", 11, "bold"), text_color="#1D1D1F")
-        lbl.pack(side="top", anchor="w")
+        lbl = ctk.CTkLabel(group_frame, text=label_text, font=("Inter", 10, "bold"))
+        lbl.pack(side="top", anchor="w", padx=5)
+        self.labels_to_update.append(lbl)
 
-        input_container = ctk.CTkFrame(group_frame, fg_color="#F1F5F9", height=45, corner_radius=8)
-        input_container.pack(fill="x", pady=(5, 0))
+        input_container = ctk.CTkFrame(group_frame, height=50, corner_radius=10, border_width=1)
+        input_container.pack(fill="x", pady=(6, 0))
         input_container.pack_propagate(False)
+        self.inputs_frames.append(input_container)
 
         entry = ctk.CTkEntry(
-            input_container, placeholder_text=placeholder,
-            fg_color="transparent", border_width=0, font=("Inter", 13),
-            text_color="black"
+            input_container, placeholder_text=placeholder, placeholder_text_color="#6B7280",
+            fg_color="transparent", border_width=0, font=("Inter", 13)
         )
         
         if is_password:
             entry.configure(show="*")
-            entry.pack(side="left", fill="both", expand=True, padx=(10, 0))
+            entry.pack(side="left", fill="both", expand=True, padx=(15, 0))
             self.eye_btn = ctk.CTkButton(
-                input_container, text="🔒", width=35, height=35, 
-                fg_color="transparent", hover_color="#E2E8F0", text_color="black",
-                font=("Inter", 14), command=self.toggle_password_visibility
+                input_container, text="👁", width=40, height=40, 
+                fg_color="transparent", hover_color="#181818", text_color="#555555",
+                font=("Inter", 16), command=self.toggle_password_visibility
             )
             self.eye_btn.pack(side="right", padx=5)
         else:
-            entry.pack(side="left", fill="both", expand=True, padx=10)
+            entry.pack(side="left", fill="both", expand=True, padx=15)
 
         self.last_entry = entry
 
