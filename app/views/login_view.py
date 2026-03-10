@@ -135,6 +135,7 @@ class LoginView(ctk.CTkFrame):
 
         self.create_input_group("CORREO ELECTRÓNICO", "tu.correo@universidad.edu.mx")
         self.user_entry = self.last_entry
+
         self.create_input_group("CONTRASEÑA", "Ingresa tu contraseña", is_password=True)
         self.pass_entry = self.last_entry
 
@@ -150,10 +151,7 @@ class LoginView(ctk.CTkFrame):
         footer = ctk.CTkFrame(self.card, fg_color="transparent")
         footer.pack(side="bottom", pady=30)
         ctk.CTkLabel(footer, text="Credenciales de acceso", font=("Inter", 11), text_color="#444444").pack()
-        self.cred1 = ctk.CTkLabel(footer, text="admin@universidad.edu.mx", font=("Inter", 11, "bold"), text_color="#777777")
-        self.cred1.pack()
-        self.cred2 = ctk.CTkLabel(footer, text="admin2026", font=("Inter", 11, "bold"), text_color="#777777")
-        self.cred2.pack()
+       
 
     def create_input_group(self, label_text, placeholder, is_password=False):
         theme = ThemeManager.get()
