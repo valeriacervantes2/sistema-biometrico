@@ -8,6 +8,10 @@
 =======
     <option name="sdkName" value="Python 3.11 (sistema-biometrico)" />
   </component>
+<<<<<<< HEAD
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 virtualenv at C:\Users\Colibecas\Documents\sistema-biometrico\.venv" project-jdk-type="Python SDK" />
 >>>>>>> main
+=======
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (sistema-biometrico) (2)" project-jdk-type="Python SDK" />
+>>>>>>> 91c6a974eac3e7f9a1393e775b4745fa5cf1ed4f
 </project>

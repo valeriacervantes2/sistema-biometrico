@@ -7,12 +7,11 @@ from app.views.login_view import LoginView
 from app.views.landing_view import LandingView
 from app.views.dashboard_view import DashboardView
 from app.views.terminal_view import TerminalView
-
+from app.database.database import inicializar_bd
 
 # Configuración global de la interfaz
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("green")
-
 
 class AppPrincipal(ctk.CTk):
 
@@ -23,13 +22,13 @@ class AppPrincipal(ctk.CTk):
         self.geometry("1200x800")
         self.minsize(1100,700)
 
-        # color base negro
+        # color base negro e inicialización de BD
         self.configure(fg_color="#0a0a0a")
+        inicializar_bd()
 
         self.contenedor_vista = None
 
         self.mostrar_login()
-
 
 # ------------------------------------------------
 
@@ -38,69 +37,54 @@ class AppPrincipal(ctk.CTk):
             self.contenedor_vista.destroy()
             self.contenedor_vista = None
 
-
 # ------------------------------------------------
 
     def mostrar_login(self):
-
         self.limpiar_pantalla()
-
         self.contenedor_vista = LoginView(
             self,
             on_login_success=self.mostrar_landing
         )
-
         self.contenedor_vista.pack(fill="both", expand=True)
-
 
 # ------------------------------------------------
 
     def mostrar_landing(self):
-
         self.limpiar_pantalla()
-
         self.contenedor_vista = LandingView(
             self,
             on_panel_select=self.mostrar_dashboard,
             on_terminal_select=self.mostrar_terminal,
             on_logout=self.mostrar_login
         )
-
         self.contenedor_vista.pack(fill="both", expand=True)
-
 
 # ------------------------------------------------
 
     def mostrar_dashboard(self):
-
         self.limpiar_pantalla()
-
         self.contenedor_vista = DashboardView(
             self,
             on_back=self.mostrar_landing
         )
-
         self.contenedor_vista.pack(fill="both", expand=True)
-
 
 # ------------------------------------------------
 
     def mostrar_terminal(self):
-
         self.limpiar_pantalla()
-
         self.contenedor_vista = TerminalView(
             self,
             on_back=self.mostrar_landing
         )
-
         self.contenedor_vista.pack(fill="both", expand=True)
-
 
 # ------------------------------------------------
 
 def main():
-
+    """
+    Lógica original de procesamiento de cámara
+    """
     # Iniciar cámara
     cap = iniciar_camara()
 
@@ -108,7 +92,6 @@ def main():
         return
 
     while True:
-
         frame = obtener_frame(cap)
 
         if frame is None:
@@ -126,10 +109,10 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
 
-
 # ------------------------------------------------
 
 if __name__ == "__main__":
-
+    # Nota: Si ejecutas main(), se iniciará la cámara en bucle infinito.
+    # Si ejecutas app.mainloop(), se iniciará la interfaz gráfica.
     app = AppPrincipal()
     app.mainloop()

@@ -1,179 +1,230 @@
 import customtkinter as ctk
 from app.views.account_view import AccountView
-from app.views.user_management_view import UserManagementView # Importamos tu clase de gestión
+from app.views.user_management_view import UserManagementView
+from app.views.facultad_management_view import FacultadManagementView
+from app.views.carrera_management_view import CarreraManagementView
+from app.views.registro_acceso_management import RegistroAccesoManagementView
 from app.theme.theme_manager import ThemeManager, LangManager
 
 class DashboardView(ctk.CTkFrame):
     def __init__(self, master, on_back):
-        theme = ThemeManager.get()
-        super().__init__(master, fg_color=theme["bg"])
+        palette = ThemeManager.get()
+        super().__init__(master, fg_color=palette["bg"])
+
         self.on_back = on_back
-        self.current_view = "panel" 
+        self.current_view_name = "panel"
+        self._buttons = {}
 
-        # suscribirse a cambios de tema/idioma
-        ThemeManager.subscribe(self.update_theme)
-        LangManager.subscribe(self.update_language)
-
-        # guardar referencias para update
-        self._refs = {}
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # Sidebar y contenido
         self.create_sidebar()
-        self.content_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.content_frame.grid(row=0, column=1, sticky="nsew")
 
-        # vista inicial: panel de control
-        self.show_panel_control()
+        self.right_panel = ctk.CTkFrame(self, fg_color="transparent")
+        self.right_panel.grid(row=0, column=1, sticky="nsew")
 
-    # ---------------- Sidebar ----------------
+        self.top_ctrl_area = ctk.CTkFrame(self.right_panel, fg_color="transparent")
+        self.top_ctrl_area.pack(side="top", fill="x")
+        self.create_top_controls(self.top_ctrl_area)
+
+        self.content_container = ctk.CTkFrame(self.right_panel, fg_color="transparent")
+        self.content_container.pack(fill="both", expand=True)
+
+        ThemeManager.subscribe(self.update_theme)
+        LangManager.subscribe(self.update_language)
+
+        self.mostrar_panel_control()
+
+
+    def create_top_controls(self, container):
+        palette = ThemeManager.get()
+        controls_wrapper = ctk.CTkFrame(container, fg_color="transparent")
+        controls_wrapper.pack(side="right", padx=40, pady=20)
+
+     
+        self.theme_control = ctk.CTkFrame(controls_wrapper, fg_color=palette["input"], corner_radius=20, width=100, height=38)
+        self.theme_control.pack(side="left", padx=10)
+        self.theme_control.pack_propagate(False)
+
+        self.theme_icon = ctk.CTkLabel(self.theme_control, text="🌙" if ThemeManager.current == "dark" else "☀️", font=("Inter", 14))
+        self.theme_icon.place(x=20, y=19, anchor="center")
+
+        self.theme_switch = ctk.CTkSwitch(
+            self.theme_control, text="", width=40,
+            progress_color="#3B82F6", command=self.cambiar_tema_logic
+        )
+        self.theme_switch.place(x=65, y=19, anchor="center")
+        if ThemeManager.current == "dark": self.theme_switch.select()
+
+        self.lang_control = ctk.CTkFrame(controls_wrapper, fg_color=palette["input"], corner_radius=20, height=38)
+        self.lang_control.pack(side="left", padx=10)
+
+        ctk.CTkLabel(self.lang_control, text="🌐", font=("Inter", 14)).pack(side="left", padx=(12, 5))
+
+        self.es_btn = ctk.CTkButton(
+            self.lang_control, text="ES", width=35, height=26, corner_radius=12,
+            fg_color="#FFFFFF" if LangManager.get() == "ES" else "transparent",
+            text_color="#000000" if LangManager.get() == "ES" else palette["text"],
+            font=("Inter", 11, "bold"), command=lambda: self.actualizar_idioma("ES")
+        )
+        self.es_btn.pack(side="left", padx=2, pady=5)
+
+        self.en_btn = ctk.CTkButton(
+            self.lang_control, text="EN", width=35, height=26, corner_radius=12,
+            fg_color="#FFFFFF" if LangManager.get() == "EN" else "transparent",
+            text_color="#000000" if LangManager.get() == "EN" else palette["text"],
+            font=("Inter", 11, "bold"), command=lambda: self.actualizar_idioma("EN")
+        )
+        self.en_btn.pack(side="left", padx=(2, 10), pady=5)
+
+    def cambiar_tema_logic(self):
+        ThemeManager.toggle()
+
     def create_sidebar(self):
-        theme = ThemeManager.get()
-        sidebar = ctk.CTkFrame(self, width=260, corner_radius=0, fg_color=theme["card"], border_width=1, border_color=theme["border"])
-        sidebar.grid(row=0, column=0, sticky="ns")
-        sidebar.grid_propagate(False)
-        self._refs["sidebar"] = sidebar
+        palette = ThemeManager.get()
+   
+        self.sidebar = ctk.CTkFrame(
+            self, width=260, corner_radius=0, 
+            fg_color=palette["card"], 
+            border_width=1, 
+            border_color=palette["border"]
+        )
+        self.sidebar.grid(row=0, column=0, sticky="ns")
+        self.sidebar.grid_propagate(False)
 
-        top = ctk.CTkFrame(sidebar, fg_color="transparent")
-        top.pack(fill="x", pady=(24, 6), padx=16)
+        self.brand_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        self.brand_frame.pack(fill="x", padx=25, pady=30)
         
-        logo = ctk.CTkLabel(top, text="🛰", font=("Inter", 20))
-        logo.pack(side="left", padx=(6,8))
-        self._refs["logo"] = logo
+        self.lbl_p = ctk.CTkLabel(self.brand_frame, text="PANEL", font=("Inter", 11, "bold"), text_color=palette["text"], anchor="w")
+        self.lbl_p.pack(fill="x")
+        self.lbl_a = ctk.CTkLabel(self.brand_frame, text="ADMINISTRADOR", font=("Inter", 15, "bold"), text_color=palette["text"], anchor="w")
+        self.lbl_a.pack(fill="x")
+        
+        self._buttons["panel"] = self.create_nav_btn(self.sidebar, "🏠", "Panel de Control", self.mostrar_panel_control)
+        self._buttons["users"] = self.create_nav_btn(self.sidebar, "👥", "Gestión de Usuarios", self.mostrar_gestion_usuarios)
+        self._buttons["facultades"] = self.create_nav_btn(self.sidebar, "🏢", "Gestión de Facultades", self.mostrar_gestion_facultades)
+        self._buttons["carreras"] = self.create_nav_btn(self.sidebar, "🎓", "Gestión de Carreras", self.mostrar_gestion_carreras)
+        self._buttons["registros"] = self.create_nav_btn(self.sidebar, "📄", "Registro de Accesos", self.mostrar_registro_accesos)
+        self._buttons["account"] = self.create_nav_btn(self.sidebar, "👤", "Cuenta", self.mostrar_cuenta)
 
-        title_admin = ctk.CTkLabel(top, text="PANEL\nADMINISTRADOR", font=("Inter", 12, "bold"), anchor="w", text_color=theme["text"])
-        title_admin.pack(side="left")
-        self._refs["title_admin"] = title_admin
+        self.btn_back = ctk.CTkButton(
+            self.sidebar, text="Volver al Menú", 
+            fg_color="transparent", text_color="#EF4444", 
+            hover_color=palette["input"], command=self.on_back
+        )
+        self.btn_back.pack(side="bottom", pady=30, padx=20, fill="x")
 
-        subtitle_sidebar = ctk.CTkLabel(top, text="Control Biométrico", font=("Inter", 9), text_color=theme["text_secondary"])
-        subtitle_sidebar.pack(anchor="w", pady=(6,0), padx=(6,0))
-        self._refs["subtitle_sidebar"] = subtitle_sidebar
+    def create_nav_btn(self, master, icon, text, command):
+        palette = ThemeManager.get()
+        btn = ctk.CTkButton(
+            master, text=f"  {icon}  {text}", command=command, 
+            anchor="w", height=42, corner_radius=8, 
+            fg_color="transparent", text_color=palette["text_secondary"], 
+            font=("Inter", 13), hover_color=palette["input"]
+        )
+        btn.pack(pady=2, padx=15, fill="x")
+        return btn
 
-        btn_panel = ctk.CTkButton(sidebar, text="Panel de Control", anchor="w", width=220, height=40, fg_color="transparent",
-                                  text_color=theme["text"], hover_color=theme["input"], command=self.show_panel_control)
-        btn_panel.pack(pady=4, padx=16, fill="x")
-        self._refs["btn_panel"] = btn_panel
+   
+    def limpiar_derecha(self):
+        for widget in self.content_container.winfo_children():
+            widget.destroy()
 
-        btn_users = ctk.CTkButton(sidebar, text="Gestión de Usuarios", anchor="w", width=220, height=40, fg_color="transparent",
-                                  text_color=theme["text"], hover_color=theme["input"], command=self.show_users)
-        btn_users.pack(pady=4, padx=16, fill="x")
-        self._refs["btn_users"] = btn_users
+    def resaltar_boton(self, key):
+        palette = ThemeManager.get()
+        active_bg = palette["text"] 
+        active_text = palette["bg"]
 
-        btn_account = ctk.CTkButton(sidebar, text="Cuenta", anchor="w", width=220, height=40, fg_color="transparent",
-                                    text_color=theme["text"], hover_color=theme["input"], command=self.show_account)
-        btn_account.pack(pady=4, padx=16, fill="x")
-        self._refs["btn_account"] = btn_account
-
-    def _update_button_colors(self, active_btn):
-        theme = ThemeManager.get()
-        for key in ["btn_panel", "btn_users", "btn_account"]:
-            btn = self._refs[key]
-            if btn == active_btn:
-                btn.configure(fg_color=theme["text"], text_color=theme["bg"], hover_color=theme["text"])
+        for k, btn in self._buttons.items():
+            if k == key:
+                btn.configure(fg_color=active_bg, text_color=active_text)
             else:
-                btn.configure(fg_color="transparent", text_color=theme["text"], hover_color=theme["input"])
+                btn.configure(fg_color="transparent", text_color=palette["text_secondary"])
 
-    # ---------------- Helpers ----------------
-    def clear_content(self):
-        theme = ThemeManager.get()
-        self.content_frame.configure(fg_color=theme["bg"])
-        for w in self.content_frame.winfo_children():
-            w.destroy()
-
-    # ---------------- Panel de Control ----------------
-    def show_panel_control(self):
-        self.current_view = "panel"
-        self.clear_content()
-        self._update_button_colors(self._refs["btn_panel"])
-        theme = ThemeManager.get()
-
-        header = ctk.CTkFrame(self.content_frame, fg_color="transparent")
-        header.pack(fill="x", padx=28, pady=(20,10))
-        title = ctk.CTkLabel(header, text="Panel de Control", font=("Inter", 24, "bold"), text_color=theme["text"])
-        title.pack(side="left", anchor="n")
-        subtitle = ctk.CTkLabel(header, text="Registro de accesos del sistema", font=("Inter", 12), text_color=theme["text_secondary"])
-        subtitle.pack(side="left", padx=(12,0), anchor="s")
-
-        stats_row = ctk.CTkFrame(self.content_frame, fg_color="transparent")
-        stats_row.pack(fill="x", padx=28, pady=(10,10))
-        def stat_card(parent, title_text, value_text, color):
-            card = ctk.CTkFrame(parent, fg_color=theme["card"], corner_radius=10, height=80, border_width=1, border_color=theme["border"])
-            card.pack(side="left", padx=(0,12), expand=True, fill="both")
-            ctk.CTkLabel(card, text=title_text, font=("Inter",10), text_color=theme["text_secondary"]).pack(anchor="nw", padx=14, pady=(10,0))
-            ctk.CTkLabel(card, text=value_text, font=("Inter",20,"bold"), text_color=color).pack(anchor="sw", padx=14, pady=(0,12))
-
-        stat_card(stats_row, "Total de Registros", "17", theme["accent_green"])
-        stat_card(stats_row, "Accesos Hoy", "0", theme["text_secondary"])
-        stat_card(stats_row, "Autorizados", "0", theme["accent_green"])
-        stat_card(stats_row, "Denegados", "0", theme["accent_red"])
-
-        chart_box = ctk.CTkFrame(self.content_frame, fg_color=theme["card"], corner_radius=12, height=260, border_width=1, border_color=theme["border"])
-        chart_box.pack(fill="both", padx=28, pady=(12,18))
-        ctk.CTkLabel(chart_box, text="📈 Tendencia por Hora", font=("Inter",12,"bold"), text_color=theme["text"]).pack(anchor="nw", padx=16, pady=10)
-        ctk.CTkLabel(chart_box, text="[ Gráfica aquí ]", font=("Inter",14), text_color=theme["text_secondary"]).place(relx=0.5, rely=0.5, anchor="center")
-
-        list_box = ctk.CTkFrame(self.content_frame, fg_color=theme["card"], corner_radius=12, border_width=1, border_color=theme["border"])
-        list_box.pack(fill="both", padx=28, pady=(6,28), expand=True)
-        ctk.CTkLabel(list_box, text="Registro de Accesos", font=("Inter",14,"bold"), text_color=theme["text"]).pack(anchor="nw", padx=16, pady=12)
-
-        scroll = ctk.CTkScrollableFrame(list_box, fg_color="transparent")
-        scroll.pack(fill="both", padx=12, pady=(0,12), expand=True)
-        for i in range(6):
-            item = ctk.CTkFrame(scroll, fg_color=theme["bg"] if ThemeManager.current=="dark" else theme["card"], 
-                                height=84, border_width=1, border_color=theme["border"])
-            item.pack(fill="x", pady=8, padx=6)
-            left = ctk.CTkFrame(item, fg_color="transparent", width=80)
-            left.pack(side="left", padx=12)
-            avatar = ctk.CTkFrame(left, width=56, height=56, corner_radius=28, fg_color=theme["input"])
-            avatar.pack()
-            info = ctk.CTkFrame(item, fg_color="transparent")
-            info.pack(side="left", fill="both", expand=True)
-            ctk.CTkLabel(info, text=f"NOMBRE APELLIDO {i+1}", font=("Inter",11,"bold"), text_color=theme["text"]).pack(anchor="nw")
-            ctk.CTkLabel(info, text=f"N° Cuenta: 3170{296+i}", font=("Inter",10), text_color=theme["text_secondary"]).pack(anchor="nw", pady=(8,0))
-            right = ctk.CTkFrame(item, fg_color="transparent", width=120)
-            right.pack(side="right", padx=12)
-            ctk.CTkLabel(right, text="09:45 a.m.", text_color=theme["text_secondary"]).pack(anchor="e", pady=12)
-
-    # ---------------- Gestión de Usuarios (Arreglado) ----------------
-    def show_users(self):
-        """Muestra la vista de gestión cargando tu clase externa"""
-        self.current_view = "users"
-        self.clear_content()
-        self._update_button_colors(self._refs["btn_users"])
+    def mostrar_panel_control(self):
+        self.limpiar_derecha()
+        self.current_view_name = "panel"
+        self.resaltar_boton("panel")
+        palette = ThemeManager.get()
         
-        # Invocamos la clase que ya tiene el buscador y el botón de agregar
-        UserManagementView(self.content_frame).pack(fill="both", expand=True)
+        header = ctk.CTkFrame(self.content_container, fg_color="transparent")
+        header.pack(fill="x", padx=40, pady=(10, 20))
+        ctk.CTkLabel(header, text="Panel de Control", font=("Inter", 28, "bold"), text_color=palette["text"]).pack(anchor="w")
+        ctk.CTkLabel(header, text="Registro de accesos del sistema", font=("Inter", 16), text_color=palette["text_secondary"]).pack(anchor="w")
 
-    # ---------------- Cuenta ----------------
-    def show_account(self):
-        self.current_view = "account"
-        self.clear_content()
-        self._update_button_colors(self._refs["btn_account"])
-        AccountView(self.content_frame, on_back=self.on_back).pack(fill="both", expand=True)
+        stats_frame = ctk.CTkFrame(self.content_container, fg_color="transparent")
+        stats_frame.pack(fill="x", padx=40, pady=10)
+        self.create_stat_card(stats_frame, "Total de Registros", "17", "#3B82F6")
+        self.create_stat_card(stats_frame, "Accesos Hoy", "0", "#6366F1")
+        self.create_stat_card(stats_frame, "Autorizados", "0", "#10B981")
+        self.create_stat_card(stats_frame, "Denegados", "0", "#EF4444")
 
-    # ---------------- Updates ----------------
+    def mostrar_gestion_usuarios(self):
+        self.limpiar_derecha()
+        self.current_view_name = "users"
+        self.resaltar_boton("users")
+        UserManagementView(self.content_container).pack(fill="both", expand=True, padx=40)
+
+    def mostrar_gestion_facultades(self):
+        self.limpiar_derecha()
+        self.current_view_name = "facultades"
+        self.resaltar_boton("facultades")
+        FacultadManagementView(self.content_container).pack(fill="both", expand=True, padx=40)
+
+    def mostrar_gestion_carreras(self):
+        self.limpiar_derecha()
+        self.current_view_name = "carreras"
+        self.resaltar_boton("carreras")
+        CarreraManagementView(self.content_container).pack(fill="both", expand=True, padx=40)
+
+    def mostrar_registro_accesos(self):
+        self.limpiar_derecha()
+        self.current_view_name = "registros"
+        self.resaltar_boton("registros")
+        RegistroAccesoManagementView(self.content_container).pack(fill="both", expand=True, padx=40)
+
+    def mostrar_cuenta(self):
+        self.limpiar_derecha()
+        self.current_view_name = "account"
+        self.resaltar_boton("account")
+        AccountView(self.content_container, on_logout=self.on_back).pack(fill="both", expand=True, padx=40)
+
+    def create_stat_card(self, master, title, value, color):
+        palette = ThemeManager.get()
+        card = ctk.CTkFrame(master, height=120, corner_radius=15, border_width=1, fg_color=palette["card"], border_color=palette["border"])
+        card.pack(side="left", padx=(0, 20), expand=True, fill="both")
+        ctk.CTkLabel(card, text=title, font=("Inter", 13, "bold"), text_color=palette["text_secondary"]).pack(anchor="w", padx=20, pady=(20, 0))
+        ctk.CTkLabel(card, text=value, font=("Inter", 32, "bold"), text_color=color).pack(anchor="w", padx=20, pady=(0, 20))
+
+   
     def update_theme(self):
-        theme = ThemeManager.get()
-        self.configure(fg_color=theme["bg"])
+        palette = ThemeManager.get()
+        ctk.set_appearance_mode(ThemeManager.current) 
         
-        try:
-            self._refs["sidebar"].configure(fg_color=theme["card"], border_color=theme["border"])
-            self._refs["logo"].configure(text_color=theme["text"])
-            self._refs["title_admin"].configure(text_color=theme["text"])
-            self._refs["subtitle_sidebar"].configure(text_color=theme["text_secondary"])
-            
-            for key in ["btn_panel", "btn_users", "btn_account"]:
-                self._refs[key].configure(text_color=theme["text"], hover_color=theme["input"])
-        except Exception:
-            pass
+        self.configure(fg_color=palette["bg"])
         
-        if self.current_view == "panel":
-            self.show_panel_control()
-        elif self.current_view == "users":
-            self.show_users()
-        elif self.current_view == "account":
-            self.show_account()
+        if hasattr(self, 'sidebar'):
+            self.sidebar.configure(fg_color=palette["card"], border_color=palette["border"])
+            self.lbl_p.configure(text_color=palette["text"])
+            self.lbl_a.configure(text_color=palette["text"])
+            self.theme_control.configure(fg_color=palette["input"])
+            self.lang_control.configure(fg_color=palette["input"])
+            self.theme_icon.configure(text="🌙" if ThemeManager.current == "dark" else "☀️", text_color=palette["text"])
+            self.btn_back.configure(hover_color=palette["input"])
+
+        vistas = {
+            "panel": self.mostrar_panel_control,
+            "users": self.mostrar_gestion_usuarios,
+            "facultades": self.mostrar_gestion_facultades,
+            "carreras": self.mostrar_gestion_carreras,
+            "registros": self.mostrar_registro_accesos,
+            "account": self.mostrar_cuenta
+        }
+        if self.current_view_name in vistas:
+            vistas[self.current_view_name]()
+
+    def actualizar_idioma(self, lang):
+        LangManager.set(lang)
 
     def update_language(self):
         self.update_theme()
