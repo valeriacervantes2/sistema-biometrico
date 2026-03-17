@@ -8,6 +8,7 @@ class RegistroAccesoManagementView(ctk.CTkFrame):
     def __init__(self, master):
         # Dinamizamos el color de fondo inicial
         palette = ThemeManager.get()
+        # Se prioriza el uso de palette["bg"] sobre el color fijo #F8FAFC
         super().__init__(master, fg_color=palette["bg"])
         
         # Suscripción para cambios de tema en tiempo real
@@ -36,23 +37,23 @@ class RegistroAccesoManagementView(ctk.CTkFrame):
             title_cont,
             text="Registro de Accesos",
             font=("Inter",28,"bold"),
-            text_color=palette["text"] # Dinamizado
+            text_color=palette["text"] # Dinamizado (antes #1E293B)
         ).pack(anchor="w")
 
         ctk.CTkLabel(
             title_cont,
             text="Historial de accesos al sistema biométrico",
             font=("Inter",15),
-            text_color=palette["text_secondary"] # Dinamizado
+            text_color=palette["text_secondary"] # Dinamizado (antes #64748B)
         ).pack(anchor="w")
 
 
         self.tabla_frame = ctk.CTkFrame(
             self,
-            fg_color=palette["card"], # Dinamizado
+            fg_color=palette["card"], # Dinamizado (antes "white")
             corner_radius=15,
             border_width=1,
-            border_color=palette["border"] # Dinamizado
+            border_color=palette["border"] # Dinamizado (antes #E2E8F0)
         )
         self.tabla_frame.pack(fill="both", expand=True, padx=40, pady=(0,40))
 
@@ -68,7 +69,7 @@ class RegistroAccesoManagementView(ctk.CTkFrame):
         registros = obtener_registros_acceso()
 
         # Encabezado de tabla con color de input para contraste
-        header_frame = ctk.CTkFrame(self.tabla_frame, fg_color=palette["input"])
+        header_frame = ctk.CTkFrame(self.tabla_frame, fg_color=palette["input"]) # Dinamizado (antes #F1F5F9)
         header_frame.pack(fill="x", padx=20, pady=(20,10))
 
         ctk.CTkLabel(header_frame, text="ID", width=50, text_color=palette["text"]).pack(side="left", padx=5)
@@ -89,9 +90,9 @@ class RegistroAccesoManagementView(ctk.CTkFrame):
 
             fila = ctk.CTkFrame(
                 self.tabla_frame,
-                fg_color="transparent", # Cambiado a transparente para mejor look en dark mode
+                fg_color="transparent", # Cambiado a transparente para mejor look en dark mode (antes "white")
                 border_width=1,
-                border_color=palette["border"], # Dinamizado
+                border_color=palette["border"], # Dinamizado (antes #E2E8F0)
                 corner_radius=8
             )
             fila.pack(fill="x", padx=20, pady=5)
@@ -106,6 +107,7 @@ class RegistroAccesoManagementView(ctk.CTkFrame):
 
             ctk.CTkLabel(
                 fila,
+                # Resultado y color unificados
                 text=resultado,
                 text_color=color,
                 font=("Inter", 12, "bold")

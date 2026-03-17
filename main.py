@@ -1,7 +1,6 @@
 import cv2
 from app.camara.camara import iniciar_camara, obtener_frame
 from app.detection.detector_rostro import procesar_frame
-
 import customtkinter as ctk
 from app.views.login_view import LoginView
 from app.views.landing_view import LandingView
@@ -18,12 +17,14 @@ class AppPrincipal(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        # Combinación de títulos y dimensiones
         self.title("SISTEMA DE CONTROL BIOMÉTRICO - PANEL ADMINISTRADOR")
         self.geometry("1200x800")
         self.minsize(1100,700)
 
-        # color base negro e inicialización de BD
+        # Mantenemos el color base oscuro para coherencia con el tema dark
         self.configure(fg_color="#0a0a0a")
+        
         inicializar_bd()
 
         self.contenedor_vista = None

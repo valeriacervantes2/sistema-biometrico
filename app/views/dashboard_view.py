@@ -6,6 +6,7 @@ from app.views.carrera_management_view import CarreraManagementView
 from app.views.registro_acceso_management import RegistroAccesoManagementView
 from app.theme.theme_manager import ThemeManager, LangManager
 
+# --- VISTA PRINCIPAL DEL DASHBOARD ---
 class DashboardView(ctk.CTkFrame):
     def __init__(self, master, on_back):
         palette = ThemeManager.get()
@@ -35,13 +36,11 @@ class DashboardView(ctk.CTkFrame):
 
         self.mostrar_panel_control()
 
-
     def create_top_controls(self, container):
         palette = ThemeManager.get()
         controls_wrapper = ctk.CTkFrame(container, fg_color="transparent")
         controls_wrapper.pack(side="right", padx=40, pady=20)
 
-     
         self.theme_control = ctk.CTkFrame(controls_wrapper, fg_color=palette["input"], corner_radius=20, width=100, height=38)
         self.theme_control.pack(side="left", padx=10)
         self.theme_control.pack_propagate(False)
@@ -84,7 +83,7 @@ class DashboardView(ctk.CTkFrame):
         palette = ThemeManager.get()
    
         self.sidebar = ctk.CTkFrame(
-            self, width=260, corner_radius=0, 
+            self, width=280, corner_radius=0, 
             fg_color=palette["card"], 
             border_width=1, 
             border_color=palette["border"]
@@ -92,24 +91,34 @@ class DashboardView(ctk.CTkFrame):
         self.sidebar.grid(row=0, column=0, sticky="ns")
         self.sidebar.grid_propagate(False)
 
-        self.brand_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        self.brand_frame.pack(fill="x", padx=25, pady=30)
+        # Sección de Perfil (Combinado de la versión naomy con temas)
+        self.profile = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        self.profile.pack(pady=40, padx=25, fill="x")
         
-        self.lbl_p = ctk.CTkLabel(self.brand_frame, text="PANEL", font=("Inter", 11, "bold"), text_color=palette["text"], anchor="w")
-        self.lbl_p.pack(fill="x")
-        self.lbl_a = ctk.CTkLabel(self.brand_frame, text="ADMINISTRADOR", font=("Inter", 15, "bold"), text_color=palette["text"], anchor="w")
-        self.lbl_a.pack(fill="x")
+        self.lbl_icon = ctk.CTkLabel(self.profile, text="👤", font=("Arial", 35))
+        self.lbl_icon.pack(side="left")
         
+        self.text_info = ctk.CTkFrame(self.profile, fg_color="transparent")
+        self.text_info.pack(side="left", padx=10)
+        
+        self.lbl_a = ctk.CTkLabel(self.text_info, text="ADMINISTRADOR", font=("Inter", 14, "bold"), text_color=palette["text"], anchor="w")
+        self.lbl_a.pack(anchor="w")
+        
+        self.lbl_p = ctk.CTkLabel(self.text_info, text="Control Biométrico", font=("Inter", 11), text_color=palette["text_secondary"], anchor="w")
+        self.lbl_p.pack(anchor="w")
+        
+        # Botones de navegación usando el diccionario _buttons para resaltar
         self._buttons["panel"] = self.create_nav_btn(self.sidebar, "🏠", "Panel de Control", self.mostrar_panel_control)
         self._buttons["users"] = self.create_nav_btn(self.sidebar, "👥", "Gestión de Usuarios", self.mostrar_gestion_usuarios)
-        self._buttons["facultades"] = self.create_nav_btn(self.sidebar, "🏢", "Gestión de Facultades", self.mostrar_gestion_facultades)
-        self._buttons["carreras"] = self.create_nav_btn(self.sidebar, "🎓", "Gestión de Carreras", self.mostrar_gestion_carreras)
-        self._buttons["registros"] = self.create_nav_btn(self.sidebar, "📄", "Registro de Accesos", self.mostrar_registro_accesos)
-        self._buttons["account"] = self.create_nav_btn(self.sidebar, "👤", "Cuenta", self.mostrar_cuenta)
+        self._buttons["facultades"] = self.create_nav_btn(self.sidebar, "🏛️", "Gestión de Facultades", self.mostrar_gestion_facultades)
+        self._buttons["carreras"] = self.create_nav_btn(self.sidebar, "📚", "Gestión de Carreras", self.mostrar_gestion_carreras)
+        self._buttons["registros"] = self.create_nav_btn(self.sidebar, "🧾", "Registro de Accesos", self.mostrar_registro_accesos)
+        self._buttons["account"] = self.create_nav_btn(self.sidebar, "⚙️", "Cuenta", self.mostrar_cuenta)
 
         self.btn_back = ctk.CTkButton(
             self.sidebar, text="Volver al Menú", 
             fg_color="transparent", text_color="#EF4444", 
+            font=("Inter", 14, "bold"),
             hover_color=palette["input"], command=self.on_back
         )
         self.btn_back.pack(side="bottom", pady=30, padx=20, fill="x")
@@ -118,22 +127,21 @@ class DashboardView(ctk.CTkFrame):
         palette = ThemeManager.get()
         btn = ctk.CTkButton(
             master, text=f"  {icon}  {text}", command=command, 
-            anchor="w", height=42, corner_radius=8, 
+            anchor="w", height=45, corner_radius=8, 
             fg_color="transparent", text_color=palette["text_secondary"], 
             font=("Inter", 13), hover_color=palette["input"]
         )
         btn.pack(pady=2, padx=15, fill="x")
         return btn
 
-   
     def limpiar_derecha(self):
         for widget in self.content_container.winfo_children():
             widget.destroy()
 
     def resaltar_boton(self, key):
         palette = ThemeManager.get()
-        active_bg = palette["text"] 
-        active_text = palette["bg"]
+        active_bg = "#0F172A" if ThemeManager.current == "light" else "#334155"
+        active_text = "#FFFFFF"
 
         for k, btn in self._buttons.items():
             if k == key:
@@ -193,10 +201,10 @@ class DashboardView(ctk.CTkFrame):
         palette = ThemeManager.get()
         card = ctk.CTkFrame(master, height=120, corner_radius=15, border_width=1, fg_color=palette["card"], border_color=palette["border"])
         card.pack(side="left", padx=(0, 20), expand=True, fill="both")
+        card.pack_propagate(False)
         ctk.CTkLabel(card, text=title, font=("Inter", 13, "bold"), text_color=palette["text_secondary"]).pack(anchor="w", padx=20, pady=(20, 0))
-        ctk.CTkLabel(card, text=value, font=("Inter", 32, "bold"), text_color=color).pack(anchor="w", padx=20, pady=(0, 20))
+        ctk.CTkLabel(card, text=value, font=("Inter", 32, "bold"), text_color=color).pack(anchor="w", padx=20)
 
-   
     def update_theme(self):
         palette = ThemeManager.get()
         ctk.set_appearance_mode(ThemeManager.current) 
@@ -205,12 +213,15 @@ class DashboardView(ctk.CTkFrame):
         
         if hasattr(self, 'sidebar'):
             self.sidebar.configure(fg_color=palette["card"], border_color=palette["border"])
-            self.lbl_p.configure(text_color=palette["text"])
+            self.lbl_p.configure(text_color=palette["text_secondary"])
             self.lbl_a.configure(text_color=palette["text"])
             self.theme_control.configure(fg_color=palette["input"])
             self.lang_control.configure(fg_color=palette["input"])
             self.theme_icon.configure(text="🌙" if ThemeManager.current == "dark" else "☀️", text_color=palette["text"])
             self.btn_back.configure(hover_color=palette["input"])
+
+        # Actualizar colores de los botones de navegación
+        self.resaltar_boton(self.current_view_name)
 
         vistas = {
             "panel": self.mostrar_panel_control,
@@ -227,4 +238,5 @@ class DashboardView(ctk.CTkFrame):
         LangManager.set(lang)
 
     def update_language(self):
+        # Aquí se podrían traducir los textos de los botones si LangManager tuviera el diccionario
         self.update_theme()

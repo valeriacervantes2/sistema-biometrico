@@ -9,27 +9,26 @@ from app.services.carrera_service import (
     obtener_facultades_para_dropdown
 )
 
-
 class CarreraManagementView(ctk.CTkFrame):
     def __init__(self, master):
-        # SIN BORRAR NADA: Dinamizamos fg_color inicial
+        # SIN BORRAR NADA: Dinamizamos fg_color inicial usando ThemeManager
         palette = ThemeManager.get()
         super().__init__(master, fg_color=palette["bg"])
         
         self.modo_edicion = False
         self.carrera_actual_id = None
         
-        # Agregamos suscripción al tema
+        # Agregamos suscripción al tema para cambios en tiempo real
         ThemeManager.subscribe(self.update_theme)
         
         self.crear_vista_tabla()
 
-    # Método nuevo para compatibilidad en tiempo real
+    # Método para compatibilidad en tiempo real
     def update_theme(self):
         palette = ThemeManager.get()
         self.configure(fg_color=palette["bg"])
         if hasattr(self, "tabla_outer") and self.tabla_outer.winfo_exists():
-            # Actualizamos los colores de los contenedores
+            # Actualizamos los colores de los contenedores dinámicamente
             self.tabla_outer.configure(fg_color=palette["card"], border_color=palette["border"])
             self.tabla_frame.configure(fg_color=palette["card"])
             self.actualizar_tabla()
@@ -44,6 +43,7 @@ class CarreraManagementView(ctk.CTkFrame):
         
         title_cont = ctk.CTkFrame(header, fg_color="transparent")
         title_cont.pack(side="left")
+        
         ctk.CTkLabel(title_cont, text="Gestión de Carreras", 
                      font=("Inter", 28, "bold"), text_color=palette["text"]).pack(anchor="w")
         ctk.CTkLabel(title_cont, text="Administra las carreras del sistema", 
@@ -61,7 +61,7 @@ class CarreraManagementView(ctk.CTkFrame):
         )
         self.btn_agregar.pack(side="right", anchor="n")
         
-        # Contenedor externo dinamizado
+        # Contenedor externo dinamizado (Une bordes de 'naomy' con colores de 'HEAD')
         self.tabla_outer = ctk.CTkFrame(self, fg_color=palette["card"],
                                         corner_radius=15, border_width=1, 
                                         border_color=palette["border"])
@@ -172,7 +172,6 @@ class CarreraManagementView(ctk.CTkFrame):
         facultades_dict = obtener_facultades_para_dropdown()
         facultades_lista = list(facultades_dict.values())
         
-        # Preparar datos si es edición (Lógica original intacta)
         if id_carrera:
             self.modo_edicion = True
             self.carrera_actual_id = id_carrera
@@ -187,7 +186,6 @@ class CarreraManagementView(ctk.CTkFrame):
             self.carrera_actual_id = None
             titulo = "Crear Nueva Carrera"
             nombre_actual = ""
-            facultad_actual_id = None
             estado_actual = 1
             facultad_actual_nombre = "Seleccionar facultad"
         
@@ -291,12 +289,7 @@ class CarreraManagementView(ctk.CTkFrame):
         facultad_nombre = self.combo_facultad.get()
         estado = 1 if self.combo_estado.get() == "Activa" else 0
         
-        if not nombre:
-            print("Error: El nombre no puede estar vacío")
-            return
-        
-        if facultad_nombre == "Seleccionar facultad":
-            print("Error: Debes seleccionar una facultad")
+        if not nombre or facultad_nombre == "Seleccionar facultad":
             return
         
         id_facultad = None
@@ -305,33 +298,19 @@ class CarreraManagementView(ctk.CTkFrame):
                 id_facultad = fac_id
                 break
         
-        if id_facultad is None:
-            print("Error: Facultad no válida")
-            return
+        if id_facultad is None: return
         
         if self.modo_edicion:
             exito = actualizar_carrera(self.carrera_actual_id, nombre, id_facultad, estado)
-            if exito:
-                print(f"Carrera actualizada: {nombre}")
-            else:
-                print("Error al actualizar")
         else:
             exito = crear_carrera(nombre, id_facultad, estado)
-            if exito:
-                print(f"Carrera creada: {nombre}")
-            else:
-                print("Error al crear")
         
         self.volver_a_tabla()
     
     def confirmar_eliminar(self, id_carrera, nombre_carrera):
         """Elimina una carrera"""
-        exito = eliminar_carrera(id_carrera)
-        if exito:
-            print(f"Carrera eliminada: {nombre_carrera}")
+        if eliminar_carrera(id_carrera):
             self.actualizar_tabla()
-        else:
-            print("Error al eliminar")
     
     def volver_a_tabla(self):
         """Vuelve a mostrar la tabla desde el formulario"""

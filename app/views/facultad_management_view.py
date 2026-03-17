@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from app.theme.theme_manager import ThemeManager # Agregado para el tema
+from app.theme.theme_manager import ThemeManager
 from app.services.facultad_service import (
     obtener_todas_facultades,
     crear_facultad,
@@ -8,30 +8,29 @@ from app.services.facultad_service import (
     obtener_facultad_por_id
 )
 
-
 class FacultadManagementView(ctk.CTkFrame):
     def __init__(self, master):
-        # Modificado fg_color para usar el manager
+        # Uso de paleta dinámica para el fondo
         palette = ThemeManager.get()
         super().__init__(master, fg_color=palette["bg"])
         
         self.modo_edicion = False
         self.facultad_actual_id = None
         
-        # Suscripción agregada para detectar cambios de tema
+        # Suscripción para detectar cambios de tema en tiempo real
         ThemeManager.subscribe(self.update_theme)
         
         self.crear_vista_tabla()
     
-    # Método nuevo para manejar la actualización visual
     def update_theme(self):
+        """Maneja la actualización visual cuando cambia el tema"""
         palette = ThemeManager.get()
         self.configure(fg_color=palette["bg"])
         if hasattr(self, "tabla_frame") and self.tabla_frame.winfo_exists():
             self.actualizar_tabla()
 
     def crear_vista_tabla(self):
-        # Recuperar paleta
+        """Crea la vista principal con tabla de facultades"""
         palette = ThemeManager.get()
         
         # Header
@@ -41,7 +40,6 @@ class FacultadManagementView(ctk.CTkFrame):
         title_cont = ctk.CTkFrame(header, fg_color="transparent")
         title_cont.pack(side="left")
         
-        # Colores dinamizados con palette
         ctk.CTkLabel(title_cont, text="Gestión de Facultades", 
                      font=("Inter", 28, "bold"), text_color=palette["text"]).pack(anchor="w")
         ctk.CTkLabel(title_cont, text="Administra las facultades del sistema", 
@@ -95,7 +93,7 @@ class FacultadManagementView(ctk.CTkFrame):
         # Si no hay facultades
         if not facultades:
             ctk.CTkLabel(self.tabla_frame, text="No hay facultades registradas", 
-                         font=("Inter", 14), text_color=palette["placeholder"]).pack(pady=40)
+                         font=("Inter", 14), text_color=palette["text_secondary"]).pack(pady=40)
             return
         
         # Crear fila para cada facultad
@@ -103,9 +101,9 @@ class FacultadManagementView(ctk.CTkFrame):
             self.crear_fila_facultad(facultad)
     
     def crear_fila_facultad(self, facultad):
+        """Crea una fila con los datos de una facultad y botones de acción"""
         palette = ThemeManager.get()
         
-        # Fila con colores de paleta
         fila = ctk.CTkFrame(self.tabla_frame, fg_color="transparent", 
                             border_width=1, border_color=palette["border"], 
                             corner_radius=8)
@@ -120,7 +118,7 @@ class FacultadManagementView(ctk.CTkFrame):
                      text_color=palette["text"]).pack(side="left", expand=True, fill="x", padx=5)
         
         # Estado (Badge)
-        estado_color = palette["accent_green"] if facultad["estado"] == 1 else palette["accent_red"]
+        estado_color = "#10B981" if facultad["estado"] == 1 else "#EF4444"
         estado_texto = "Activa" if facultad["estado"] == 1 else "Inactiva"
         ctk.CTkLabel(fila, text=estado_texto, font=("Inter", 11, "bold"), 
                      text_color=estado_color, width=80).pack(side="left", padx=5)
@@ -143,6 +141,7 @@ class FacultadManagementView(ctk.CTkFrame):
         btn_eliminar.pack(side="left", padx=5, pady=10)
     
     def abrir_formulario(self, id_facultad=None):
+        """Abre el formulario para crear o editar una facultad"""
         palette = ThemeManager.get()
         
         # Limpiar vista anterior
@@ -238,27 +237,32 @@ class FacultadManagementView(ctk.CTkFrame):
         btn_cancelar.pack(side="left", padx=5, expand=True, fill="x")
     
     def guardar_facultad(self):
-        #Guarda la facultad (crear o editar)
+        """Guarda la facultad (crear o editar)"""
         nombre = self.input_nombre.get().strip()
         estado = 1 if self.combo_estado.get() == "Activa" else 0
+        
         if not nombre:
             print("Error: El nombre no puede estar vacío")
             return
+        
         if self.modo_edicion:
             exito = actualizar_facultad(self.facultad_actual_id, nombre, estado)
             if exito: print(f"Facultad actualizada: {nombre}")
         else:
             exito = crear_facultad(nombre, estado)
             if exito: print(f"Facultad creada: {nombre}")
+            
         self.volver_a_tabla()
     
     def confirmar_eliminar(self, id_facultad, nombre_facultad):
+        """Elimina una facultad"""
         exito = eliminar_facultad(id_facultad)
         if exito:
             print(f"Facultad eliminada: {nombre_facultad}")
             self.actualizar_tabla()
     
     def volver_a_tabla(self):
+        """Vuelve a mostrar la tabla limpiando el formulario"""
         for widget in self.winfo_children():
             widget.destroy()
         self.crear_vista_tabla()

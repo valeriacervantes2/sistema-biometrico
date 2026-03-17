@@ -3,18 +3,18 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
-<<<<<<< HEAD
     </content>
     <orderEntry type="jdk" jdkName="Python 3.14 (sistema-biometrico)" jdkType="Python SDK" />
-=======
+
       <excludeFolder url="file://$MODULE_DIR$/venv311" />
     </content>
-<<<<<<< HEAD
+
     <orderEntry type="jdk" jdkName="Python 3.10 virtualenv at C:\Users\Colibecas\Documents\sistema-biometrico\.venv" jdkType="Python SDK" />
->>>>>>> main
-=======
+
     <orderEntry type="jdk" jdkName="Python 3.11 (sistema-biometrico) (2)" jdkType="Python SDK" />
->>>>>>> 91c6a974eac3e7f9a1393e775b4745fa5cf1ed4f
+
+    <orderEntry type="jdk" jdkName="Python 3.11 (sistema-biometrico) (2)" jdkType="Python SDK" />
+
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
