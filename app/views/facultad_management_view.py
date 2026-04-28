@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from app.theme.theme_manager import ThemeManager
+from app.services.theme import COLORS
 from app.services.facultad_service import (
     obtener_todas_facultades,
     crear_facultad,
@@ -10,259 +10,200 @@ from app.services.facultad_service import (
 
 class FacultadManagementView(ctk.CTkFrame):
     def __init__(self, master):
-        # Uso de paleta dinámica para el fondo
-        palette = ThemeManager.get()
-        super().__init__(master, fg_color=palette["bg"])
+        super().__init__(master, fg_color=COLORS["bg"])
         
         self.modo_edicion = False
         self.facultad_actual_id = None
         
-        # Suscripción para detectar cambios de tema en tiempo real
-        ThemeManager.subscribe(self.update_theme)
+        # --- Configuración de Fuentes ---
+        self.font_header = ("Inter", 30, "bold")
+        self.font_sub = ("Inter", 16, "bold")
+        self.font_normal = ("Inter", 13)
+        self.font_small = ("Inter", 11, "bold")
         
         self.crear_vista_tabla()
     
-    def update_theme(self):
-        """Maneja la actualización visual cuando cambia el tema"""
-        palette = ThemeManager.get()
-        self.configure(fg_color=palette["bg"])
-        if hasattr(self, "tabla_frame") and self.tabla_frame.winfo_exists():
-            self.actualizar_tabla()
-
     def crear_vista_tabla(self):
-        """Crea la vista principal con tabla de facultades"""
-        palette = ThemeManager.get()
-        
-        # Header
+        # 1. Header de la vista
         header = ctk.CTkFrame(self, fg_color="transparent")
         header.pack(fill="x", padx=40, pady=(40, 20))
         
         title_cont = ctk.CTkFrame(header, fg_color="transparent")
         title_cont.pack(side="left")
+        ctk.CTkLabel(title_cont, text="🏫 Gestión de Facultades", font=self.font_header, text_color=COLORS["text"]).pack(anchor="w")
+        ctk.CTkLabel(title_cont, text="Administra las unidades académicas del sistema", font=self.font_normal, text_color=COLORS["subtext"]).pack(anchor="w")
         
-        ctk.CTkLabel(title_cont, text="Gestión de Facultades", 
-                     font=("Inter", 28, "bold"), text_color=palette["text"]).pack(anchor="w")
-        ctk.CTkLabel(title_cont, text="Administra las facultades del sistema", 
-                     font=("Inter", 15), text_color=palette["text_secondary"]).pack(anchor="w")
-        
-        # Botón Agregar
-        self.btn_agregar = ctk.CTkButton(
-            header, 
-            text="➕ Agregar Facultad", 
-            fg_color="#10B981", 
-            hover_color="#059669",
-            text_color="white",
-            font=("Inter", 13, "bold"),
-            command=self.abrir_formulario
+        ctk.CTkButton(header, text="➕ Agregar Facultad", fg_color=COLORS["text"], hover_color=COLORS["hover"], text_color=COLORS["bg"],
+                     font=self.font_sub, height=50, corner_radius=12, command=self.abrir_formulario).pack(side="right", anchor="n")
+
+        # 2. Barra de búsqueda
+        bar = ctk.CTkFrame(self, fg_color="transparent")
+        bar.pack(fill="x", padx=40, pady=(0, 10))
+        self.entry_busqueda = ctk.CTkEntry(
+            bar, placeholder_text="🔍 Buscar facultad por nombre...",
+            height=42, corner_radius=10,
+            fg_color=COLORS["hover"], border_width=1, border_color=COLORS["border"],
+            text_color=COLORS["text"]
         )
-        self.btn_agregar.pack(side="right", anchor="n")
+        self.entry_busqueda.pack(fill="x", expand=True)
+        self.entry_busqueda.bind("<KeyRelease>", self._on_search)
         
-        # Frame para la tabla adaptado a la paleta
-        self.tabla_frame = ctk.CTkFrame(self, fg_color=palette["card"], 
-                                        corner_radius=15, border_width=1, 
-                                        border_color=palette["border"])
-        self.tabla_frame.pack(fill="both", expand=True, padx=40, pady=(0, 40))
+        # 3. Card Principal
+        self.main_card = ctk.CTkFrame(self, fg_color=COLORS["card"], corner_radius=15, border_width=1, border_color=COLORS["border"])
+        self.main_card.pack(fill="both", expand=True, padx=40, pady=(0, 40))
         
-        # Cargar y mostrar datos
-        self.actualizar_tabla()
-    
-    def actualizar_tabla(self):
-        """Obtiene facultades de la BD y las muestra en la tabla"""
-        palette = ThemeManager.get()
-        
-        # Limpiar tabla anterior
-        for widget in self.tabla_frame.winfo_children():
-            widget.destroy()
-        
-        # Obtener facultades de la BD
-        facultades = obtener_todas_facultades()
-        
-        # Crear encabezados adaptados
-        header_frame = ctk.CTkFrame(self.tabla_frame, fg_color=palette["input"])
-        header_frame.pack(fill="x", padx=20, pady=(20, 10))
-        
-        ctk.CTkLabel(header_frame, text="ID", font=("Inter", 12, "bold"), 
-                     text_color=palette["text"], width=50).pack(side="left", padx=5)
-        ctk.CTkLabel(header_frame, text="Nombre", font=("Inter", 12, "bold"), 
-                     text_color=palette["text"]).pack(side="left", expand=True, fill="x", padx=5)
-        ctk.CTkLabel(header_frame, text="Estado", font=("Inter", 12, "bold"), 
-                     text_color=palette["text"], width=80).pack(side="left", padx=5)
-        ctk.CTkLabel(header_frame, text="Acciones", font=("Inter", 12, "bold"), 
-                     text_color=palette["text"], width=200).pack(side="left", padx=5)
-        
-        # Si no hay facultades
+        self.render_table_content()
+
+    def _on_search(self, event=None):
+        self.render_table_content()
+
+    def render_table_content(self):
+        """Renderiza la tabla de facultades, filtrando por búsqueda"""
+        for w in self.main_card.winfo_children(): 
+            w.destroy()
+
+        ancho_id = 100
+        ancho_nombre = 450
+        ancho_estado = 150
+
+        table_head = ctk.CTkFrame(self.main_card, fg_color="transparent", height=35)
+        table_head.pack(fill="x", padx=20, pady=(10, 5))
+
+        ctk.CTkLabel(table_head, text="🏛️ NOMBRE DE FACULTAD", font=self.font_small, text_color=COLORS["text"], width=ancho_nombre, anchor="w").pack(side="left")
+        ctk.CTkLabel(table_head, text="⚙️ ESTADO", font=self.font_small, text_color=COLORS["text"], width=ancho_estado, anchor="center").pack(side="left")
+        ctk.CTkLabel(table_head, text="ACCIONES", font=self.font_small, text_color=COLORS["text"]).pack(side="right", padx=60)
+
+        ctk.CTkFrame(self.main_card, fg_color=COLORS["border"], height=1).pack(fill="x", padx=20)
+
+        todas = obtener_todas_facultades()
+        query = self.entry_busqueda.get().strip().lower() if hasattr(self, "entry_busqueda") else ""
+        facultades = [f for f in todas if query in f["nombre"].lower()] if query else todas
+
+        scroll = ctk.CTkScrollableFrame(self.main_card, fg_color="transparent")
+        scroll.pack(expand=True, fill="both")
+
         if not facultades:
-            ctk.CTkLabel(self.tabla_frame, text="No hay facultades registradas", 
-                         font=("Inter", 14), text_color=palette["text_secondary"]).pack(pady=40)
+            msg = f"No se encontraron facultades para \"{query}\"" if query else "No hay facultades registradas"
+            ctk.CTkLabel(scroll, text=msg, font=self.font_normal, text_color="#94A3B8").pack(pady=40)
             return
-        
-        # Crear fila para cada facultad
-        for facultad in facultades:
-            self.crear_fila_facultad(facultad)
-    
-    def crear_fila_facultad(self, facultad):
-        """Crea una fila con los datos de una facultad y botones de acción"""
-        palette = ThemeManager.get()
-        
-        fila = ctk.CTkFrame(self.tabla_frame, fg_color="transparent", 
-                            border_width=1, border_color=palette["border"], 
-                            corner_radius=8)
-        fila.pack(fill="x", padx=20, pady=5)
-        
-        # ID
-        ctk.CTkLabel(fila, text=str(facultad["id"]), font=("Inter", 12), 
-                     text_color=palette["text"], width=50).pack(side="left", padx=5, pady=10)
-        
-        # Nombre
-        ctk.CTkLabel(fila, text=facultad["nombre"], font=("Inter", 12), 
-                     text_color=palette["text"]).pack(side="left", expand=True, fill="x", padx=5)
-        
-        # Estado (Badge)
-        estado_color = "#10B981" if facultad["estado"] == 1 else "#EF4444"
-        estado_texto = "Activa" if facultad["estado"] == 1 else "Inactiva"
-        ctk.CTkLabel(fila, text=estado_texto, font=("Inter", 11, "bold"), 
-                     text_color=estado_color, width=80).pack(side="left", padx=5)
-        
-        # Botones de Editar y Eliminar
-        btn_editar = ctk.CTkButton(
-            fila, text="✏️ Editar", width=90, height=30,
-            fg_color="#3B82F6", hover_color="#2563EB",
-            font=("Inter", 11, "bold"),
-            command=lambda: self.abrir_formulario(facultad["id"])
-        )
-        btn_editar.pack(side="left", padx=5, pady=10)
-        
-        btn_eliminar = ctk.CTkButton(
-            fila, text="🗑️ Eliminar", width=90, height=30,
-            fg_color="#EF4444", hover_color="#DC2626",
-            font=("Inter", 11, "bold"),
-            command=lambda: self.confirmar_eliminar(facultad["id"], facultad["nombre"])
-        )
-        btn_eliminar.pack(side="left", padx=5, pady=10)
-    
+
+        for f in facultades:
+            row = ctk.CTkFrame(scroll, fg_color="transparent", height=65)
+            row.pack(fill="x", side="top", pady=1)
+            row.pack_propagate(False)
+
+            ctk.CTkLabel(row, text=f"#{f['id']}", font=self.font_normal, text_color=COLORS["text"], width=ancho_id).pack(side="left")
+            ctk.CTkLabel(row, text=f["nombre"].upper(), font=("Inter", 12, "bold"), text_color=COLORS["text"], width=ancho_nombre, anchor="w").pack(side="left")
+
+            es_activa = f.get('estado', 1) == 1
+
+# 🔥 contenedor fijo (como usuarios)
+            estado_box = ctk.CTkFrame(row, fg_color="transparent", width=ancho_estado)
+            estado_box.pack(side="left", fill="y")
+            estado_box.pack_propagate(False)
+
+            badge_est = ctk.CTkFrame(
+            estado_box,
+            fg_color="#D1FAE5" if es_activa else "#FEE2E2",
+            corner_radius=20
+            )
+            badge_est.pack(expand=True)
+
+            ctk.CTkLabel(
+            badge_est,
+            text="● ACTIVA" if es_activa else "● INACTIVA",
+            font=("Inter", 9, "bold"),
+            text_color="#065F46" if es_activa else "#991B1B"
+            ).pack(padx=10, pady=3)
+
+            act_block = ctk.CTkFrame(row, fg_color="transparent")
+            act_block.pack(side="right", padx=20)
+            ctk.CTkButton(act_block, text="✏️", width=32, height=32, fg_color=COLORS["hover"], text_color=COLORS["text"], command=lambda id_f=f["id"]: self.abrir_formulario(id_f)).pack(side="left", padx=4)
+            ctk.CTkButton(act_block, text="🗑️", width=32, height=32, fg_color="#FFF1F2", text_color="#E11D48", command=lambda id_f=f["id"], n=f["nombre"]: self.confirmar_eliminar_modal(id_f, n)).pack(side="left", padx=2)
+
+            ctk.CTkFrame(scroll, fg_color=COLORS["hover"], height=1).pack(fill="x", padx=20)
+
     def abrir_formulario(self, id_facultad=None):
-        """Abre el formulario para crear o editar una facultad"""
-        palette = ThemeManager.get()
+        self.main_card.pack_forget()
         
-        # Limpiar vista anterior
-        self.tabla_frame.pack_forget()
-        
-        # Preparar datos si es edición
         if id_facultad:
             self.modo_edicion = True
             self.facultad_actual_id = id_facultad
             facultad = obtener_facultad_por_id(id_facultad)
-            titulo = "Editar Facultad"
-            nombre_actual = facultad["nombre"] if facultad else ""
-            estado_actual = facultad["estado"] if facultad else 1
+            titulo = "✏️ Editar Facultad"
+            nombre_ini = facultad["nombre"] if facultad else ""
+            estado_ini = "Activa" if facultad and facultad["estado"] == 1 else "Inactiva"
         else:
             self.modo_edicion = False
-            self.facultad_actual_id = None
-            titulo = "Crear Nueva Facultad"
-            nombre_actual = ""
-            estado_actual = 1
+            titulo = "➕ Crear Nueva Facultad"
+            nombre_ini = ""
+            estado_ini = "Activa"
+
+        self.form_base = ctk.CTkFrame(self, fg_color=COLORS["bg"])
+        self.form_base.pack(fill="both", expand=True)
         
-        # Frame del formulario adaptado
-        form_frame = ctk.CTkFrame(self, fg_color=palette["bg"])
-        form_frame.pack(fill="both", expand=True)
+        ctk.CTkLabel(self.form_base, text=titulo, font=self.font_header, text_color=COLORS["text"]).pack(anchor="w", padx=60, pady=(40, 20))
+
+        form_card = ctk.CTkFrame(self.form_base, fg_color=COLORS["card"], corner_radius=15, border_width=1, border_color=COLORS["border"])
+        form_card.pack(fill="x", padx=60, pady=10)
+
+        ctk.CTkLabel(form_card, text="🏛️ Nombre de la Facultad", font=self.font_small, text_color=COLORS["text"]).pack(anchor="w", padx=25, pady=(25, 5))
+        self.input_nombre = ctk.CTkEntry(form_card, height=45, font=self.font_normal, fg_color=COLORS["hover"], border_width=0, text_color=COLORS["text"])
+        self.input_nombre.insert(0, nombre_ini)
+        self.input_nombre.pack(fill="x", padx=25, pady=(0, 20))
+
+        ctk.CTkLabel(form_card, text="⚙️ Estado", font=self.font_small, text_color=COLORS["text"]).pack(anchor="w", padx=25, pady=(0, 5))
+        self.combo_estado = ctk.CTkOptionMenu(form_card, values=["Activa", "Inactiva"], height=45, font=self.font_normal, fg_color=COLORS["hover"], button_color=COLORS["border"], text_color=COLORS["text"])
+        self.combo_estado.set(estado_ini)
+        self.combo_estado.pack(fill="x", padx=25, pady=(0, 30))
+
+        btns = ctk.CTkFrame(self.form_base, fg_color="transparent")
+        btns.pack(fill="x", padx=60, pady=30)
         
-        # Header
-        header = ctk.CTkFrame(form_frame, fg_color="transparent")
-        header.pack(fill="x", padx=40, pady=(40, 20))
-        ctk.CTkLabel(header, text=titulo, font=("Inter", 28, "bold"), 
-                     text_color=palette["text"]).pack(anchor="w")
-        
-        # Contenedor del formulario adaptado
-        form_container = ctk.CTkFrame(form_frame, fg_color=palette["card"], 
-                                      corner_radius=15, border_width=1, 
-                                      border_color=palette["border"])
-        form_container.pack(fill="both", expand=True, padx=40, pady=40)
-        
-        # Campo Nombre
-        ctk.CTkLabel(form_container, text="Nombre de la Facultad", 
-                     font=("Inter", 13, "bold"), text_color=palette["text"]).pack(anchor="w", padx=20, pady=(20, 5))
-        
-        self.input_nombre = ctk.CTkEntry(
-            form_container,
-            placeholder_text="Ej: Facultad de Ingeniería",
-            font=("Inter", 13),
-            height=40,
-            fg_color=palette["input"],
-            border_color=palette["border"],
-            text_color=palette["text"]
-        )
-        self.input_nombre.pack(fill="x", padx=20, pady=(0, 20))
-        self.input_nombre.insert(0, nombre_actual)
-        
-        # Campo Estado
-        ctk.CTkLabel(form_container, text="Estado", 
-                     font=("Inter", 13, "bold"), text_color=palette["text"]).pack(anchor="w", padx=20, pady=(0, 5))
-        
-        self.combo_estado = ctk.CTkComboBox(
-            form_container,
-            values=["Activa", "Inactiva"],
-            font=("Inter", 13),
-            height=40,
-            fg_color=palette["input"],
-            border_color=palette["border"],
-            button_color=palette["border"]
-        )
-        self.combo_estado.pack(fill="x", padx=20, pady=(0, 30))
-        self.combo_estado.set("Activa" if estado_actual == 1 else "Inactiva")
-        
-        # Botones
-        btn_frame = ctk.CTkFrame(form_container, fg_color="transparent")
-        btn_frame.pack(fill="x", padx=20, pady=(0, 20))
-        
-        btn_guardar = ctk.CTkButton(
-            btn_frame,
-            text="💾 Guardar",
-            fg_color="#10B981",
-            hover_color="#059669",
-            font=("Inter", 13, "bold"),
-            height=40,
-            command=self.guardar_facultad
-        )
-        btn_guardar.pack(side="left", padx=5, expand=True, fill="x")
-        
-        btn_cancelar = ctk.CTkButton(
-            btn_frame,
-            text="❌ Cancelar",
-            fg_color="#6B7280",
-            hover_color="#4B5563",
-            font=("Inter", 13, "bold"),
-            height=40,
-            command=self.volver_a_tabla
-        )
-        btn_cancelar.pack(side="left", padx=5, expand=True, fill="x")
-    
+        ctk.CTkButton(btns, text="❌ Cancelar", font=self.font_sub, fg_color="#FEE2E2", text_color=COLORS["text"], height=55, command=self.volver_a_tabla).pack(side="left", expand=True, fill="x", padx=(0, 10))
+        ctk.CTkButton(btns, text="💾 Guardar Facultad", font=self.font_sub, fg_color="#D1FAE5", text_color=COLORS["text"], height=55, command=self.guardar_facultad).pack(side="left", expand=True, fill="x", padx=(10, 0))
+
     def guardar_facultad(self):
-        """Guarda la facultad (crear o editar)"""
         nombre = self.input_nombre.get().strip()
         estado = 1 if self.combo_estado.get() == "Activa" else 0
-        
-        if not nombre:
-            print("Error: El nombre no puede estar vacío")
-            return
-        
-        if self.modo_edicion:
-            exito = actualizar_facultad(self.facultad_actual_id, nombre, estado)
-            if exito: print(f"Facultad actualizada: {nombre}")
-        else:
-            exito = crear_facultad(nombre, estado)
-            if exito: print(f"Facultad creada: {nombre}")
-            
+        if not nombre: return
+        if self.modo_edicion: actualizar_facultad(self.facultad_actual_id, nombre, estado)
+        else: crear_facultad(nombre, estado)
         self.volver_a_tabla()
-    
-    def confirmar_eliminar(self, id_facultad, nombre_facultad):
-        """Elimina una facultad"""
-        exito = eliminar_facultad(id_facultad)
-        if exito:
-            print(f"Facultad eliminada: {nombre_facultad}")
-            self.actualizar_tabla()
-    
+
+    def confirmar_eliminar_modal(self, id_facultad, nombre):
+        # 1. Overlay Transparente
+        self.overlay = ctk.CTkFrame(self, fg_color="transparent") 
+        self.overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+        
+        # 2. Ventana Modal
+        modal = ctk.CTkFrame(self.overlay, fg_color=COLORS["card"], corner_radius=20, width=420, height=240, border_width=2, border_color=COLORS["border"])
+        modal.place(relx=0.5, rely=0.5, anchor="center")
+        modal.pack_propagate(False)
+
+        ctk.CTkLabel(modal, text="🏛️", font=("Inter", 45)).pack(pady=(25, 5))
+        ctk.CTkLabel(modal, text="¿Está seguro de eliminar esta facultad?", font=("Inter", 16, "bold"), text_color=COLORS["text"]).pack()
+        ctk.CTkLabel(modal, text=f"Se eliminará: {nombre.upper()}", font=("Inter", 12), text_color=COLORS["subtext"]).pack(pady=5)
+        
+        # 3. Botones (Verde Confirmar / Rojo Cancelar)
+        btns = ctk.CTkFrame(modal, fg_color="transparent")
+        btns.pack(fill="x", side="bottom", pady=25, padx=30)
+        
+        ctk.CTkButton(btns, text="Cancelar", fg_color="#EF4444", text_color="white", hover_color="#DC2626", 
+                     height=40, font=("Inter", 13, "bold"), command=self.cerrar_modal).pack(side="left", expand=True, padx=(0, 10))
+        
+        ctk.CTkButton(btns, text="Confirmar y Borrar", fg_color="#10B981", text_color="white", hover_color="#059669", 
+                     height=40, font=("Inter", 13, "bold"), command=lambda: self.borrar_facultad_y_cerrar(id_facultad)).pack(side="left", expand=True)
+
+    def cerrar_modal(self):
+        if hasattr(self, 'overlay'): self.overlay.destroy()
+
+    def borrar_facultad_y_cerrar(self, id_facultad):
+        if eliminar_facultad(id_facultad):
+            self.render_table_content()
+        self.cerrar_modal()
+
     def volver_a_tabla(self):
-        """Vuelve a mostrar la tabla limpiando el formulario"""
-        for widget in self.winfo_children():
-            widget.destroy()
-        self.crear_vista_tabla()
+        if hasattr(self, 'form_base'): self.form_base.destroy()
+        self.main_card.pack(fill="both", expand=True, padx=40, pady=(0, 40))
+        self.render_table_content()
