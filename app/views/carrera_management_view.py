@@ -1,5 +1,13 @@
+import unicodedata
 import customtkinter as ctk
 from app.services.theme import COLORS
+
+def normalizar(texto):
+    """Elimina acentos y convierte a minúsculas para búsqueda flexible."""
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', str(texto).lower())
+        if unicodedata.category(c) != 'Mn'
+    )
 from app.services.carrera_service import (
     obtener_todas_carreras,
     crear_carrera,
@@ -62,7 +70,7 @@ class CarreraManagementView(ctk.CTkFrame):
         # --- CUERPO SCROLLABLE ---
         todas = obtener_todas_carreras()
         query = self.entry_busqueda.get().strip().lower() if hasattr(self, "entry_busqueda") else ""
-        carreras = [c for c in todas if query in c["nombre"].lower() or query in (c.get("facultad_nombre") or "").lower()] if query else todas
+        carreras = [c for c in todas if normalizar(query) in normalizar(c["nombre"]) or normalizar(query) in normalizar(c.get("facultad_nombre") or "")] if query else todas
         scroll = ctk.CTkScrollableFrame(self.main_card, fg_color="transparent")
         scroll.pack(expand=True, fill="both")
         

@@ -1,5 +1,13 @@
+import unicodedata
 import customtkinter as ctk
 from app.services.theme import COLORS
+
+def normalizar(texto):
+    """Elimina acentos y convierte a minúsculas para búsqueda flexible."""
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', str(texto).lower())
+        if unicodedata.category(c) != 'Mn'
+    )
 from app.services.facultad_service import (
     obtener_todas_facultades,
     crear_facultad,
@@ -77,7 +85,7 @@ class FacultadManagementView(ctk.CTkFrame):
 
         todas = obtener_todas_facultades()
         query = self.entry_busqueda.get().strip().lower() if hasattr(self, "entry_busqueda") else ""
-        facultades = [f for f in todas if query in f["nombre"].lower()] if query else todas
+        facultades = [f for f in todas if normalizar(query) in normalizar(f["nombre"])] if query else todas
 
         scroll = ctk.CTkScrollableFrame(self.main_card, fg_color="transparent")
         scroll.pack(expand=True, fill="both")

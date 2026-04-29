@@ -1,6 +1,14 @@
+import unicodedata
 import customtkinter as ctk
 from app.views.terminal_view import TerminalView
 from app.services.theme import COLORS
+
+def normalizar(texto):
+    """Elimina acentos y convierte a minúsculas para búsqueda flexible."""
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', str(texto).lower())
+        if unicodedata.category(c) != 'Mn'
+    )
 from app.services.carrera_service import obtener_todas_carreras, obtener_facultades_para_dropdown
 from app.services.usuario_service import (
     crear_usuario, 
@@ -243,6 +251,7 @@ class UserManagementView(ctk.CTkFrame):
         self.entry_busqueda = ctk.CTkEntry(bar, placeholder_text="🔍 Buscar usuario...", height=42, corner_radius=10, fg_color=COLORS["hover"]
 , border_color=COLORS["border"], text_color=COLORS["text"])
         self.entry_busqueda.pack(side="left", fill="x", expand=True, padx=(0, 15))
+        self.entry_busqueda.bind("<KeyRelease>", lambda e: self.aplicar_filtro())
         self.btn_filter = ctk.CTkButton(bar, text="⚙️ Filtrar ⌵", width=110, height=42, corner_radius=10, fg_color=COLORS["card"], text_color=COLORS["text"], border_color=COLORS["border"], command=self.toggle_filter)
         self.btn_filter.pack(side="left")
 
@@ -265,6 +274,23 @@ class UserManagementView(ctk.CTkFrame):
     def aplicar_filtro_visual(self, v):
         self.filtro_rol_actual = v
         self.draw_tags()
+        self.aplicar_filtro()
+
+    def aplicar_filtro(self):
+        query = self.entry_busqueda.get().strip().lower() if hasattr(self, "entry_busqueda") else ""
+        rol = self.filtro_rol_actual
+
+        resultado = self.all_users
+        if query:
+            resultado = [u for u in resultado if
+                normalizar(query) in normalizar(u["nombre_solo"]) or
+                normalizar(query) in normalizar(u["ap"]) or
+                normalizar(query) in normalizar(u["am"]) or
+                normalizar(query) in normalizar(u.get("cuenta", ""))]
+        if rol != "Todos":
+            resultado = [u for u in resultado if u["r"].upper() == rol.upper()]
+
+        self.render_table_content(resultado)
 
     def update_carreras_dinamicas(self, fn):
         c = self.carreras_por_plantel.get(fn, ["Sin Carreras"])
