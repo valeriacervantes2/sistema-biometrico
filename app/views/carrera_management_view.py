@@ -1,4 +1,5 @@
 import unicodedata
+import unicodedata
 import customtkinter as ctk
 from app.services.theme import COLORS
 

@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import os
 from app.services.theme import COLORS
+from app.views.app_context import AppContext
 from PIL import Image, ImageOps, ImageDraw # Necesitamos estas tres de PIL
 
 class LoginView(ctk.CTkFrame):
@@ -84,7 +85,7 @@ class LoginView(ctk.CTkFrame):
         # --- BUSCADOR DE IMAGEN ROBUSTO ---
         # Intentamos encontrar la carpeta 'app/assets' desde la raíz del proyecto
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        assets_path = os.path.join(base_path, "app", "views", "assets", "logo_koda.png")
+        assets_path = os.path.join(base_path, "app", "views", "assets", "imgg.png")
 
         # DIAGNÓSTICO EN CONSOLA (Revisa esto en tu terminal si no sale la imagen)
         print(f"DEBUG: Buscando logo circular en: {assets_path}")
@@ -112,28 +113,28 @@ class LoginView(ctk.CTkFrame):
             # Si falla la ruta anterior, intentamos una ruta directa por si acaso
             print("ERROR: No se encontró. Intentando ruta alternativa...")
             # Intento 2: carpeta assets en el mismo nivel que views
-            alt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "logo_koda.png")
+            alt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "imgg.png")
             if os.path.exists(alt_path):
                  # ... (repetir lógica de carga si existe)
                  pass
 
         # --- RESTO DEL DISEÑO ---
-        ctk.CTkLabel(self.card, text="Sistema de Reconocimiento\nFacial", 
+        ctk.CTkLabel(self.card, text=AppContext.t("Sistema de Reconocimiento\nFacial"), 
                      font=("Inter", 26, "bold"), text_color=COLORS["text"], justify="center").pack(pady=(15, 10))
         
-        ctk.CTkLabel(self.card, text="Ingresa tus credenciales para continuar", 
+        ctk.CTkLabel(self.card, text=AppContext.t("Ingresa tus credenciales para continuar"), 
                      font=("Inter", 14), text_color="#8E8E93").pack(pady=(0, 25))
         
-        self.create_input_group("CORREO ELECTRÓNICO", "Escribe tu correo")
+        self.create_input_group(AppContext.t("CORREO ELECTRÓNICO"), AppContext.t("Escribe tu correo"))
         self.user_entry = self.last_entry
-        self.create_input_group("CONTRASEÑA", "Escribe tu contraseña", is_password=True)
+        self.create_input_group(AppContext.t("CONTRASEÑA"), AppContext.t("Escribe tu contraseña"), is_password=True)
         self.pass_entry = self.last_entry
 
         self.error_label = ctk.CTkLabel(self.card, text="", text_color="#EF4444", font=("Inter", 13))
         self.error_label.pack(pady=(5, 0))
 
         self.login_btn = ctk.CTkButton(
-            self.card, text="→   INICIAR SESIÓN", 
+            self.card, text="→   " + AppContext.t("INICIAR SESIÓN"), 
             fg_color="#000000", hover_color="#262626", 
             width=350, height=55, corner_radius=12, 
             font=("Inter", 15, "bold"), command=self.validar_login
@@ -190,4 +191,4 @@ class LoginView(ctk.CTkFrame):
 
     def validar_login(self):
         if self.user_entry.get() == "1" and self.pass_entry.get() == "1": self.on_login_success()
-        else: self.error_label.configure(text="Credenciales incorrectas.")
+        else: self.error_label.configure(text=AppContext.t("Credenciales incorrectas."))
