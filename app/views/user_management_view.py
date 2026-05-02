@@ -1,16 +1,8 @@
+import re
 import unicodedata
 import customtkinter as ctk
 from app.views.terminal_view import TerminalView
 from app.services.theme import COLORS
-
-
-def normalizar(texto):
-    """Elimina acentos y convierte a minúsculas para búsqueda flexible."""
-    return ''.join(
-        c for c in unicodedata.normalize('NFD', str(texto).lower())
-        if unicodedata.category(c) != 'Mn'
-    )
-
 from app.views.app_context import AppContext
 from app.detection.detector_rostro import encodings_db, usuarios_db
 from app.recognition.encoding_manager import (
@@ -27,6 +19,25 @@ from app.services.usuario_service import (
     obtener_id_facultad_por_nombre, 
     desactivar_usuario 
 )
+
+
+def normalizar(texto):
+    """Normaliza texto para búsqueda flexible: sin acentos, sin puntuación, espacios colapsados."""
+    if not texto:
+        return ''
+    texto = str(texto).lower().strip()
+    # ñ antes de NFD para que no se pierda como 'n' con tilde
+    texto = texto.replace('ñ', 'n').replace('ü', 'u')
+    # Eliminar diacríticos
+    texto = ''.join(
+        c for c in unicodedata.normalize('NFD', texto)
+        if unicodedata.category(c) != 'Mn'
+    )
+    # Quitar símbolos raros, dejar letras, números y espacios
+    texto = re.sub(r'[^a-z0-9\s]', '', texto)
+    # Colapsar espacios múltiples
+    return re.sub(r'\s+', ' ', texto).strip()
+
 
 TIPOS_USUARIO = {
     1: "Estudiante",
@@ -148,11 +159,9 @@ class UserManagementView(ctk.CTkFrame):
             ctk.CTkLabel(badge_e, text="● ACTIVO" if es_activo else "● INACTIVO", font=("Inter", 9, "bold"), text_color="#065F46" if es_activo else "#991B1B").pack(padx=10, pady=3)
 
             a_b = ctk.CTkFrame(row, fg_color="transparent"); a_b.pack(side="right", padx=20)
-            ctk.CTkButton(a_b, text="✏️", width=32, height=32, fg_color=COLORS["hover"]
-, text_color=COLORS["text"], command=lambda d=u: self.abrir_formulario(d)).pack(side="left", padx=4)
+            ctk.CTkButton(a_b, text="✏️", width=32, height=32, fg_color=COLORS["hover"], text_color=COLORS["text"], command=lambda d=u: self.abrir_formulario(d)).pack(side="left", padx=4)
             ctk.CTkButton(a_b, text="🗑️", width=32, height=32, fg_color="#FFF1F2", text_color="#E11D48", command=lambda i=u['id']: self.ejecutar_eliminacion(i)).pack(side="left", padx=2)
-            ctk.CTkFrame(scroll, fg_color=COLORS["hover"]
-, height=1).pack(fill="x", padx=20, side="top")
+            ctk.CTkFrame(scroll, fg_color=COLORS["hover"], height=1).pack(fill="x", padx=20, side="top")
 
     def abrir_formulario(self, usuario=None):
         self.vista_tabla.pack_forget()
@@ -187,7 +196,8 @@ class UserManagementView(ctk.CTkFrame):
         vcmd = (self.register(self.validar_ocho_numeros), '%P')
         entrada = self.inputs_obligatorios.get("cuenta") 
         if entrada: 
-                entrada.configure(validate="key", validatecommand=vcmd)
+            entrada.configure(validate="key", validatecommand=vcmd)
+
         # Botón biométrico
         texto_boton = "📷 Registrar Biometría" if not usuario else "🔄 Re-tomar Biometría"
 
@@ -200,7 +210,6 @@ class UserManagementView(ctk.CTkFrame):
             font=self.font_sub,
             command=self.abrir_terminal_biometrica
         )
-
         self.btn_biometria.pack(fill="x", padx=60, pady=(20, 10))
 
         self.label_estado = ctk.CTkLabel(
@@ -224,8 +233,7 @@ class UserManagementView(ctk.CTkFrame):
         for label, val in fields:
             f = ctk.CTkFrame(grid, fg_color="transparent"); f.pack(side="left", expand=True, fill="x", padx=5)
             ctk.CTkLabel(f, text=label, font=self.font_small, text_color=COLORS["subtext"]).pack(anchor="w")
-            entry = ctk.CTkEntry(f, height=40, font=self.font_normal, fg_color=COLORS["hover"]
-, border_width=0, text_color=COLORS["text"])
+            entry = ctk.CTkEntry(f, height=40, font=self.font_normal, fg_color=COLORS["hover"], border_width=0, text_color=COLORS["text"])
             entry.insert(0, val); entry.pack(fill="x", pady=5)
             if "Apellido" in label: self.inputs_apellidos[label] = entry
             else: self.inputs_obligatorios[label] = entry
@@ -233,18 +241,15 @@ class UserManagementView(ctk.CTkFrame):
     def validar_y_guardar(self):
         if not self.usuario_editando_id:
             if not hasattr(self, "biometria_temp") or self.biometria_temp is None:
-            
                 self.label_estado.configure(
-                   text="❌ Biometría inválida o duplicada",
-                   text_color="#EF4444"
+                    text="❌ Biometría inválida o duplicada",
+                    text_color="#EF4444"
                 )
-
                 self.btn_biometria.configure(
-                   text="❌ Biometría requerida",
-                   fg_color="#EF4444",
-                   hover_color="#DC2626"
+                    text="❌ Biometría requerida",
+                    fg_color="#EF4444",
+                    hover_color="#DC2626"
                 )
-
                 return
 
         try:
@@ -268,17 +273,15 @@ class UserManagementView(ctk.CTkFrame):
             ap = self.inputs_apellidos["Apellido Paterno"].get().strip()
             am = self.inputs_apellidos["Apellido Materno"].get().strip()
 
-            # 🔥 AQUÍ ESTABA EL ERROR
             tipo_texto = self.rol_var.get()
 
             TIPOS_USUARIO_INV = {
-            "ESTUDIANTE": 1,
-            "DOCENTE": 2,
-            "TRABAJADOR": 3
+                "ESTUDIANTE": 1,
+                "DOCENTE": 2,
+                "TRABAJADOR": 3
             }
 
             tipo_usuario = TIPOS_USUARIO_INV.get(tipo_texto.upper())
-
             id_fac = obtener_id_facultad_por_nombre(self.plantel_menu.get())
 
             if not tipo_usuario or not id_fac:
@@ -286,21 +289,15 @@ class UserManagementView(ctk.CTkFrame):
                 return
 
             if self.usuario_editando_id:
+                actualizar_usuario(id_usuario, n, ap, am, cta, tipo_usuario, id_fac, em)
 
-               actualizar_usuario(id_usuario, n, ap, am, cta, tipo_usuario, id_fac, em)
-
-             # 🔥 SI TOMÓ NUEVA BIOMETRÍA → reemplazar
-               if hasattr(self, "biometria_temp") and self.biometria_temp is not None:
-
-                  print("♻️ Reemplazando biometría...")
-
-                  eliminar_encoding(id_usuario)  # borrar viejo
-                  guardar_encoding(id_usuario, self.biometria_temp)  # guardar nuevo
-
-                  encodings_db[:], usuarios_db[:] = cargar_encodings()
-
-                  self.biometria_temp = None
-                  
+                # 🔥 SI TOMÓ NUEVA BIOMETRÍA → reemplazar
+                if hasattr(self, "biometria_temp") and self.biometria_temp is not None:
+                    print("♻️ Reemplazando biometría...")
+                    eliminar_encoding(id_usuario)
+                    guardar_encoding(id_usuario, self.biometria_temp)
+                    encodings_db[:], usuarios_db[:] = cargar_encodings()
+                    self.biometria_temp = None
             else:
                 usuario_id = crear_usuario(n, ap, am, tipo_usuario, id_fac, None, cta, em)
 
@@ -312,18 +309,17 @@ class UserManagementView(ctk.CTkFrame):
 
                     if not guardado:
                         self.label_estado.configure(
-                        text="❌ Rostro ya registrado en el sistema",
-                        text_color="#EF4444"
-                    ) 
-                    return
+                            text="❌ Rostro ya registrado en el sistema",
+                            text_color="#EF4444"
+                        )
+                        return
 
                     print("✔ Encoding guardado en BD")
-                
+
                 except Exception as e:
                     print("ERROR al guardar encoding:", e)
 
                 encodings_db[:], usuarios_db[:] = cargar_encodings()
-
                 self.biometria_temp = None
 
             self.refresh_data()
@@ -340,15 +336,11 @@ class UserManagementView(ctk.CTkFrame):
 
     def create_search_bar(self, master):
         bar = ctk.CTkFrame(master, fg_color="transparent"); bar.pack(fill="x", padx=30, pady=10)
-        self.entry_busqueda = ctk.CTkEntry(bar, placeholder_text=AppContext.t("🔍 Buscar usuario..."), height=42, corner_radius=10, fg_color=COLORS["hover"]
-, border_color=COLORS["border"], text_color=COLORS["text"])
+        self.entry_busqueda = ctk.CTkEntry(bar, placeholder_text=AppContext.t("🔍 Buscar usuario..."), height=42, corner_radius=10, fg_color=COLORS["hover"], border_color=COLORS["border"], text_color=COLORS["text"])
         self.entry_busqueda.pack(side="left", fill="x", expand=True, padx=(0, 15))
-
         self.entry_busqueda.bind("<KeyRelease>", self._debounce_filtro)
-        self.btn_filter = ctk.CTkButton(bar, text="⚙️ Filtrar ⌵", width=110, height=42, corner_radius=10, fg_color=COLORS["card"], text_color=COLORS["text"], border_color=COLORS["border"], command=self.toggle_filter)
 
         self.btn_filter = ctk.CTkButton(bar, text=AppContext.t("⚙️ Filtrar ⌵"), width=110, height=42, corner_radius=10, fg_color=COLORS["card"], text_color=COLORS["text"], border_color=COLORS["border"], command=self.toggle_filter)
-
         self.btn_filter.pack(side="left")
 
     def toggle_filter(self):
@@ -364,8 +356,7 @@ class UserManagementView(ctk.CTkFrame):
         ctk.CTkLabel(r1, text="👤 Rol:", font=self.font_small, text_color=COLORS["text"], width=80).pack(side="left")
         for t in ["Todos", "ESTUDIANTE", "DOCENTE", "AUXILIAR"]:
             act = self.filtro_rol_actual == t
-            ctk.CTkButton(r1, text=t, height=28, corner_radius=10, fg_color=COLORS["hover"]
-        if act else "white", text_color=COLORS["text"], border_color=COLORS["border"], command=lambda v=t: self.aplicar_filtro_visual(v)).pack(side="left", padx=3)
+            ctk.CTkButton(r1, text=t, height=28, corner_radius=10, fg_color=COLORS["hover"] if act else "white", text_color=COLORS["text"], border_color=COLORS["border"], command=lambda v=t: self.aplicar_filtro_visual(v)).pack(side="left", padx=3)
 
     def aplicar_filtro_visual(self, v):
         self.filtro_rol_actual = v
@@ -373,12 +364,11 @@ class UserManagementView(ctk.CTkFrame):
         self.aplicar_filtro()
 
     def aplicar_filtro(self):
-        query = self.entry_busqueda.get().strip() if hasattr(self, "entry_busqueda") else ""
+        query = normalizar(self.entry_busqueda.get()) if hasattr(self, "entry_busqueda") else ""
         rol   = self.filtro_rol_actual
         resultado = self.all_users
         if query:
-            qn = normalizar(query)  # normalizar UNA sola vez
-            resultado = [u for u in resultado if qn in u["_norm"]]
+            resultado = [u for u in resultado if query in u["_norm"]]
         if rol != "Todos":
             rol_n = rol.upper()
             resultado = [u for u in resultado if u["r"].upper() == rol_n]
@@ -395,12 +385,9 @@ class UserManagementView(ctk.CTkFrame):
         self.carrera_menu.configure(values=c); self.carrera_var.set(c[0])
 
     def ejecutar_eliminacion(self, id_cuenta):
-        # 1. Overlay Transparente (eliminamos el color azul oscuro)
         self.overlay = ctk.CTkFrame(self, fg_color="transparent") 
         self.overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
         
-        # 2. Caja del Modal (la ventanita blanca)
-        # Añadimos borde más fuerte para que resalte sobre el fondo blanco
         modal = ctk.CTkFrame(self.overlay, fg_color=COLORS["card"], corner_radius=20, width=420, height=240, border_width=2, border_color="#CBD5E1")
         modal.place(relx=0.5, rely=0.5, anchor="center")
         modal.pack_propagate(False)
@@ -409,7 +396,6 @@ class UserManagementView(ctk.CTkFrame):
         ctk.CTkLabel(modal, text=AppContext.t("¿Está seguro de eliminar al usuario?"), font=("Inter", 16, "bold"), text_color=COLORS["text"]).pack()
         ctk.CTkLabel(modal, text=AppContext.t("Esta acción desactivará al usuario permanentemente."), font=("Inter", 12), text_color=COLORS["subtext"]).pack(pady=5)
         
-        # 3. Botones (Verde para confirmar, Rojo para cancelar)
         btns = ctk.CTkFrame(modal, fg_color="transparent")
         btns.pack(fill="x", side="bottom", pady=25, padx=30)
         
@@ -434,23 +420,19 @@ class UserManagementView(ctk.CTkFrame):
         self.render_table_content(self.all_users)
 
     def abrir_terminal_biometrica(self):
-    # NO validar ID aquí ❌
-
         self.form_base.pack_forget()
 
         self.terminal_container = ctk.CTkFrame(self, fg_color="black")
         self.terminal_container.pack(fill="both", expand=True)
 
         self.terminal_view = TerminalView(
-        self.terminal_container,
-        user_id=None,  # 🔥 aún no existe
-        on_back=self.cerrar_terminal_biometrica,
-        on_capture=self.recibir_biometria,
-        modo="registro"   # 👈 ESTO ES CLAVE
+            self.terminal_container,
+            user_id=None,
+            on_back=self.cerrar_terminal_biometrica,
+            on_capture=self.recibir_biometria,
+            modo="registro"
         )
-    
         self.terminal_view.pack(fill="both", expand=True)
-
 
     def cerrar_terminal_biometrica(self):
         if hasattr(self, "terminal_view"):
@@ -465,57 +447,56 @@ class UserManagementView(ctk.CTkFrame):
             self.form_base.pack(fill="both", expand=True)
 
     def recibir_biometria(self, encoding):
+        print("✔ Captura recibida")
 
-       print("✔ Captura recibida")
+        if encoding is None:
+            print("❌ Encoding inválido")
+            return
 
-       if encoding is None:
-           print("❌ Encoding inválido")
-           return
+        # 🔥 cargar base actual
+        encodings_db, usuarios_db = cargar_encodings()
 
-    # 🔥 cargar base actual
-       encodings_db, usuarios_db = cargar_encodings()
+        # 🔥 validar duplicado
+        idx, distancia = find_best_match(encoding, encodings_db)
 
-    # 🔥 validar duplicado
-       idx, distancia = find_best_match(encoding, encodings_db)
+        if idx is not None:
+            print("❌ Rostro duplicado detectado")
 
-       if idx is not None:
-           print("❌ Rostro duplicado detectado")
+            self.biometria_temp = None
 
-           self.biometria_temp = None
+            if hasattr(self, "btn_biometria"):
+                self.btn_biometria.configure(
+                    text="❌ Rostro ya registrado",
+                    fg_color="#EF4444",
+                    hover_color="#DC2626"
+                )
 
-           if hasattr(self, "btn_biometria"):
-               self.btn_biometria.configure(
-                  text="❌ Rostro ya registrado",
-                  fg_color="#EF4444",
-                  hover_color="#DC2626"
+            if hasattr(self, "label_estado"):
+                self.label_estado.configure(
+                    text="❌ Este rostro ya existe en el sistema",
+                    text_color="#EF4444"
+                )
+
+            self.cerrar_terminal_biometrica()
+            return
+
+        # SOLO SI NO ES DUPLICADO
+        print("✔ Rostro único, válido para registro")
+
+        self.biometria_temp = encoding
+
+        if hasattr(self, "btn_biometria"):
+            self.btn_biometria.configure(
+                text="✔ Biometría registrada",
+                fg_color="#10B981",
+                hover_color="#059669",
+                state="disabled"
             )
 
-           if hasattr(self, "label_estado"):
-               self.label_estado.configure(
-                  text="❌ Este rostro ya existe en el sistema",
-                  text_color="#EF4444"
+        if hasattr(self, "label_estado"):
+            self.label_estado.configure(
+                text="✔ Biometría válida",
+                text_color="#10B981"
             )
 
-           self.cerrar_terminal_biometrica()
-           return
-
-            # ✅ SOLO SI NO ES DUPLICADO
-       print("✔ Rostro único, válido para registro")
-
-       self.biometria_temp = encoding
-
-       if hasattr(self, "btn_biometria"):
-           self.btn_biometria.configure(
-              text="✔ Biometría registrada",
-              fg_color="#10B981",
-              hover_color="#059669",
-              state="disabled"
-        )
-
-       if hasattr(self, "label_estado"):
-           self.label_estado.configure(
-              text="✔ Biometría válida",
-              text_color="#10B981"
-        )
-
-       self.cerrar_terminal_biometrica()
+        self.cerrar_terminal_biometrica()

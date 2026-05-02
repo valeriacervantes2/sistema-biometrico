@@ -1,17 +1,8 @@
+import re
 import unicodedata
 import customtkinter as ctk
 from app.services.theme import COLORS
-
-
-def normalizar(texto):
-    """Elimina acentos y convierte a minúsculas para búsqueda flexible."""
-    return ''.join(
-        c for c in unicodedata.normalize('NFD', str(texto).lower())
-        if unicodedata.category(c) != 'Mn'
-    )
-
 from app.views.app_context import AppContext
-
 from app.services.facultad_service import (
     obtener_todas_facultades,
     crear_facultad,
@@ -19,6 +10,25 @@ from app.services.facultad_service import (
     eliminar_facultad,
     obtener_facultad_por_id
 )
+
+
+def normalizar(texto):
+    """Normaliza texto para búsqueda flexible: sin acentos, sin puntuación, espacios colapsados."""
+    if not texto:
+        return ''
+    texto = str(texto).lower().strip()
+    # ñ antes de NFD para que no se pierda como 'n' con tilde
+    texto = texto.replace('ñ', 'n').replace('ü', 'u')
+    # Eliminar diacríticos
+    texto = ''.join(
+        c for c in unicodedata.normalize('NFD', texto)
+        if unicodedata.category(c) != 'Mn'
+    )
+    # Quitar símbolos raros, dejar letras, números y espacios
+    texto = re.sub(r'[^a-z0-9\s]', '', texto)
+    # Colapsar espacios múltiples
+    return re.sub(r'\s+', ' ', texto).strip()
+
 
 class FacultadManagementView(ctk.CTkFrame):
     def __init__(self, master):
@@ -59,7 +69,6 @@ class FacultadManagementView(ctk.CTkFrame):
         self.entry_busqueda.bind("<KeyRelease>", self._on_search)
         
         # 3. Card Principal
-        
         self.main_card = ctk.CTkFrame(self, fg_color=COLORS["card"], corner_radius=15, border_width=1, border_color=COLORS["border"])
         self.main_card.pack(fill="both", expand=True, padx=40, pady=(0, 40))
         
@@ -83,10 +92,6 @@ class FacultadManagementView(ctk.CTkFrame):
         table_head = ctk.CTkFrame(self.main_card, fg_color="transparent", height=35)
         table_head.pack(fill="x", padx=20, pady=(10, 5))
 
-        ctk.CTkLabel(table_head, text="🏛️ NOMBRE DE FACULTAD", font=self.font_small, text_color=COLORS["text"], width=ancho_nombre, anchor="w").pack(side="left")
-        ctk.CTkLabel(table_head, text="⚙️ ESTADO", font=self.font_small, text_color=COLORS["text"], width=ancho_estado, anchor="center").pack(side="left")
-        ctk.CTkLabel(table_head, text="ACCIONES", font=self.font_small, text_color=COLORS["text"]).pack(side="right", padx=60)
-
         ctk.CTkLabel(table_head, text="🏛️ " + AppContext.t("Nombre de la Facultad").upper(), font=self.font_small, text_color=COLORS["text"], width=ancho_nombre, anchor="w").pack(side="left")
         ctk.CTkLabel(table_head, text="⚙️ " + AppContext.t("Estado").upper(), font=self.font_small, text_color=COLORS["text"], width=ancho_estado, anchor="center").pack(side="left")
         ctk.CTkLabel(table_head, text=AppContext.t("Acciones").upper(), font=self.font_small, text_color=COLORS["text"]).pack(side="right", padx=60)
@@ -94,10 +99,9 @@ class FacultadManagementView(ctk.CTkFrame):
         ctk.CTkFrame(self.main_card, fg_color=COLORS["border"], height=1).pack(fill="x", padx=20)
 
         todas = obtener_todas_facultades()
-        query = self.entry_busqueda.get().strip() if hasattr(self, "entry_busqueda") else ""
+        query = normalizar(self.entry_busqueda.get()) if hasattr(self, "entry_busqueda") else ""
         if query:
-            qn = normalizar(query)  # normalizar UNA sola vez
-            facultades = [f for f in todas if qn in normalizar(f["nombre"])]
+            facultades = [f for f in todas if query in normalizar(f["nombre"])]
         else:
             facultades = todas
 
