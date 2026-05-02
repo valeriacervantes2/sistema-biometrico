@@ -30,15 +30,27 @@ def cargar_encodings(archivo="encodings.json"):
     if not os.path.exists(archivo):
         return [], []
 
-    with open(archivo, "r") as f:
-        datos = json.load(f)
+    try:
+        with open(archivo, "r") as f:
+            datos = json.load(f)
+
+        if not isinstance(datos, list):
+            raise ValueError("El archivo no contiene una lista")
+
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"⚠️  {archivo} corrupto ({e}), se inicia sin encodings")
+        return [], []
 
     encodings = []
     usuarios = []
 
     for usuario in datos:
-        encodings.append(np.array(usuario["encoding"]))
-        usuarios.append(usuario["usuario"])
+        try:
+            encodings.append(np.array(usuario["encoding"]))
+            usuarios.append(usuario["usuario"])
+        except (KeyError, TypeError):
+            print(f"⚠️  Registro inválido en {archivo}, se omite: {usuario}")
+            continue
 
     return encodings, usuarios
 

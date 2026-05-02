@@ -13,15 +13,27 @@ from app.recognition.encoding_manager import (
 )
 
 def guardar_logs():
-    with open("logs_accesos.json", "w") as f:
+    # Escritura atómica: escribe en temporal y luego renombra
+    # para evitar corrupción si el proceso se interrumpe a mitad
+    tmp = "logs_accesos.json.tmp"
+    with open(tmp, "w") as f:
         json.dump(logs_accesos, f)
+    os.replace(tmp, "logs_accesos.json")
 
 def cargar_logs():
     global logs_accesos
 
     if os.path.exists("logs_accesos.json"):
-        with open("logs_accesos.json", "r") as f:
-            logs_accesos = json.load(f)
+        try:
+            with open("logs_accesos.json", "r") as f:
+                logs_accesos = json.load(f)
+            # Asegurarse de que sea una lista válida
+            if not isinstance(logs_accesos, list):
+                raise ValueError("El archivo no contiene una lista")
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"⚠️  logs_accesos.json corrupto ({e}), iniciando con lista vacía")
+            logs_accesos = []
+            guardar_logs()  # Sobreescribe el archivo corrupto
     else:
         logs_accesos = []
 

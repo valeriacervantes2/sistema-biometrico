@@ -78,16 +78,25 @@ class UserManagementView(ctk.CTkFrame):
 
             self.all_users = []
             for u in data:
+                nombre  = u["nombre"]
+                ap      = u["a_paterno"]
+                am      = u["a_materno"]
+                cuenta  = u.get("cuenta", "")
+                correo  = u.get("correo", "")
+                rol     = TIPOS_USUARIO.get(u.get("tipo_usuario", 1), "N/A")
+                # Pre-normalizar todos los campos buscables en un solo string
+                _norm = normalizar(f"{nombre} {ap} {am} {cuenta} {correo} {rol}")
                 self.all_users.append({
-                    "nombre_solo": u["nombre"],
-                    "ap": u["a_paterno"],
-                    "am": u["a_materno"],
-                    "r": TIPOS_USUARIO.get(u.get("tipo_usuario", 1), "N/A"),
-                    "cuenta": u.get("cuenta", ""),
+                    "nombre_solo": nombre,
+                    "ap": ap,
+                    "am": am,
+                    "r": rol,
+                    "cuenta": cuenta,
                     "id": u["id_usuario"],
-                    "correo": u.get("correo", ""), # no tienes correo en tu query
-                    "estado": u.get("estado", 1)
-            })
+                    "correo": correo,
+                    "estado": u.get("estado", 1),
+                    "_norm": _norm,
+                })
 
         except Exception as e:
             print("Error usuarios:", e)
@@ -301,7 +310,7 @@ class UserManagementView(ctk.CTkFrame):
 , border_color=COLORS["border"], text_color=COLORS["text"])
         self.entry_busqueda.pack(side="left", fill="x", expand=True, padx=(0, 15))
 
-        self.entry_busqueda.bind("<KeyRelease>", lambda e: self.aplicar_filtro())
+        self.entry_busqueda.bind("<KeyRelease>", self._debounce_filtro)
         self.btn_filter = ctk.CTkButton(bar, text="⚙️ Filtrar ⌵", width=110, height=42, corner_radius=10, fg_color=COLORS["card"], text_color=COLORS["text"], border_color=COLORS["border"], command=self.toggle_filter)
 
         self.btn_filter = ctk.CTkButton(bar, text=AppContext.t("⚙️ Filtrar ⌵"), width=110, height=42, corner_radius=10, fg_color=COLORS["card"], text_color=COLORS["text"], border_color=COLORS["border"], command=self.toggle_filter)
@@ -330,20 +339,22 @@ class UserManagementView(ctk.CTkFrame):
         self.aplicar_filtro()
 
     def aplicar_filtro(self):
-        query = self.entry_busqueda.get().strip().lower() if hasattr(self, "entry_busqueda") else ""
-        rol = self.filtro_rol_actual
-
+        query = self.entry_busqueda.get().strip() if hasattr(self, "entry_busqueda") else ""
+        rol   = self.filtro_rol_actual
         resultado = self.all_users
         if query:
-            resultado = [u for u in resultado if
-                normalizar(query) in normalizar(u["nombre_solo"]) or
-                normalizar(query) in normalizar(u["ap"]) or
-                normalizar(query) in normalizar(u["am"]) or
-                normalizar(query) in normalizar(u.get("cuenta", ""))]
+            qn = normalizar(query)  # normalizar UNA sola vez
+            resultado = [u for u in resultado if qn in u["_norm"]]
         if rol != "Todos":
-            resultado = [u for u in resultado if u["r"].upper() == rol.upper()]
-
+            rol_n = rol.upper()
+            resultado = [u for u in resultado if u["r"].upper() == rol_n]
         self.render_table_content(resultado)
+
+    def _debounce_filtro(self, event=None):
+        """Espera 200ms tras la ultima tecla antes de filtrar."""
+        if hasattr(self, "_after_id"):
+            self.after_cancel(self._after_id)
+        self._after_id = self.after(200, self.aplicar_filtro)
 
     def update_carreras_dinamicas(self, fn):
         c = self.carreras_por_plantel.get(fn, ["Sin Carreras"])

@@ -66,7 +66,10 @@ class FacultadManagementView(ctk.CTkFrame):
         self.render_table_content()
 
     def _on_search(self, event=None):
-        self.render_table_content()
+        """Debounce: espera 200ms tras la ultima tecla antes de filtrar."""
+        if hasattr(self, "_after_id"):
+            self.after_cancel(self._after_id)
+        self._after_id = self.after(200, self.render_table_content)
 
     def render_table_content(self):
         """Renderiza la tabla de facultades, filtrando por búsqueda"""
@@ -91,8 +94,12 @@ class FacultadManagementView(ctk.CTkFrame):
         ctk.CTkFrame(self.main_card, fg_color=COLORS["border"], height=1).pack(fill="x", padx=20)
 
         todas = obtener_todas_facultades()
-        query = self.entry_busqueda.get().strip().lower() if hasattr(self, "entry_busqueda") else ""
-        facultades = [f for f in todas if normalizar(query) in normalizar(f["nombre"])] if query else todas
+        query = self.entry_busqueda.get().strip() if hasattr(self, "entry_busqueda") else ""
+        if query:
+            qn = normalizar(query)  # normalizar UNA sola vez
+            facultades = [f for f in todas if qn in normalizar(f["nombre"])]
+        else:
+            facultades = todas
 
         scroll = ctk.CTkScrollableFrame(self.main_card, fg_color="transparent")
         scroll.pack(expand=True, fill="both")
