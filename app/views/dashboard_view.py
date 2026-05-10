@@ -21,11 +21,11 @@ class DashboardView(ctk.CTkFrame):
         self.is_compact = False
         self.on_back = on_back
 
-        self.btn_panel     = None
-        self.btn_users     = None
+        self.btn_panel      = None
+        self.btn_users      = None
         self.btn_facultades = None
-        self.btn_carreras  = None
-        self.btn_account   = None
+        self.btn_carreras   = None
+        self.btn_account    = None
 
         # OPTIMIZACIÓN: debounce para resize; evita redibujar en cada pixel
         self._resize_job = None
@@ -146,6 +146,7 @@ class DashboardView(ctk.CTkFrame):
             widget.destroy()
 
     def actualizar_navegacion(self, btn_act):
+        """Marca el botón seleccionado con colores oscuros para resaltar sobre el blanco"""
         btns = [
             getattr(self, "btn_panel", None),
             getattr(self, "btn_users", None),
@@ -157,8 +158,10 @@ class DashboardView(ctk.CTkFrame):
             if not b or not b.winfo_exists():
                 continue
             if b == btn_act:
+                # Botón Seleccionado: Azul muy oscuro con texto blanco
                 b.configure(fg_color=COLORS["selected"], text_color=("white", "black"), hover_color=COLORS["selected"])
             else:
+                # Botones Inactivos: Transparentes con texto negro
                 b.configure(fg_color="transparent", text_color=COLORS["text"], hover_color="#F1F5F9")
 
     # ── Navegación ────────────────────────────────────────────────────────────
@@ -225,13 +228,14 @@ class DashboardView(ctk.CTkFrame):
         self.create_stat_card(stats_frame, "🚫 " + AppContext.t("Denegados"),         "1",  "#EF4444", 3)
 
         graph_box = ctk.CTkFrame(main_scroll, fg_color=COLORS["card"], corner_radius=20,
-                                  border_width=1, border_color=COLORS["border"], height=280)
+                                 border_width=1, border_color=COLORS["border"], height=280)
         graph_box.pack(fill="x", padx=40, pady=20)
         graph_box.pack_propagate(False)
 
         ctk.CTkLabel(graph_box, text="📈 " + AppContext.t("Tendencia de Accesos por Hora"),
                      font=("Inter", 18, "bold"), text_color=COLORS["text"]).pack(anchor="w", padx=30, pady=20)
 
+        # -------- FILTRO DE FECHA --------
         self.fecha_var = ctk.StringVar(value=datetime.now().strftime("%Y-%m-%d"))
 
         filtro_frame = ctk.CTkFrame(graph_box, fg_color="transparent")
@@ -246,11 +250,14 @@ class DashboardView(ctk.CTkFrame):
         self.calendario.pack(side="left", padx=5)
         self.calendario.bind("<<DateEntrySelected>>", lambda e: self.filtrar_por_fecha())
 
+        # Contenedor solo para la gráfica
         self.graph_container = ctk.CTkFrame(graph_box, fg_color="transparent")
         self.graph_container.pack(fill="both", expand=True, padx=20, pady=10)
 
+        # Render inicial
         self.filtrar_por_fecha()
 
+        # Sección de Últimos Accesos (Tabla)
         header_tabla = ctk.CTkFrame(main_scroll, fg_color="transparent")
         header_tabla.pack(fill="x", padx=75, pady=(20, 10))
         ctk.CTkLabel(header_tabla, text=AppContext.t("Registro de últimos accesos"),
@@ -288,6 +295,7 @@ class DashboardView(ctk.CTkFrame):
         for spine in ["top", "right", "left", "bottom"]:
             ax.spines[spine].set_visible(False)
         ax.grid(axis='y', linestyle='--', alpha=0.2)
+
         ax.set_xticks(horas)
         ax.set_xticklabels([f"{h:02d}" for h in horas], rotation=45, fontsize=8)
         ax.set_title("Accesos por hora", fontsize=12)
@@ -328,6 +336,7 @@ class DashboardView(ctk.CTkFrame):
 
         fig = Figure(figsize=(6, 3), dpi=100)
         ax  = fig.add_subplot(111)
+
         fig.patch.set_facecolor(bg_color)
         ax.set_facecolor(bg_color)
 
@@ -366,8 +375,8 @@ class DashboardView(ctk.CTkFrame):
 
         logs = [
             {"u": "MARÍA ELENA RODRÍGUEZ HERNÁNDEZ", "id_c": "31702938", "m": "MARIA.ROD@UNIV.MX", "ok": True},
-            {"u": "JOSÉ LUIS PÉREZ RAMÍREZ",          "id_c": "31702969", "m": "JOSE.PEREZ@UNIV.MX", "ok": False, "motivo": "⚠️ Rostro no reconocido"},
-            {"u": "CARLOS ALBERTO MARTÍNEZ GARCÍA",   "id_c": "31702945", "m": "CARLOS.M@UNIV.MX",   "ok": True},
+            {"u": "JOSÉ LUIS PÉREZ RAMÍREZ",         "id_c": "31702969", "m": "JOSE.PEREZ@UNIV.MX", "ok": False, "motivo": "⚠️ Rostro no reconocido"},
+            {"u": "CARLOS ALBERTO MARTÍNEZ GARCÍA",  "id_c": "31702945", "m": "CARLOS.M@UNIV.MX",   "ok": True},
         ]
 
         for log in logs:
@@ -386,6 +395,7 @@ class DashboardView(ctk.CTkFrame):
             det = f"ID: {log['id_c']} • {log['m']}"
             if not log["ok"]:
                 det += f"  {log.get('motivo', '')}"
+
             ctk.CTkLabel(mid, text=det, font=("Inter", 11),
                          text_color=COLORS["subtext"]).pack(anchor="w")
 
@@ -427,6 +437,8 @@ class DashboardView(ctk.CTkFrame):
             ctk.CTkLabel(profile, text="👤", font=("Arial", 35)).pack(side="left")
             txt_info = ctk.CTkFrame(profile, fg_color="transparent")
             txt_info.pack(side="left", padx=10)
+
+            # Textos traducidos del perfil
             ctk.CTkLabel(txt_info, text=AppContext.t("ADMINISTRADOR"),
                          font=("Inter", 14, "bold"), text_color=COLORS["text"]).pack(anchor="w")
             ctk.CTkLabel(txt_info, text=AppContext.t("Control Biométrico"),
@@ -464,7 +476,7 @@ class DashboardView(ctk.CTkFrame):
         btn = ctk.CTkButton(
             master, text=texto_final, height=45, anchor="w",
             fg_color="transparent", text_color=COLORS["text"],
-            hover_color=COLORS["hover"], command=comando
+            hover_color=COLORS["hover"], font=("Inter", 16), command=comando
         )
         btn.pack(pady=6, padx=20, fill="x")
         return btn
@@ -483,12 +495,13 @@ class DashboardView(ctk.CTkFrame):
         wrapper = ctk.CTkFrame(container, fg_color="transparent")
         wrapper.pack(side="right", padx=40, pady=20)
 
+        # Switch de Tema
         t_f = ctk.CTkFrame(wrapper, fg_color="#E2E8F0", corner_radius=20, width=100, height=38)
         t_f.pack(side="left", padx=10)
         t_f.pack_propagate(False)
         ctk.CTkLabel(t_f, text="☀️", font=("Inter", 16)).place(x=20, y=19, anchor="center")
         self.theme_switch = ctk.CTkSwitch(t_f, text="", width=40,
-                                           progress_color="#1D1D1F", command=self.toggle_theme)
+                                          progress_color="#1D1D1F", command=self.toggle_theme)
         if ctk.get_appearance_mode() == "Dark":
             self.theme_switch.select()
         else:

@@ -108,7 +108,7 @@ class FacultadManagementView(ctk.CTkFrame):
         self.entry_busqueda.bind("<KeyRelease>", self._on_search)
 
         self.main_card = ctk.CTkFrame(self.vista_tabla, fg_color=COLORS["card"], corner_radius=15,
-                                       border_width=1, border_color=COLORS["border"])
+                                      border_width=1, border_color=COLORS["border"])
         self.main_card.pack(fill="both", expand=True, padx=padx_main, pady=(0, pady_top))
 
         self.render_table_content()
@@ -244,13 +244,13 @@ class FacultadManagementView(ctk.CTkFrame):
                      font=self.font_header, text_color=COLORS["text"]).pack(anchor="w", padx=60, pady=(40, 20))
 
         form_card = ctk.CTkFrame(self.form_base, fg_color=COLORS["card"], corner_radius=15,
-                                  border_width=1, border_color=COLORS["border"])
+                                 border_width=1, border_color=COLORS["border"])
         form_card.pack(fill="x", padx=60, pady=10)
 
         ctk.CTkLabel(form_card, text="🏛️ " + AppContext.t("Nombre de la Facultad"),
                      font=self.font_small, text_color=COLORS["text"]).pack(anchor="w", padx=25, pady=(25, 5))
         self.input_nombre = ctk.CTkEntry(form_card, height=45, font=self.font_normal,
-                                          fg_color=COLORS["hover"], border_width=0, text_color=COLORS["text"])
+                                         fg_color=COLORS["hover"], border_width=0, text_color=COLORS["text"])
         self.input_nombre.insert(0, nombre_ini)
         self.input_nombre.pack(fill="x", padx=25, pady=(0, 20))
 
@@ -274,15 +274,35 @@ class FacultadManagementView(ctk.CTkFrame):
                       fg_color="#D1FAE5", text_color=COLORS["text"], height=55,
                       command=self.guardar_facultad).pack(side="left", expand=True, fill="x", padx=(10, 0))
 
+
+    def facultad_existe(self, nombre):
+        todas = obtener_todas_facultades()
+
+        return any(
+            f["nombre"].strip().lower() == nombre.strip().lower()
+            for f in todas
+        )
+
     def guardar_facultad(self):
         nombre = self.input_nombre.get().strip()
         estado = 1 if self.combo_estado.get() == AppContext.t("Activa") else 0
+        
         if not nombre:
             return
+
+        if len(nombre) < 3:
+            print("❌ Nombre muy corto")
+            return
+
+        if self.facultad_existe(nombre) and not self.modo_edicion:
+            print("❌ Facultad duplicada")
+            return
+
         if self.modo_edicion:
             actualizar_facultad(self.facultad_actual_id, nombre, estado)
         else:
             crear_facultad(nombre, estado)
+            
         self._invalidar_cache()
         self.volver_a_tabla()
 
@@ -291,7 +311,7 @@ class FacultadManagementView(ctk.CTkFrame):
         self.overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
 
         modal = ctk.CTkFrame(self.overlay, fg_color=COLORS["card"], corner_radius=20,
-                              width=420, height=240, border_width=2, border_color=COLORS["border"])
+                             width=420, height=240, border_width=2, border_color=COLORS["border"])
         modal.place(relx=0.5, rely=0.5, anchor="center")
         modal.pack_propagate(False)
 
