@@ -1,8 +1,14 @@
 import customtkinter as ctk
+
+# ── Tema CLARO por defecto — debe ir ANTES de crear cualquier widget ──
+ctk.set_appearance_mode("light")
+ctk.set_default_color_theme("blue")
+
 from app.views.login_view import LoginView
 from app.views.dashboard_view import DashboardView
 from app.views.terminal_view import TerminalView
 from app.database.database import inicializar_bd
+
 
 class AppPrincipal(ctk.CTk):
     def __init__(self):
@@ -10,18 +16,22 @@ class AppPrincipal(ctk.CTk):
 
         self.title("SISTEMA BIOMÉTRICO")
         self.geometry("1100x800")
-        self.configure(fg_color="white")
+        self.configure(fg_color=("white", "#0F172A"))  # claro/oscuro automático
 
         # Inicializar base de datos al arrancar
         inicializar_bd()
 
         self.contenedor_vista = None
+<<<<<<< HEAD
         
         # --- NUEVO: Control de estado ---
         # Guardamos qué vista está activa para poder refrescarla
         self.vista_actual = "terminal" 
         
         # Iniciar directamente en la Terminal
+=======
+
+>>>>>>> main
         self.mostrar_terminal()
 
     def limpiar_pantalla(self):
@@ -44,10 +54,14 @@ class AppPrincipal(ctk.CTk):
             self.mostrar_dashboard()
 
     def mostrar_terminal(self):
+<<<<<<< HEAD
         """Muestra la terminal de reconocimiento facial"""
         self.vista_actual = "terminal"
         self.limpiar_pantalla()
         # Pasamos self como controller para que la vista pueda pedir refrescos si es necesario
+=======
+        self.limpiar_pantalla()
+>>>>>>> main
         self.contenedor_vista = TerminalView(self, on_back=self.mostrar_login)
         self.contenedor_vista.pack(expand=True, fill="both")
 
@@ -63,6 +77,7 @@ class AppPrincipal(ctk.CTk):
         self.limpiar_pantalla()
         self.contenedor_vista = DashboardView(self, on_back=self.mostrar_terminal)
         self.contenedor_vista.pack(expand=True, fill="both")
+
 
 if __name__ == "__main__":
     app = AppPrincipal()
