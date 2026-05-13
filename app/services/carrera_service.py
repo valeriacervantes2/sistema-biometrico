@@ -188,3 +188,8 @@ def obtener_facultades_para_dropdown():
     except Exception as e:
         print(f"Error al obtener facultades: {e}")
         return {}
+    
+def eliminar_carrera(id_carrera):
+    # Alias para compatibilidad con la vista
+    # En realidad desactiva la carrera (estado = 0)
+    return desactivar_carrera(id_carrera)

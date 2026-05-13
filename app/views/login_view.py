@@ -1,13 +1,8 @@
 import customtkinter as ctk
 import os
 from app.services.theme import COLORS
-<<<<<<< HEAD
-from app.views.app_context import AppContext
-from PIL import Image, ImageOps, ImageDraw # Necesitamos estas tres de PIL
-=======
 from PIL import Image, ImageOps, ImageDraw
 
->>>>>>> main
 
 class LoginView(ctk.CTkFrame):
     def __init__(self, master, on_login_success):
@@ -40,7 +35,7 @@ class LoginView(ctk.CTkFrame):
         )
         self.theme_icon.place(x=22, y=19, anchor="center")
         self.theme_switch = ctk.CTkSwitch(
-            self.theme_control, text="", width=40,
+            self.theme_control, text="", width=45,
             progress_color="#1D1D1F", button_color="#1D1D1F",
             command=self.actualizar_icono_tema
         )
@@ -95,15 +90,8 @@ class LoginView(ctk.CTkFrame):
 
     def create_form(self):
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-<<<<<<< HEAD
-        assets_path = os.path.join(base_path, "app", "views", "assets", "imgg.png")
-
-        # DIAGNÓSTICO EN CONSOLA (Revisa esto en tu terminal si no sale la imagen)
-        print(f"DEBUG: Buscando logo circular en: {assets_path}")
-=======
         assets_path = os.path.join(base_path, "app", "views", "assets", "logo_koda.png")
         print(f"DEBUG: Buscando logo en: {assets_path}")
->>>>>>> main
 
         if os.path.exists(assets_path):
             try:
@@ -120,24 +108,6 @@ class LoginView(ctk.CTkFrame):
             except Exception as e:
                 print(f"ERROR al cargar imagen: {e}")
         else:
-<<<<<<< HEAD
-            # Si falla la ruta anterior, intentamos una ruta directa por si acaso
-            print("ERROR: No se encontró. Intentando ruta alternativa...")
-            # Intento 2: carpeta assets en el mismo nivel que views
-            alt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "imgg.png")
-            if os.path.exists(alt_path):
-                 # ... (repetir lógica de carga si existe)
-                 pass
-
-        # --- RESTO DEL DISEÑO ---
-        ctk.CTkLabel(self.card, text=AppContext.t("Sistema de Reconocimiento\nFacial"), 
-                     font=("Inter", 26, "bold"), text_color=COLORS["text"], justify="center").pack(pady=(15, 10))
-        
-        ctk.CTkLabel(self.card, text=AppContext.t("Ingresa tus credenciales para continuar"), 
-                     font=("Inter", 14), text_color="#8E8E93").pack(pady=(0, 25))
-        
-        self.create_input_group(AppContext.t("CORREO ELECTRÓNICO"), AppContext.t("Escribe tu correo"))
-=======
             print("ERROR: No se encontró el logo.")
 
         ctk.CTkLabel(self.card, text="Sistema de Reconocimiento\nFacial",
@@ -146,26 +116,18 @@ class LoginView(ctk.CTkFrame):
                      font=("Inter", 14), text_color=COLORS["subtext"]).pack(pady=(0, 25))
 
         self.create_input_group("CORREO ELECTRÓNICO", "Escribe tu correo")
->>>>>>> main
         self.user_entry = self.last_entry
-        self.create_input_group(AppContext.t("CONTRASEÑA"), AppContext.t("Escribe tu contraseña"), is_password=True)
+        self.create_input_group("CONTRASEÑA", "Escribe tu contraseña", is_password=True)
         self.pass_entry = self.last_entry
 
         self.error_label = ctk.CTkLabel(self.card, text="", text_color="#EF4444", font=("Inter", 13))
         self.error_label.pack(pady=(5, 0))
 
-<<<<<<< HEAD
-        self.login_btn = ctk.CTkButton(
-            self.card, text="→   " + AppContext.t("INICIAR SESIÓN"), 
-            fg_color="#000000", hover_color="#262626", 
-            width=350, height=55, corner_radius=12, 
-=======
         ctk.CTkButton(
             self.card, text="→   INICIAR SESIÓN",
             fg_color=COLORS["text"], hover_color=COLORS["subtext"],
             text_color=COLORS["bg"],
             width=350, height=55, corner_radius=12,
->>>>>>> main
             font=("Inter", 15, "bold"), command=self.validar_login
         ).pack(pady=(25, 20))
 
@@ -173,14 +135,9 @@ class LoginView(ctk.CTkFrame):
         if lang == "ES":
             self.es_btn.configure(fg_color="#1D1D1F", text_color="white", hover_color="#3E3E3F")
             self.en_btn.configure(fg_color="transparent", text_color="#4A4A4A", hover_color="#CBD5E1")
-            AppContext.set_idioma("es")
         else:
             self.en_btn.configure(fg_color="#1D1D1F", text_color="white", hover_color="#3E3E3F")
             self.es_btn.configure(fg_color="transparent", text_color="#4A4A4A", hover_color="#CBD5E1")
-            AppContext.set_idioma("en")
-        
-        # Redibujar el formulario con el nuevo idioma
-        self.recargar_vista()
 
     def regresar_a_terminal(self):
         self.master.mostrar_terminal()
@@ -233,18 +190,7 @@ class LoginView(ctk.CTkFrame):
         self.last_entry = entry
 
     def validar_login(self):
-<<<<<<< HEAD
-        if self.user_entry.get() == "1" and self.pass_entry.get() == "1": self.on_login_success()
-        else: self.error_label.configure(text=AppContext.t("Credenciales incorrectas."))
-
-    def recargar_vista(self):
-        """Destruye y recrea el formulario para aplicar cambios de idioma"""
-        for widget in self.card.winfo_children():
-            widget.destroy()
-        self.create_form()
-=======
         if self.user_entry.get() == "1" and self.pass_entry.get() == "1":
             self.on_login_success()
         else:
             self.error_label.configure(text="Credenciales incorrectas.")
->>>>>>> main

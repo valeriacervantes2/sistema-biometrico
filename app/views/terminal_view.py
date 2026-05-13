@@ -118,14 +118,6 @@ TEMAS = {
     },
 }
 
-# Mensajes genéricos que NO representan un usuario reconocido
-MENSAJES_INVALIDOS = (
-    "DESCONOCIDO", "ERROR", "NO REGISTRADO",
-    "CARA DETECTADA", "DETECTADA CORRECTAMENTE",
-    "PROCESANDO", "ANALIZANDO", "NINGUNO", "NONE",
-    "CORRECTO", "DETECTADO", "CARA", "ROSTRO", "",
-)
-
 
 class TerminalView(ctk.CTkFrame):
     def __init__(self, master, user_id=None, on_back=None, on_capture=None, modo="acceso"):
@@ -280,7 +272,7 @@ class TerminalView(ctk.CTkFrame):
             text=AppContext.t("LISTO"),
             font=("Courier New", 19, "bold"),
             text_color=ACCENT_PURPLE,
-            fg_color="transparent",
+            fg_color="transparent",   # sin cuadro
         )
         self.badge_label.place(relx=0.955, rely=0.23, anchor="ne")
 
@@ -383,6 +375,7 @@ class TerminalView(ctk.CTkFrame):
         cv2.line(frame, (fx, y + 1), (fx + fw, y + 1), c, 1)
 
     def _aplicar_vignette(self, frame):
+        # Normalizar a BGR 3 canales — fix del crash original
         if frame.ndim == 2:
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
         elif frame.shape[2] == 4:
@@ -440,7 +433,7 @@ class TerminalView(ctk.CTkFrame):
         fh_orig, fw_orig = frame_dibujado.shape[:2]
 
         # ── Detectar todos los rostros ────────────────────────────────────────
-        faces     = self.detectar_rostros(frame_dibujado)
+        faces    = self.detectar_rostros(frame_dibujado)
         num_caras = len(faces)
         ahora     = time.time()
 
@@ -471,13 +464,13 @@ class TerminalView(ctk.CTkFrame):
             # ── Validar iluminación ───────────────────────────────────────────
             gris = cv2.cvtColor(frame_dibujado, cv2.COLOR_BGR2GRAY)
             brillo_medio = float(np.mean(gris))
-            muy_oscuro = brillo_medio < 40
+            muy_oscuro = brillo_medio < 40  # umbral: 0-255
 
             # ── Validar tamaño del rostro (lejos/cerca) ───────────────────────
             fx0, fy0, fw0, fh0 = self.face_box
-            area_cara  = fw0 * fh0
+            area_cara = fw0 * fh0
             area_frame = frame_dibujado.shape[0] * frame_dibujado.shape[1]
-            muy_lejos  = (area_cara / area_frame) < 0.04
+            muy_lejos = (area_cara / area_frame) < 0.04  # menos del 4% del frame
 
             if not self.escaneando and not self.esperando_reset:
                 if muy_oscuro:
@@ -489,32 +482,33 @@ class TerminalView(ctk.CTkFrame):
                 elif self.estado_actual not in ("autorizado", "negado"):
                     self.escaneando = True
                     self.inicio_escaneo = ahora
-<<<<<<< HEAD
                     self.usuario_detectado = ""   # se irá llenando frame a frame
                     if self.modo == "registro":
                         self.aplicar_estilo_visual("escaneando")
                     else:
                         self.aplicar_estilo_visual("escaneando")
-=======
-                    self.usuario_detectado = ""
-                    self.aplicar_estilo_visual("escaneando")
->>>>>>> main
 
             if self.escaneando and self.face_box is not None:
                 fx, fy, fw, fh = self.face_box
                 self._dibujar_linea_escaneo(frame_dibujado, fx, fy, fw, fh, ACCENT_AMBER)
 
+                # Actualizar usuario_detectado en cada frame mientras escaneamos.
+                # Se descarta cualquier mensaje genérico y se guarda solo el nombre real.
                 msg_actual = str(mensaje).upper().strip()
-                if msg_actual and not any(g in msg_actual for g in MENSAJES_INVALIDOS):
+                MENSAJES_GENERICOS = (
+                    "CARA DETECTADA", "DETECTADA CORRECTAMENTE",
+                    "PROCESANDO", "ANALIZANDO", "NINGUNO", "NONE",
+                    "CORRECTO", "DETECTADO", "CARA", "ROSTRO", "",
+                )
+                if msg_actual and not any(g in msg_actual for g in MENSAJES_GENERICOS):
                     self.usuario_detectado = msg_actual
 
                 if ahora - self.inicio_escaneo > 3.0:
                     self.escaneando = False
-                    self.pos_linea  = 0
-                    self.esperando_reset     = True
+                    self.pos_linea = 0
+                    self.esperando_reset = True
                     self.inicio_espera_reset = ahora
 
-<<<<<<< HEAD
                     # =========================================================
                     # MODO REGISTRO
                     # =========================================================
@@ -583,39 +577,19 @@ class TerminalView(ctk.CTkFrame):
                                 )
 
                     
-=======
-                    if not self.usuario_detectado:
-                        self.usuario_detectado = msg_actual
-
-                    # ✅ FIX 1: autorizado SOLO si el nombre es positivamente válido
-                    nombre_valido = bool(self.usuario_detectado) and not any(
-                        p in self.usuario_detectado for p in MENSAJES_INVALIDOS
-                    )
-                    if nombre_valido:
-                        self.aplicar_estilo_visual("autorizado", usuario=self.usuario_detectado)
-                    else:
-                        self.aplicar_estilo_visual("negado")
->>>>>>> main
 
             if self.face_box is not None:
                 fx, fy, fw, fh = self.face_box
                 color_esq = (
-                    ACCENT_AMBER  if self.escaneando                      else
-                    ACCENT_GREEN  if self.estado_actual == "autorizado"   else
-                    ACCENT_RED    if self.estado_actual == "negado"       else
+                    ACCENT_AMBER if self.escaneando else
+                    ACCENT_GREEN if self.estado_actual == "autorizado" else
+                    ACCENT_RED   if self.estado_actual == "negado"     else
                     ACCENT_PURPLE
                 )
                 self._dibujar_esquinas(frame_dibujado, fx, fy, fw, fh, color_esq)
 
         # ── Sin cara ──────────────────────────────────────────────────────────
         else:
-            # ✅ FIX 2: cancelar escaneo si la cara desaparece durante el proceso
-            if self.escaneando and not self.esperando_reset:
-                self.escaneando = False
-                self.pos_linea  = 0
-                self.face_box   = None
-                self.aplicar_estilo_visual("vacio")
-
             if not self.escaneando and not self.esperando_reset:
                 if ahora - self.ultimo_rostro_visto > 0.8:
                     if self.estado_actual != "vacio":
@@ -667,6 +641,7 @@ class TerminalView(ctk.CTkFrame):
             self.aplicar_estilo_visual("vacio")
             self.after(200, self.actualizar_video)
         else:
+            # Banner + área de video muestran el error
             self.aplicar_estilo_visual("sin_camara")
             self._flush_pending_style()
             self.video_display.configure(

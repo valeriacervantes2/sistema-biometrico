@@ -1,7 +1,14 @@
 # theme.py
+import customtkinter as ctk
+
+# ── Tema por defecto: CLARO ──────────────────────────────────────
+# Llama esta función UNA vez al inicio de main.py (ya incluida aquí)
+def aplicar_tema_inicial():
+    ctk.set_appearance_mode("light")
+    ctk.set_default_color_theme("blue")
+
 # Todos los valores son tuplas ("modo_claro", "modo_oscuro")
 # CustomTkinter los aplica automáticamente al llamar ctk.set_appearance_mode()
-
 COLORS = {
     "bg":       ("#F8FAFC", "#0F172A"),
     "sidebar":  ("#FFFFFF", "#020617"),
