@@ -2,7 +2,6 @@ import customtkinter as ctk
 import numpy as np
 from scipy.interpolate import make_interp_spline
 from matplotlib.figure import Figure
-from matplotlib.ticker import MaxNLocator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from app.views.user_management_view import UserManagementView
 from app.views.account_view import AccountView
@@ -14,12 +13,14 @@ from datetime import datetime
 from tkcalendar import DateEntry
 from app.detection.detector_rostro import logs_accesos
 
-
 class DashboardView(ctk.CTkFrame):
     def __init__(self, master, on_back):
         super().__init__(master, fg_color=COLORS["bg"])
         self.is_compact = False
         self.on_back = on_back
+
+        # Estado del sidebar responsivo
+        self.sidebar_open = False
 
         self.btn_panel      = None
         self.btn_users      = None
@@ -27,7 +28,6 @@ class DashboardView(ctk.CTkFrame):
         self.btn_carreras   = None
         self.btn_account    = None
 
-        # OPTIMIZACIÓN: debounce para resize; evita redibujar en cada pixel
         self._resize_job = None
         self.bind("<Configure>", self._on_resize)
 
@@ -53,58 +53,82 @@ class DashboardView(ctk.CTkFrame):
     # ── Menú / Sidebar ────────────────────────────────────────────────────────
 
     def construir_menu(self, parent):
-        self.crear_btn_sidebar(parent, "🏠 Panel de Control",
-            lambda: [self.cerrar_overlay(), self.mostrar_panel_control()])
-        self.crear_btn_sidebar(parent, "👥 Gestion de Usuarios",
-            lambda: [self.cerrar_overlay(), self.mostrar_gestion_usuarios()])
-        self.crear_btn_sidebar(parent, "🏫 Gestion de Facultades",
-            lambda: [self.cerrar_overlay(), self.mostrar_gestion_facultades()])
-        self.crear_btn_sidebar(parent, "📚 Gestion de Carreras",
-            lambda: [self.cerrar_overlay(), self.mostrar_gestion_carreras()])
-        self.crear_btn_sidebar(parent, "⚙️ Configuración",
-            lambda: [self.cerrar_overlay(), self.mostrar_cuenta()])
+        self.btn_panel = self.crear_btn_sidebar(parent, "🏠 Panel de Control",
+            lambda: [self.cerrar_overlay_sidebar(), self.mostrar_panel_control()])
+        self.btn_users = self.crear_btn_sidebar(parent, "👥 Gestion de Usuarios",
+            lambda: [self.cerrar_overlay_sidebar(), self.mostrar_gestion_usuarios()])
+        self.btn_facultades = self.crear_btn_sidebar(parent, "🏫 Gestion de Facultades",
+            lambda: [self.cerrar_overlay_sidebar(), self.mostrar_gestion_facultades()])
+        self.btn_carreras = self.crear_btn_sidebar(parent, "📚 Gestion de Carreras",
+            lambda: [self.cerrar_overlay_sidebar(), self.mostrar_gestion_carreras()])
+        self.btn_account = self.crear_btn_sidebar(parent, "⚙️ Configuración",
+            lambda: [self.cerrar_overlay_sidebar(), self.mostrar_cuenta()])
 
-    def toggle_sidebar_overlay(self):
-        if hasattr(self, "overlay_bg") and self.overlay_bg.winfo_exists():
-            self.overlay_bg.destroy()
-            return
+    # --- LÓGICA DEL SIDEBAR FLOTANTE (RESPONSIVE) SIN ANIMACIÓN ---
+    def toggle_overlay_sidebar(self):
+        if self.sidebar_open:
+            self.cerrar_overlay_sidebar()
+        else:
+            self.abrir_overlay_sidebar()
 
+    def abrir_overlay_sidebar(self):
+        self.sidebar_open = True
+
+        # Fondo transparente para capturar clics fuera del menú
         self.overlay_bg = ctk.CTkFrame(self, fg_color="transparent")
         self.overlay_bg.place(relx=0, rely=0, relwidth=1, relheight=1)
-        self.overlay_bg.bind("<Button-1>", lambda e: self.cerrar_overlay())
+        self.overlay_bg.bind("<Button-1>", lambda e: self.cerrar_overlay_sidebar())
 
-        self.overlay_sidebar = ctk.CTkFrame(self.overlay_bg, width=280, fg_color=COLORS["sidebar"])
+        # El Sidebar en sí (aparece de inmediato)
+        self.overlay_sidebar = ctk.CTkFrame(self, width=280, fg_color=COLORS["sidebar"], corner_radius=0)
         self.overlay_sidebar.place(x=0, y=0, relheight=1)
-        self.overlay_sidebar.bind("<Button-1>", lambda e: "break")
+        self.overlay_sidebar.bind("<Button-1>", lambda e: "break") 
 
-        ctk.CTkLabel(
-            self.overlay_sidebar, text="K O D A",
-            font=("Times New Roman", 32, "bold"), text_color="#3C054F"
-        ).pack(anchor="w", padx=20, pady=20)
+        # Header del sidebar en modo responsivo (aquí sí mantenemos la hamburguesa para cerrarlo)
+        header = ctk.CTkFrame(self.overlay_sidebar, fg_color="transparent")
+        header.pack(fill="x", pady=(15, 0), padx=10)
 
         ctk.CTkButton(
-            self.overlay_sidebar, text="✕", width=40, height=40,
-            fg_color="transparent", text_color=COLORS["text"],
-            command=self.cerrar_overlay
-        ).pack(anchor="ne", padx=10, pady=10)
+            header, text="☰", width=40, height=40,
+            fg_color="transparent", text_color=COLORS["text"], font=("Inter", 18),
+            command=self.cerrar_overlay_sidebar
+        ).pack(side="left", padx=(10, 5))
+
+        ctk.CTkLabel(
+            header, text="K O D A",
+            font=("Times New Roman", 28, "bold"), text_color="#3C054F"
+        ).pack(side="left", padx=5)
+
+        profile = ctk.CTkFrame(self.overlay_sidebar, fg_color="transparent")
+        profile.pack(pady=(40, 15), padx=20, fill="x")
+        ctk.CTkLabel(profile, text="👤", font=("Arial", 35)).pack(side="left")
+        txt_info = ctk.CTkFrame(profile, fg_color="transparent")
+        txt_info.pack(side="left", padx=10)
+
+        ctk.CTkLabel(txt_info, text=AppContext.t("ADMINISTRADOR"),
+                     font=("Inter", 14, "bold"), text_color=COLORS["text"]).pack(anchor="w")
+        ctk.CTkLabel(txt_info, text=AppContext.t("Control Biométrico"),
+                     font=("Inter", 11), text_color=COLORS["subtext"]).pack(anchor="w")
 
         self.construir_menu(self.overlay_sidebar)
 
-    def crear_btn_overlay(self, texto, comando):
         ctk.CTkButton(
-            self.overlay_sidebar, text=texto, height=45, anchor="w",
-            fg_color="transparent", text_color=COLORS["text"],
-            hover_color=COLORS["hover"],
-            command=lambda: [self.cerrar_overlay(), comando()]
-        ).pack(fill="x", padx=20, pady=5)
+            self.overlay_sidebar, text="🚪 " + AppContext.t("Cerrar Sesión"),
+            fg_color="transparent", text_color="#EF4444",
+            font=("Inter", 14, "bold"), command=self.on_back
+        ).pack(side="bottom", pady=30, padx=20, fill="x")
 
-    def cerrar_overlay(self):
+    def cerrar_overlay_sidebar(self):
+        if not self.sidebar_open: return
+        self.sidebar_open = False
+
         if hasattr(self, "overlay_bg") and self.overlay_bg.winfo_exists():
             self.overlay_bg.destroy()
+        
+        if hasattr(self, "overlay_sidebar") and self.overlay_sidebar.winfo_exists():
+            self.overlay_sidebar.destroy()
 
-    def toggle_sidebar(self):
-        self.is_compact = not self.is_compact
-        self.redibujar_layout()
+    # ── Resize & Layout ───────────────────────────────────────────────────────
 
     def _on_resize(self, event):
         new_mode = event.width < 900
@@ -119,6 +143,7 @@ class DashboardView(ctk.CTkFrame):
 
         if not self.is_compact:
             self.create_sidebar()
+            self.cerrar_overlay_sidebar()
         else:
             if hasattr(self, 'sidebar_frame') and self.sidebar_frame.winfo_exists():
                 self.sidebar_frame.destroy()
@@ -146,7 +171,6 @@ class DashboardView(ctk.CTkFrame):
             widget.destroy()
 
     def actualizar_navegacion(self, btn_act):
-        """Marca el botón seleccionado con colores oscuros para resaltar sobre el blanco"""
         btns = [
             getattr(self, "btn_panel", None),
             getattr(self, "btn_users", None),
@@ -158,10 +182,8 @@ class DashboardView(ctk.CTkFrame):
             if not b or not b.winfo_exists():
                 continue
             if b == btn_act:
-                # Botón Seleccionado: Azul muy oscuro con texto blanco
                 b.configure(fg_color=COLORS["selected"], text_color=("white", "black"), hover_color=COLORS["selected"])
             else:
-                # Botones Inactivos: Transparentes con texto negro
                 b.configure(fg_color="transparent", text_color=COLORS["text"], hover_color="#F1F5F9")
 
     # ── Navegación ────────────────────────────────────────────────────────────
@@ -169,36 +191,31 @@ class DashboardView(ctk.CTkFrame):
     def mostrar_panel_control(self):
         self.vista_actual_func = self.mostrar_panel_control
         self.limpiar_derecha()
-        if not self.is_compact:
-            self.actualizar_navegacion(self.btn_panel)
+        if self.btn_panel: self.actualizar_navegacion(self.btn_panel)
         self.render_dashboard_principal()
 
     def mostrar_gestion_usuarios(self):
         self.vista_actual_func = self.mostrar_gestion_usuarios
         self.limpiar_derecha()
-        if not self.is_compact:
-            self.actualizar_navegacion(self.btn_users)
+        if self.btn_users: self.actualizar_navegacion(self.btn_users)
         UserManagementView(self.content_container).pack(fill="both", expand=True, padx=40)
 
     def mostrar_gestion_facultades(self):
         self.vista_actual_func = self.mostrar_gestion_facultades
         self.limpiar_derecha()
-        if not self.is_compact:
-            self.actualizar_navegacion(self.btn_facultades)
+        if self.btn_facultades: self.actualizar_navegacion(self.btn_facultades)
         FacultadManagementView(self.content_container).pack(fill="both", expand=True, padx=40)
 
     def mostrar_gestion_carreras(self):
         self.vista_actual_func = self.mostrar_gestion_carreras
         self.limpiar_derecha()
-        if not self.is_compact:
-            self.actualizar_navegacion(self.btn_carreras)
+        if self.btn_carreras: self.actualizar_navegacion(self.btn_carreras)
         CarreraManagementView(self.content_container).pack(fill="both", expand=True, padx=40)
 
     def mostrar_cuenta(self):
         self.vista_actual_func = self.mostrar_cuenta
         self.limpiar_derecha()
-        if not self.is_compact:
-            self.actualizar_navegacion(self.btn_account)
+        if self.btn_account: self.actualizar_navegacion(self.btn_account)
         AccountView(self.content_container, on_logout=self.on_back).pack(fill="both", expand=True, padx=40)
 
     # ── Dashboard principal ───────────────────────────────────────────────────
@@ -235,7 +252,6 @@ class DashboardView(ctk.CTkFrame):
         ctk.CTkLabel(graph_box, text="📈 " + AppContext.t("Tendencia de Accesos por Hora"),
                      font=("Inter", 18, "bold"), text_color=COLORS["text"]).pack(anchor="w", padx=30, pady=20)
 
-        # -------- FILTRO DE FECHA --------
         self.fecha_var = ctk.StringVar(value=datetime.now().strftime("%Y-%m-%d"))
 
         filtro_frame = ctk.CTkFrame(graph_box, fg_color="transparent")
@@ -250,14 +266,11 @@ class DashboardView(ctk.CTkFrame):
         self.calendario.pack(side="left", padx=5)
         self.calendario.bind("<<DateEntrySelected>>", lambda e: self.filtrar_por_fecha())
 
-        # Contenedor solo para la gráfica
         self.graph_container = ctk.CTkFrame(graph_box, fg_color="transparent")
         self.graph_container.pack(fill="both", expand=True, padx=20, pady=10)
 
-        # Render inicial
         self.filtrar_por_fecha()
 
-        # Sección de Últimos Accesos (Tabla)
         header_tabla = ctk.CTkFrame(main_scroll, fg_color="transparent")
         header_tabla.pack(fill="x", padx=75, pady=(20, 10))
         ctk.CTkLabel(header_tabla, text=AppContext.t("Registro de últimos accesos"),
@@ -275,43 +288,12 @@ class DashboardView(ctk.CTkFrame):
         self.fecha_var.set(fecha)
         self.actualizar_grafica()
 
-    def render_grafica_accesos(self, container):
-        from app.detection.detector_rostro import logs_accesos
-        from datetime import datetime
-
-        hoy    = datetime.now().strftime("%Y-%m-%d")
-        horas  = list(range(24))
-        conteo = [0] * 24
-
-        for log in logs_accesos:
-            if log["fecha"] == hoy:
-                conteo[int(log["hora"])] += 1
-
-        fig = Figure(figsize=(6, 3), dpi=100)
-        ax  = fig.add_subplot(111)
-        fig.patch.set_facecolor("#FFFFFF")
-        ax.set_facecolor("#FFFFFF")
-        ax.bar(horas, conteo, color="#3B82F6", width=0.6)
-        for spine in ["top", "right", "left", "bottom"]:
-            ax.spines[spine].set_visible(False)
-        ax.grid(axis='y', linestyle='--', alpha=0.2)
-
-        ax.set_xticks(horas)
-        ax.set_xticklabels([f"{h:02d}" for h in horas], rotation=45, fontsize=8)
-        ax.set_title("Accesos por hora", fontsize=12)
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-
-        canvas = FigureCanvasTkAgg(fig, master=container)
-        canvas.draw()
-        canvas.get_tk_widget().pack(fill="both", expand=True)
-
     def actualizar_grafica(self):
         if not self.winfo_exists():
             return
         if not hasattr(self, "graph_container") or not self.graph_container.winfo_exists():
             return
 
-        # OPTIMIZACIÓN: destruir canvas anterior de forma segura
         if hasattr(self, "canvas"):
             try:
                 self.canvas.get_tk_widget().destroy()
@@ -365,9 +347,7 @@ class DashboardView(ctk.CTkFrame):
         self.canvas.get_tk_widget().pack(fill="both", expand=True)
 
     def render_mini_tabla_accesos_data(self):
-        if not hasattr(self, "contenedor_tabla"):
-            return
-        if not self.contenedor_tabla.winfo_exists():
+        if not hasattr(self, "contenedor_tabla") or not self.contenedor_tabla.winfo_exists():
             return
 
         for widget in self.contenedor_tabla.winfo_children():
@@ -401,8 +381,7 @@ class DashboardView(ctk.CTkFrame):
 
             ctk.CTkFrame(self.contenedor_tabla, fg_color=COLORS["border"], height=1).pack(fill="x", padx=20)
 
-    # ── Sidebar ───────────────────────────────────────────────────────────────
-
+    # ── Sidebar Fijo (Modo Computadora - Sin botón hamburguesa) ────────────────
     def create_sidebar(self):
         if hasattr(self, 'sidebar_frame') and self.sidebar_frame.winfo_exists():
             self.sidebar_frame.destroy()
@@ -415,35 +394,27 @@ class DashboardView(ctk.CTkFrame):
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         self.sidebar_frame.grid_propagate(False)
 
+        # Header sin el botón hamburguesa
         header = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
-        header.pack(fill="x", pady=(15, 0), padx=10)
-
-        ctk.CTkButton(
-            header, text="☰", width=35, height=35,
-            fg_color="transparent", text_color=COLORS["text"],
-            command=self.toggle_sidebar
-        ).pack(side="left", padx=5)
+        header.pack(fill="x", pady=(20, 0), padx=25) 
 
         ctk.CTkLabel(
-            header,
-            text="K" if self.is_compact else "K O D A",
-            font=("Times New Roman", 28 if self.is_compact else 38, "bold"),
-            text_color="#3C054F"
-        ).pack(side="left", padx=5)
+            header, text="K O D A",
+            font=("Times New Roman", 38, "bold"), text_color="#3C054F"
+        ).pack(side="left")
 
-        if not self.is_compact:
-            profile = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
-            profile.pack(pady=(40, 15), padx=20, fill="x")
-            ctk.CTkLabel(profile, text="👤", font=("Arial", 35)).pack(side="left")
-            txt_info = ctk.CTkFrame(profile, fg_color="transparent")
-            txt_info.pack(side="left", padx=10)
+        profile = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
+        profile.pack(pady=(40, 15), padx=20, fill="x")
+        ctk.CTkLabel(profile, text="👤", font=("Arial", 35)).pack(side="left")
+        txt_info = ctk.CTkFrame(profile, fg_color="transparent")
+        txt_info.pack(side="left", padx=10)
 
-            # Textos traducidos del perfil
-            ctk.CTkLabel(txt_info, text=AppContext.t("ADMINISTRADOR"),
-                         font=("Inter", 14, "bold"), text_color=COLORS["text"]).pack(anchor="w")
-            ctk.CTkLabel(txt_info, text=AppContext.t("Control Biométrico"),
-                         font=("Inter", 11), text_color=COLORS["subtext"]).pack(anchor="w")
-            self.construir_menu(self.sidebar_frame)
+        ctk.CTkLabel(txt_info, text=AppContext.t("ADMINISTRADOR"),
+                     font=("Inter", 14, "bold"), text_color=COLORS["text"]).pack(anchor="w")
+        ctk.CTkLabel(txt_info, text=AppContext.t("Control Biométrico"),
+                     font=("Inter", 11), text_color=COLORS["subtext"]).pack(anchor="w")
+        
+        self.construir_menu(self.sidebar_frame)
 
         ctk.CTkButton(
             self.sidebar_frame, text="🚪 " + AppContext.t("Cerrar Sesión"),
@@ -452,14 +423,11 @@ class DashboardView(ctk.CTkFrame):
         ).pack(side="bottom", pady=30, padx=20, fill="x")
 
     def create_stat_card(self, master, title, value, color, index):
-        card = ctk.CTkFrame(
-            master, height=80 if self.is_compact else 100,
-            fg_color=COLORS["card"], corner_radius=15,
-            border_width=1, border_color=COLORS["border"]
-        )
+        card = ctk.CTkFrame(master, height=80 if self.is_compact else 100,
+                            fg_color=COLORS["card"], corner_radius=15,
+                            border_width=1, border_color=COLORS["border"])
         if self.is_compact:
-            row = index // 2
-            col = index % 2
+            row, col = index // 2, index % 2
             card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
         else:
             card.pack(side="left", padx=(0, 20), expand=True, fill="both")
@@ -485,17 +453,17 @@ class DashboardView(ctk.CTkFrame):
         for widget in container.winfo_children():
             widget.destroy()
 
+        # Solo renderizar el menú de hamburguesa si estamos en modo responsivo
         if self.is_compact:
             ctk.CTkButton(
                 container, text="☰", width=40, height=40,
-                fg_color="transparent", text_color=COLORS["text"],
-                command=self.toggle_sidebar_overlay
-            ).pack(side="left", padx=20)
+                fg_color="transparent", text_color=COLORS["text"], font=("Inter", 20),
+                command=self.toggle_overlay_sidebar
+            ).pack(side="left", padx=(20, 0))
 
         wrapper = ctk.CTkFrame(container, fg_color="transparent")
         wrapper.pack(side="right", padx=40, pady=20)
 
-        # Switch de Tema
         t_f = ctk.CTkFrame(wrapper, fg_color="#E2E8F0", corner_radius=20, width=100, height=38)
         t_f.pack(side="left", padx=10)
         t_f.pack_propagate(False)
@@ -527,8 +495,7 @@ class DashboardView(ctk.CTkFrame):
     # ── Idioma ────────────────────────────────────────────────────────────────
 
     def cambiar_idioma_dashboard(self, nuevo_idioma):
-        if AppContext.idioma_actual == nuevo_idioma:
-            return
+        if AppContext.idioma_actual == nuevo_idioma: return
         AppContext.set_idioma(nuevo_idioma)
         self.refrescar_idioma_completo()
 
