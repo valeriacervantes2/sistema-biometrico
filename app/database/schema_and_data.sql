@@ -22,7 +22,17 @@ CREATE TABLE IF NOT EXISTS "carrera" (
     "estado" INTEGER DEFAULT 1,
     FOREIGN KEY("id_facultad") REFERENCES "facultad"("id_facultad") ON DELETE CASCADE
 );
-
+-- USUARIOS BASE
+INSERT OR IGNORE INTO "usuario" (
+    "id_usuario", "nombre", "a_paterno", "a_materno", 
+    "cuenta", "correo", "tipo_usuario", "estado", 
+    "fecha_registro", "id_facultad"
+) 
+VALUES (
+    1, 'ADMINISTRADOR', 'DEL SISTEMA', '', 
+    'admin', 'admin@universidad.edu.mx', 1, 1, 
+    '2024-01-01 12:00:00', 1
+);
 CREATE TABLE IF NOT EXISTS "usuario" (
     "id_usuario" INTEGER PRIMARY KEY AUTOINCREMENT,
     "nombre" TEXT NOT NULL,
