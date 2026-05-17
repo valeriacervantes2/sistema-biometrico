@@ -31,6 +31,8 @@ class DashboardView(ctk.CTkFrame):
         self._resize_job = None
         self.bind("<Configure>", self._on_resize)
 
+        # Configuración de pesos de la cuadrícula
+        self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -124,7 +126,6 @@ class DashboardView(ctk.CTkFrame):
 
         if hasattr(self, "overlay_bg") and self.overlay_bg.winfo_exists():
             self.overlay_bg.destroy()
-        
         if hasattr(self, "overlay_sidebar") and self.overlay_sidebar.winfo_exists():
             self.overlay_sidebar.destroy()
 
@@ -139,6 +140,7 @@ class DashboardView(ctk.CTkFrame):
             self._resize_job = self.after(150, self.redibujar_layout)
 
     def redibujar_layout(self):
+        self.cerrar_overlay_sidebar()
         self.limpiar_derecha()
 
         if not self.is_compact:
