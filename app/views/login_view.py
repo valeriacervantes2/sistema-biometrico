@@ -167,7 +167,7 @@ class LoginView(ctk.CTkFrame):
             ctk.set_appearance_mode("light")
 
         # 🔥 refrescar vista
-        self.recargar_vista()
+        #self.recargar_vista()
 
     def toggle_password_visibility(self):
         if self.pass_entry.cget("show") == "*":
