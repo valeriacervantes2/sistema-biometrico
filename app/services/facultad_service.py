@@ -165,3 +165,8 @@ def obtener_facultad_por_id(id_facultad):
     except Exception as e:
         print(f"Error al obtener facultad: {e}")
         return None
+    
+def eliminar_facultad(id_facultad):
+    # Alias para mantener compatibilidad con la vista
+    # En realidad desactiva la facultad (estado = 0)
+    return desactivar_facultad(id_facultad)
