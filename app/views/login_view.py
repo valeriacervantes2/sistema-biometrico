@@ -195,7 +195,7 @@ class LoginView(ctk.CTkFrame):
         self.last_entry = entry
 
     def validar_login(self):
-        if self.user_entry.get() == "1" and self.pass_entry.get() == "1": self.on_login_success()
+        if self.user_entry.get() == "adminuni@unicol.mx" and self.pass_entry.get() == "123456": self.on_login_success()
         else: self.error_label.configure(text=AppContext.t("Credenciales incorrectas."))
 
     def recargar_vista(self):
