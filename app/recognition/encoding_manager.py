@@ -3,8 +3,6 @@ import json
 import os
 import numpy as np
 
-
-# Generar encoding facial
 def generar_face_encoding(frame_rgb):
 
     encodings = face_recognition.face_encodings(frame_rgb)
@@ -16,8 +14,6 @@ def generar_face_encoding(frame_rgb):
 
     return encoding
 
-
-# Verificar que tenga dimensión 128
 def verificar_dimension(encoding):
 
     if encoding is None:
@@ -51,10 +47,15 @@ def compare_embeddings(embedding1, embedding2):
 
     return distancia
 
-def find_best_match(encoding_actual, encoding_db, threshold=0.6):
+def find_best_match(
+    encoding_actual,
+    encoding_db,
+    usuarios_db,
+    threshold=0.6
+):
 
     mejor_distancia = float("inf")
-    mejor_index = None
+    mejor_usuario = None
 
     for i, encoding_guardado in enumerate(encoding_db):
 
@@ -62,53 +63,93 @@ def find_best_match(encoding_actual, encoding_db, threshold=0.6):
             encoding_guardado,
             encoding_actual
         )
+
         if distancia < mejor_distancia:
             mejor_distancia = distancia
-            mejor_index = i
+            mejor_usuario = usuarios_db[i]
 
     if mejor_distancia < threshold:
-        return mejor_index, mejor_distancia
-    else:
-        return None, mejor_distancia
 
-# Guardar encoding en JSON
+        return mejor_usuario, mejor_distancia
+
+    return None, mejor_distancia
+
 def guardar_encoding(usuario, encoding, archivo="encodings.json"):
 
-    datos_usuario = {
-        "usuario": usuario,
-        "encoding": encoding.tolist()
-    }
+        if encoding is None:
 
-    if os.path.exists(archivo):
+            return {
+                "ok": False,
+                "error": "No hay encoding facial"
+            }
 
-        with open(archivo, "r") as f:
-            datos = json.load(f)
+        encoding = np.array(encoding)
 
-    else:
-        datos = []
+        if len(encoding) != 128:
 
-    for existente in datos:
-        encoding_existente = np.array(existente["encoding"])
+            return {
+                "ok": False,
+                "error": "Encoding inválido"
+            }
 
-        distancia = face_recognition.face_distance(
-            [encoding_existente],
-            encoding
-        )[0]
+        datos_usuario = {
+            "usuario": usuario,
+            "encoding": encoding.tolist()
+        }
 
-        if distancia < 0.6:  # mismo rostro
-            print("❌ Este rostro ya está registrado")
-            return False
+        if os.path.exists(archivo):
 
-    datos.append(datos_usuario)
+            with open(archivo, "r") as f:
+                datos = json.load(f)
 
-    with open(archivo, "w") as f:
-        json.dump(datos, f, indent=4)
+        else:
+            datos = []
 
-    print(f"Encoding guardado como {usuario}")
-    return True
+        for existente in datos:
 
+            if str(existente["usuario"]) == str(usuario):
 
-# Comparar distancia entre rostros
+                return {
+                    "ok": False,
+                    "error": "usuario_duplicado"
+                }
+
+        for existente in datos:
+
+            encoding_existente = np.array(
+                existente["encoding"]
+            )
+
+            distancia = face_recognition.face_distance(
+                [encoding_existente],
+                encoding
+            )[0]
+
+            print(
+                f"Comparando con {existente['usuario']} "
+                f"-> distancia: {distancia}"
+            )
+
+            if distancia < 0.45:
+
+                return {
+                    "ok": False,
+                    "error": "rostro_duplicado",
+                    "usuario_duplicado": existente["usuario"],
+                    "distancia": float(distancia)
+                }
+
+        datos.append(datos_usuario)
+
+        with open(archivo, "w") as f:
+            json.dump(datos, f, indent=4)
+
+        print(f"✔ Encoding guardado como usuario {usuario}")
+
+        return {
+            "ok": True
+        }
+
 def comparar_encodings(encoding_guardado, encoding_actual):
 
     distancia = face_recognition.face_distance(

@@ -6,9 +6,12 @@ import time
 from app.recognition.encoding_manager import cargar_encodings
 from app.detection.detector_rostro import find_best_match
 from app.views.app_context import AppContext
-from app.camara.camara import iniciar_camara, obtener_frame
+from app.camara.camara import iniciar_camara, liberar_camara, obtener_frame
 from app.detection.detector_rostro import procesar_frame
 from app.services.usuario_service import usuario_activo
+from app.database.database import get_connection
+from datetime import datetime
+from app.hardware.cerradura import Cerradura
 
 
 # ── Paleta ────────────────────────────────────────────────────────────────────
@@ -61,6 +64,17 @@ TEMAS = {
         "badge":    "✗  ERROR",
         "b_color":  ACCENT_RED,
     },
+    "inactivo": {
+        "border":   ACCENT_RED,
+        "bar":      ACCENT_RED,
+        "banner":   "#1a0508",
+        "dot":      ACCENT_RED,
+        "status":   "USUARIO INACTIVO",
+        "st_color": ACCENT_RED,
+        "name":     "",
+        "badge":    "🚫 BLOQUEADO",
+        "b_color":  ACCENT_RED,
+},
     "multiples": {
         "border":   ACCENT_CYAN,
         "bar":      ACCENT_CYAN,
@@ -130,6 +144,11 @@ class TerminalView(ctk.CTkFrame):
         self.loop_id = None
         self.estado_actual = None
         self.running = True
+        self.cerradura = None
+
+        #  SOLO usar cerradura en modo acceso
+        if self.modo != "registro":
+            self.cerradura = Cerradura()
 
         self.escaneando = False
         self.inicio_escaneo = 0.0
@@ -309,6 +328,8 @@ class TerminalView(ctk.CTkFrame):
         nombre = t["name"]
         if estado == "autorizado":
             nombre = f"BIENVENIDO:  {usuario}" if usuario else "ACCESO CONCEDIDO"
+        elif estado == "inactivo":
+            nombre = f"{usuario}\nUSUARIO INACTIVO" if usuario else "USUARIO INACTIVO"
 
         self.video_container.configure(border_color=t["border"])
         self.data_banner.configure(fg_color=t["banner"])
@@ -517,16 +538,46 @@ class TerminalView(ctk.CTkFrame):
 
                         if face_encoding is not None:
 
-                            # ✅ SI ES NUEVO → capturar UNA SOLA VEZ
-                            if self.on_capture:
-                                self.on_capture(face_encoding)
+                            
+                            # ?? Verificar si el rostro ya existe
+                            match_id, distancia = find_best_match(
+                                face_encoding,
+                                cargar_encodings()[0],
+                                cargar_encodings()[1]
+                            )
 
-        # 🔥 cerrar cámara inmediatamente
-                             # Detener loop
+                            # ? Rostro duplicado
+                            if match_id is not None and distancia < 0.45:
+
+                                self.status_label.configure(
+                                    text="USUARIO YA REGISTRADO",
+                                    text_color=ACCENT_RED
+                                )
+
+                                self.lbl_nombre.configure(
+                                    text="ESTE ROSTRO YA EXISTE EN EL SISTEMA",
+                                    text_color=ACCENT_RED
+                                )
+
+                                self.badge_label.configure(
+                                    text="? DUPLICADO",
+                                    text_color=ACCENT_RED
+                                )
+
+                                # ?? volver a permitir escaneo
+                                self.esperando_reset = False
+                                self.escaneando = False
+                                self.pos_linea = 0
+
+                                self.loop_id = self.after(1500, self.actualizar_video)
+                                return
+
+
+                            # ? Rostro nuevo
                             self.running = False
 
-                            # Cerrar cámara
-                            self.cerrar_y_volver()
+                            if self.on_capture:
+                                self.on_capture(face_encoding)
 
                             return
                         
@@ -545,38 +596,96 @@ class TerminalView(ctk.CTkFrame):
 
                             self.aplicar_estilo_visual("negado")
 
+                            self.registrar_acceso_bd(
+                                usuario_id,
+                                0,
+                                None,
+                                "Acceso denegado"
+                            )
+
+                            # ?? mantener bloqueada
+                            if self.cerradura:
+                                self.cerradura.bloquear()
+
+####-
                         else:
 
-                            #USUARIO ACTIVO
-                            if usuario_id is not None and usuario_activo(usuario_id):
+                            # Si nunca se resolvió un nombre, usar el último mensaje disponible
+                            if not self.usuario_detectado:
+                                self.usuario_detectado = msg_actual
 
-                                self.aplicar_estilo_visual(
-                                    "autorizado",
-                                    usuario=self.usuario_detectado
+                            # Usuario desconocido
+                            if any(p in self.usuario_detectado for p in ("DESCONOCIDO", "ERROR", "NO REGISTRADO")):
+
+                                self.aplicar_estilo_visual("negado")
+
+                                self.registrar_acceso_bd(
+                                    None,
+                                    0,
+                                    None,
+                                    "Acceso denegado"
                                 )
 
-                            #usuario inactivo
+                                if self.cerradura:
+                                    self.cerradura.bloquear()
 
+                            # Usuario identificado
                             else:
 
-                                self.estado_actual = "negado"
+                                # USUARIO SIN ID
+                                if usuario_id is None:
 
-                                self.status_label.configure(
-                                    text="USUARIO INACTIVO",
-                                    text_color=ACCENT_RED
-                                )
+                                    self.aplicar_estilo_visual("negado")
 
-                                self.lbl_nombre.configure(
-                                    text=f"{self.usuario_detectado}\nUSUARIO INACTIVO",
-                                    text_color=ACCENT_RED
-                                )
+                                    self.registrar_acceso_bd(
+                                        None,
+                                        0,
+                                        None,
+                                        "Usuario no identificado"
+                                    )
 
-                                self.badge_label.configure(
-                                    text="✗ BLOQUEADO",
-                                    text_color=ACCENT_RED
-                                )
+                                    if self.cerradura:
+                                        self.cerradura.bloquear()
 
-                    
+                                # USUARIO ACTIVO
+                                elif usuario_activo(usuario_id):
+
+                                    self.aplicar_estilo_visual(
+                                        "autorizado",
+                                        usuario=self.usuario_detectado
+                                    )
+
+                                    self.registrar_acceso_bd(
+                                        usuario_id,
+                                        1,
+                                        None,
+                                    "Acceso autorizado"
+                                    )
+
+                                    if self.cerradura:
+                                        self.cerradura.desbloquear_temporal(2)
+
+                                # USUARIO INACTIVO
+                                else:
+
+                                    self.aplicar_estilo_visual(
+                                        "inactivo",
+                                        usuario=self.usuario_detectado
+                                    )
+
+                                    self.registrar_acceso_bd(
+                                        usuario_id,
+                                        0,
+                                        None,
+                                        "Usuario inactivo"
+                                    )
+
+                                    if self.cerradura:
+                                        self.cerradura.bloquear() ##
+
+                                    
+
+####---
 
             if self.face_box is not None:
                 fx, fy, fw, fh = self.face_box
@@ -652,14 +761,24 @@ class TerminalView(ctk.CTkFrame):
             )
 
     def cerrar_y_volver(self):
-        if self.loop_id:
-            self.after_cancel(self.loop_id)
-            self.loop_id = None
-        if self.cap:
-            self.cap.release()
-            self.cap = None
-        self.on_back()
+        self.running = False
 
+        if self.loop_id:
+            try:
+                self.after_cancel(self.loop_id)
+            except Exception:
+                pass
+            self.loop_id = None
+
+        if self.cap:
+            liberar_camara(self.cap)
+            self.cap = None
+
+        if self.on_back:
+            self.on_back()
+
+    
+        
     def on_close(self):
         print("🛑 Cerrando terminal biométrica")
 
@@ -668,13 +787,44 @@ class TerminalView(ctk.CTkFrame):
         if self.loop_id:
             try:
                 self.after_cancel(self.loop_id)
-            except:
+            except Exception:
                 pass
+
             self.loop_id = None
 
-        if hasattr(self, "cap") and self.cap is not None:
-             if self.cap.isOpened():
-                self.cap.release()
-                print("📷 Cámara liberada")
+        try:
+            from app.camara.camara import liberar_camara
+            liberar_camara(self.cap)
+
+        except Exception as e:
+            print("Error liberando cámara:", e)
 
         self.cap = None
+        
+    
+    
+    
+    def registrar_acceso_bd(self, id_usuario, resultado, confianza=None, motivo=""):
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                INSERT INTO registro_acceso
+                (id_usuario, fecha_hora, resultado, confianza, motivo)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                id_usuario,
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                resultado,
+                confianza,
+                motivo
+            ))
+
+            conn.commit()
+            conn.close()
+
+            print("✔ Acceso registrado en BD:", motivo)
+
+        except Exception as e:
+            print("❌ Error registrando acceso:", e)

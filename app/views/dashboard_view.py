@@ -13,6 +13,8 @@ from app.views.app_context import AppContext
 from datetime import datetime
 from tkcalendar import DateEntry
 from app.detection.detector_rostro import logs_accesos
+from app.database.database import get_connection
+
 
 
 class DashboardView(ctk.CTkFrame):
@@ -31,6 +33,7 @@ class DashboardView(ctk.CTkFrame):
         self.on_back = on_back
 
         # Configuración de pesos de la cuadrícula
+        self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -61,34 +64,34 @@ class DashboardView(ctk.CTkFrame):
 
     def construir_menu(self, parent):
         # BOTONES (🔥 AQUÍ está el cambio)
-        self.crear_btn_sidebar(
+        self.crear_btn_overlay(
             parent,
             "🏠 Panel de Control",
-            lambda: [self.cerrar_overlay(), self.mostrar_panel_control()]
+            self.mostrar_panel_control
         )
 
-        self.crear_btn_sidebar(
+        self.crear_btn_overlay(
             parent,
             "👥 Gestion de Usuarios",
-            lambda: [self.cerrar_overlay(), self.mostrar_gestion_usuarios()]
+            self.mostrar_gestion_usuarios
         )
 
-        self.crear_btn_sidebar(
+        self.crear_btn_overlay(
             parent,
             "🏫 Gestion de Facultades",
-            lambda: [self.cerrar_overlay(), self.mostrar_gestion_facultades()]
+            self.mostrar_gestion_facultades
         )
 
-        self.crear_btn_sidebar(
+        self.crear_btn_overlay(
             parent,
             "📚 Gestion de Carreras",
-            lambda: [self.cerrar_overlay(), self.mostrar_gestion_carreras()]
+            self.mostrar_gestion_carreras
         )
 
-        self.crear_btn_sidebar(
+        self.crear_btn_overlay(
             parent,
             "⚙️ Configuración",
-            lambda: [self.cerrar_overlay(), self.mostrar_cuenta()]
+            self.mostrar_cuenta
         )
 
         # LOGOUT
@@ -102,58 +105,65 @@ class DashboardView(ctk.CTkFrame):
 
     def toggle_sidebar_overlay(self):
 
-        # cerrar si ya existe
-        if hasattr(self, "overlay_bg") and self.overlay_bg.winfo_exists():
-            self.overlay_bg.destroy()
+        # Si ya está abierto, lo cierra
+        if hasattr(self, "overlay_sidebar") and self.overlay_sidebar.winfo_exists():
+            self.overlay_sidebar.destroy()
             return
 
-        # fondo oscuro
-
-        root = self.winfo_toplevel()
-
-        self.overlay_bg = ctk.CTkFrame(self, fg_color="transparent")
-        self.overlay_bg.place(relx=0, rely=0, relwidth=1, relheight=1)
-
-        # click fuera cierra
-        self.overlay_bg.bind("<Button-1>", lambda e: self.cerrar_overlay())
-
-        # sidebar
+        # Sidebar flotante, NO usa grid
         self.overlay_sidebar = ctk.CTkFrame(
-            self.overlay_bg,
+            self,
             width=280,
-            fg_color=COLORS["sidebar"]
+            fg_color=COLORS["sidebar"],
+            border_width=1,
+            border_color=COLORS["border"],
+            corner_radius=0
         )
-        self.overlay_sidebar.place(x=0, y=0, relheight=1)
 
-        # evitar que click dentro cierre
-        self.overlay_sidebar.bind("<Button-1>", lambda e: "break")
+        # Se pone encima sin mover nada
+        self.overlay_sidebar.place(
+            x=0,
+            y=0,
+            relheight=1
+        )
 
-        # HEADER
-        ctk.CTkLabel(
+        self.overlay_sidebar.lift()
+
+        # HEADER con logo y botón cerrar
+        header = ctk.CTkFrame(
             self.overlay_sidebar,
+            fg_color="transparent",
+            height=75
+        )
+        header.pack(fill="x", padx=15, pady=(10, 5))
+        header.pack_propagate(False)
+
+        ctk.CTkLabel(
+            header,
             text="K O D A",
             font=("Times New Roman", 32, "bold"),
             text_color="#3C054F"
-        ).pack(anchor="w", padx=20, pady=20)
+        ).pack(side="left", padx=(5, 0))
 
         ctk.CTkButton(
-            self.overlay_sidebar,
-            text="✕",
-            width=40,
-            height=40,
+            header,
+            text="☰",
+            width=22,
+            height=22,
             fg_color="transparent",
             text_color=COLORS["text"],
+            hover_color=COLORS["hover"],
+            font=("Inter", 14, "bold"),
             command=self.cerrar_overlay
-        ).pack(anchor="ne", padx=10, pady=10)
+        ).pack(side="right", padx=(0, 5), pady=5)
 
-        # BOTONES
+        # Menú
         self.construir_menu(self.overlay_sidebar)
 
 
-        
-    def crear_btn_overlay(self, texto, comando):
+    def crear_btn_overlay(self, master, texto, comando):
         ctk.CTkButton(
-            self.overlay_sidebar,
+            master,
             text=texto,
             height=45,
             anchor="w",
@@ -164,8 +174,11 @@ class DashboardView(ctk.CTkFrame):
         ).pack(fill="x", padx=20, pady=5)
 
     def cerrar_overlay(self):
-        if hasattr(self, "overlay_bg") and self.overlay_bg.winfo_exists():
-            self.overlay_bg.destroy()
+        if hasattr(self, "overlay_sidebar") and self.overlay_sidebar.winfo_exists():
+            self.overlay_sidebar.destroy()
+            
+            
+            
 
     def toggle_sidebar(self):
         self.is_compact = not self.is_compact
@@ -183,6 +196,7 @@ class DashboardView(ctk.CTkFrame):
             self._resize_job = self.after(150, self.redibujar_layout)
 
     def redibujar_layout(self):
+        self.cerrar_overlay()
         self.limpiar_derecha()
 
         # SOLO crear sidebar en modo normal
@@ -274,6 +288,45 @@ class DashboardView(ctk.CTkFrame):
             self.actualizar_navegacion(self.btn_account)
         AccountView(self.content_container, on_logout=self.on_back).pack(fill="both", expand=True, padx=40)
 
+
+
+    def obtener_estadisticas_dashboard(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        hoy = datetime.now().strftime("%Y-%m-%d")
+
+        cursor.execute("SELECT COUNT(*) FROM usuario")
+        total_registros = cursor.fetchone()[0]
+
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM registro_acceso
+            WHERE DATE(fecha_hora) = ?
+        """, (hoy,))
+        accesos_hoy = cursor.fetchone()[0]
+
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM registro_acceso
+            WHERE DATE(fecha_hora) = ?
+            AND resultado = 1
+        """, (hoy,))
+        autorizados = cursor.fetchone()[0]
+
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM registro_acceso
+            WHERE DATE(fecha_hora) = ?
+            AND resultado = 0
+        """, (hoy,))
+        denegados = cursor.fetchone()[0]
+
+        conn.close()
+
+        return total_registros, accesos_hoy, autorizados, denegados
+    
+    
     # --- RENDERIZADO DEL PANEL DE CONTROL (DASHBOARD) ---
     def render_dashboard_principal(self):
         
@@ -295,10 +348,12 @@ class DashboardView(ctk.CTkFrame):
             stats_frame.grid_columnconfigure(0, weight=1)
             stats_frame.grid_columnconfigure(1, weight=1)
 
-        self.create_stat_card(stats_frame, "👥 " + AppContext.t("Total Registros"), "17", "#3B82F6", 0)
-        self.create_stat_card(stats_frame, "🕒 " + AppContext.t("Accesos Hoy"), "5", "#6366F1", 1)
-        self.create_stat_card(stats_frame, "✅ " + AppContext.t("Autorizados"), "4", "#10B981", 2)
-        self.create_stat_card(stats_frame, "🚫 " + AppContext.t("Denegados"), "1", "#EF4444", 3)
+        total_registros, accesos_hoy, autorizados, denegados = self.obtener_estadisticas_dashboard()
+
+        self.create_stat_card(stats_frame, "👥 " + AppContext.t("Total Registros"), str(total_registros), "#3B82F6", 0)
+        self.create_stat_card(stats_frame, "🕒 " + AppContext.t("Accesos Hoy"), str(accesos_hoy), "#6366F1", 1)
+        self.create_stat_card(stats_frame, "✅ " + AppContext.t("Autorizados"), str(autorizados), "#10B981", 2)
+        self.create_stat_card(stats_frame, "🚫 " + AppContext.t("Denegados"), str(denegados), "#EF4444", 3)
         
         # Contenedor de la Gráfica
         graph_box = ctk.CTkFrame(main_scroll, fg_color=COLORS["card"], corner_radius=20, border_width=1, border_color=COLORS["border"], height=280)
@@ -419,26 +474,40 @@ class DashboardView(ctk.CTkFrame):
         if not self.graph_container.winfo_exists():
             return
 
-
-
         for widget in self.graph_container.winfo_children():
             widget.destroy()
 
-        mode = ctk.get_appearance_mode()
-        bg_color = "#1E293B" if mode == "Dark" else "#FFFFFF"
-        text_color = "#F8FAFC" if mode == "Dark" else "#000000"
-        grid_color = "#334155" if mode == "Dark" else "#E2E8F0"
-
         fecha = self.fecha_var.get()
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT 
+                CAST(strftime('%H', fecha_hora) AS INTEGER) AS hora,
+                COUNT(*) AS total
+            FROM registro_acceso
+            WHERE DATE(fecha_hora) = ?
+            GROUP BY hora
+            ORDER BY hora
+        """, (fecha,))
+
+        filas = cursor.fetchall()
+        conn.close()
+
         horas = list(range(24))
         conteo = [0] * 24
 
-        for log in logs_accesos:
-            if log["fecha"] == fecha:
-                h = int(log["hora"])
-                conteo[h] += 1
+        for fila in filas:
+            conteo[int(fila[0])] = int(fila[1])
 
-        fig = Figure(figsize=(6, 3), dpi=100)
+        mode = ctk.get_appearance_mode()
+        bg_color = "#1E293B" if mode == "Dark" else "#FFFFFF"
+        text_color = "#F8FAFC" if mode == "Dark" else "#0F172A"
+        grid_color = "#334155" if mode == "Dark" else "#E2E8F0"
+        line_color = "#3B82F6"
+
+        fig = Figure(figsize=(7, 3.2), dpi=100)
         ax = fig.add_subplot(111)
 
         fig.patch.set_facecolor(bg_color)
@@ -447,31 +516,71 @@ class DashboardView(ctk.CTkFrame):
         x = np.array(horas)
         y = np.array(conteo)
 
-        if sum(y) == 0:
-            y = np.zeros(24)
+        if sum(conteo) > 0:
+            x_smooth = np.linspace(x.min(), x.max(), 300)
+            spl = make_interp_spline(x, y, k=3)
+            y_smooth = np.clip(spl(x_smooth), 0, None)
 
-        x_smooth = np.linspace(x.min(), x.max(), 300)
-        spl = make_interp_spline(x, y, k=3)
-        y_smooth = spl(x_smooth)
-        y_smooth = np.clip(y_smooth, 0, None)
+            ax.fill_between(x_smooth, y_smooth, color=line_color, alpha=0.22)
+            ax.plot(x_smooth, y_smooth, color=line_color, linewidth=2.8)
 
-        ax.fill_between(x_smooth, y_smooth, color="#3B82F6", alpha=0.4)
-        ax.plot(x_smooth, y_smooth, color="#3B82F6", linewidth=2)
+            ax.scatter(
+                x,
+                y, 
+                s=28,
+                color=line_color,
+                edgecolors=bg_color,
+                linewidths=1.2,
+                zorder=3
+            )
+        else:
+            ax.plot(horas, conteo, color=line_color, linewidth=2.5, alpha=0.6)
 
-        ax.tick_params(colors=text_color, labelsize=9)
-        ax.xaxis.label.set_color(text_color)
-        ax.yaxis.label.set_color(text_color)
-        ax.title.set_color(text_color)
-        ax.grid(axis='y', linestyle='--', alpha=0.3, color=grid_color)
+            ax.text(
+                0.5,
+                0.5,
+                "Sin accesos registrados en esta fecha",
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                fontsize=11,
+                color=text_color,
+                alpha=0.7
+            )
+
+        ax.set_xlim(0, 23)
+        ax.set_ylim(bottom=0)
+
+        max_y = max(conteo) if conteo else 0
+        ax.set_ylim(0, max(3, max_y + 1))
+
+        ax.set_xticks([0, 3, 6, 9, 12, 15, 18, 21, 23])
+        ax.set_xticklabels(
+            ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "23:00"],
+            fontsize=9,
+            color=text_color
+        )
+
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.tick_params(axis="y", colors=text_color, labelsize=9)
+
+        ax.grid(axis="y", linestyle="--", alpha=0.25, color=grid_color)
+        ax.grid(axis="x", visible=False)
 
         for spine in ax.spines.values():
             spine.set_visible(False)
 
-        #ax.set_title(f"Accesos del día {fecha}", fontsize=11, pad=10)
-        
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+
+        fig.tight_layout(pad=1.4)
+
         canvas = FigureCanvasTkAgg(fig, master=self.graph_container)
         canvas.draw()
-        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+        widget = canvas.get_tk_widget()
+        widget.configure(bg=bg_color, highlightthickness=0)
+        widget.pack(fill="both", expand=True)
         
     def render_mini_tabla_accesos_data(self):
         if not hasattr(self, "contenedor_tabla"):
@@ -483,47 +592,143 @@ class DashboardView(ctk.CTkFrame):
         for widget in self.contenedor_tabla.winfo_children():
             widget.destroy()
 
-        logs = [
-            {"u": "MARÍA ELENA RODRÍGUEZ HERNÁNDEZ", "id_c": "31702938", "m": "MARIA.ROD@UNIV.MX", "ok": True},
-            {"u": "JOSÉ LUIS PÉREZ RAMÍREZ", "id_c": "31702969", "m": "JOSE.PEREZ@UNIV.MX", "ok": False, "motivo": "⚠️ Rostro no reconocido"},
-            {"u": "CARLOS ALBERTO MARTÍNEZ GARCÍA", "id_c": "31702945", "m": "CARLOS.M@UNIV.MX", "ok": True}
-        ]
+        mode = ctk.get_appearance_mode()
+        bg_color = "#1E293B" if mode == "Dark" else "#FFFFFF"
+        row_color = "#0F172A" if mode == "Dark" else "#F8FAFC"
+        text_color = "#F8FAFC" if mode == "Dark" else "#0F172A"
+        subtext_color = "#CBD5E1" if mode == "Dark" else "#64748B"
+        border_color = "#334155" if mode == "Dark" else "#E2E8F0"
 
-        for log in logs:
-            row = ctk.CTkFrame(self.contenedor_tabla, fg_color="transparent", height=85)
-            row.pack(fill="x", side="top")
-            row.pack_propagate(False)
+        self.contenedor_tabla.configure(
+            fg_color=bg_color,
+            border_color=border_color
+        )
 
-            ctk.CTkLabel(row, text="👤", font=("Inter", 20)).pack(side="left", padx=20)
+        conn = get_connection()
+        cursor = conn.cursor()
 
-            mid = ctk.CTkFrame(row, fg_color="transparent")
-            mid.pack(side="left", fill="both", expand=True)
+        cursor.execute("""
+            SELECT 
+                r.id_registro,
+                r.fecha_hora,
+                r.resultado,
+                r.motivo,
+                u.nombre,
+                u.a_paterno,
+                u.a_materno,
+                u.cuenta,
+                u.correo
+            FROM registro_acceso r
+            LEFT JOIN usuario u ON r.id_usuario = u.id_usuario
+            ORDER BY r.fecha_hora DESC
+            LIMIT 10
+        """)
 
-            ctk.CTkLabel(mid, text=log["u"], font=("Inter", 13, "bold"),
-                         text_color=COLORS["text"]).pack(anchor="w", pady=(15, 0))
+        registros = cursor.fetchall()
+        conn.close()
 
-            det = f"ID: {log['id_c']} • {log['m']}"
-            if not log["ok"]:
-                det += f"  {log.get('motivo', '')}"
+        if not registros:
+            ctk.CTkLabel(
+                self.contenedor_tabla,
+                text="Sin accesos registrados",
+                font=("Inter", 13),
+                text_color=subtext_color
+            ).pack(pady=30)
+            return
 
-            ctk.CTkLabel(mid, text=det, font=("Inter", 11),
-                         text_color=COLORS["subtext"]).pack(anchor="w")
+        for reg in registros:
+            _, fecha_hora, resultado, motivo, nombre, ap, am, cuenta, correo = reg
 
-            ctk.CTkFrame(self.contenedor_tabla, fg_color=COLORS["border"], height=1).pack(fill="x", padx=20)
+            ok = int(resultado) == 1
+
+            nombre_completo = (
+                f"{nombre or ''} {ap or ''} {am or ''}".strip().upper()
+                if nombre else "USUARIO NO REGISTRADO"
+            )
+
+            cuenta_txt = cuenta if cuenta else "Sin cuenta"
+            correo_txt = correo if correo else "Sin correo"
+            motivo_txt = motivo if motivo else ("Acceso autorizado" if ok else "Acceso denegado")
+
+            card = ctk.CTkFrame(
+                self.contenedor_tabla,
+                fg_color=row_color,
+                corner_radius=12,
+                border_width=1,
+                border_color=border_color
+            )
+            card.pack(fill="x", padx=16, pady=8)
+
+            top = ctk.CTkFrame(card, fg_color="transparent")
+            top.pack(fill="x", padx=14, pady=(12, 4))
+
+            ctk.CTkLabel(
+                top,
+                text="✅" if ok else "🚫",
+                font=("Inter", 22)
+            ).pack(side="left", padx=(0, 10))
+
+            info = ctk.CTkFrame(top, fg_color="transparent")
+            info.pack(side="left", fill="x", expand=True)
+
+            ctk.CTkLabel(
+                info,
+                text=nombre_completo,
+                font=("Inter", 13, "bold"),
+                text_color=text_color,
+                anchor="w"
+            ).pack(anchor="w", fill="x")
+
+            ctk.CTkLabel(
+                info,
+                text=f"ID: {cuenta_txt}  •  {correo_txt}",
+                font=("Inter", 11),
+                text_color=subtext_color,
+                anchor="w"
+            ).pack(anchor="w", fill="x")
+
+            badge = ctk.CTkFrame(
+                top,
+                fg_color="#D1FAE5" if ok else "#FEE2E2",
+                corner_radius=16
+            )
+            badge.pack(side="right")
+
+            ctk.CTkLabel(
+                badge,
+                text="AUTORIZADO" if ok else "DENEGADO",
+                font=("Inter", 9, "bold"),
+                text_color="#065F46" if ok else "#991B1B"
+            ).pack(padx=10, pady=4)
+
+            bottom = ctk.CTkFrame(card, fg_color="transparent")
+            bottom.pack(fill="x", padx=14, pady=(0, 12))
+
+            ctk.CTkLabel(
+                bottom,
+                text=f"🕒 {fecha_hora}   •   {motivo_txt}",
+                font=("Inter", 10),
+                text_color=subtext_color,
+                anchor="w"
+            ).pack(anchor="w")
+    
+    
+    
+    
     # --- SIDEBAR ---
     def create_sidebar(self):
-        sidebar = ctk.CTkFrame(self, width=280, corner_radius=0, fg_color=COLORS["sidebar"], border_width=1, border_color=COLORS["border"])
-        sidebar.grid(row=0, column=0, sticky="nsew")
-        sidebar.grid_propagate(False)
+        self.sidebar_frame = ctk.CTkFrame(self, width=280, corner_radius=0, fg_color=COLORS["sidebar"], border_width=1, border_color=COLORS["border"])
+        self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
+        self.sidebar_frame.grid_propagate(False)
         
-        header = ctk.CTkFrame(sidebar, fg_color="transparent")
+        header = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
         header.pack(fill="x", pady=(15, 0), padx=15)
         # Se eliminó la línea de las 3 barras (☰)
         ctk.CTkLabel(header, text="K O D A", font=("Times New Roman", 38, "bold"), text_color="#3C054F").pack(side="left", padx=15)
 
 
         if not self.is_compact:
-            profile = ctk.CTkFrame(sidebar, fg_color="transparent")
+            profile = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
             profile.pack(pady=(40, 15), padx=20, fill="x")
             ctk.CTkLabel(profile, text="👤", font=("Arial", 35)).pack(side="left")
             txt_info = ctk.CTkFrame(profile, fg_color="transparent")
@@ -533,13 +738,13 @@ class DashboardView(ctk.CTkFrame):
             ctk.CTkLabel(txt_info, text=AppContext.t("ADMINISTRADOR"), font=("Inter", 14, "bold"), text_color=COLORS["text"]).pack(anchor="w")
             ctk.CTkLabel(txt_info, text=AppContext.t("Control Biométrico"), font=("Inter", 11), text_color=COLORS["subtext"]).pack(anchor="w")
 
-        self.btn_panel = self.crear_btn_sidebar(sidebar, "🏠   Panel de Control", self.mostrar_panel_control)
-        self.btn_users = self.crear_btn_sidebar(sidebar, "👥   Gestión de Usuarios", self.mostrar_gestion_usuarios)
-        self.btn_facultades = self.crear_btn_sidebar(sidebar, "🏫   Gestión de Facultades", self.mostrar_gestion_facultades)
-        self.btn_carreras = self.crear_btn_sidebar(sidebar, "📚   Gestión de Carreras", self.mostrar_gestion_carreras)
-        self.btn_account = self.crear_btn_sidebar(sidebar, "⚙️   Configuración Cuenta", self.mostrar_cuenta)
+        self.btn_panel = self.crear_btn_sidebar(self.sidebar_frame, "🏠   Panel de Control", self.mostrar_panel_control)
+        self.btn_users = self.crear_btn_sidebar(self.sidebar_frame, "👥   Gestión de Usuarios", self.mostrar_gestion_usuarios)
+        self.btn_facultades = self.crear_btn_sidebar(self.sidebar_frame, "🏫   Gestión de Facultades", self.mostrar_gestion_facultades)
+        self.btn_carreras = self.crear_btn_sidebar(self.sidebar_frame, "📚   Gestión de Carreras", self.mostrar_gestion_carreras)
+        self.btn_account = self.crear_btn_sidebar(self.sidebar_frame, "⚙️   Configuración Cuenta", self.mostrar_cuenta)
 
-        ctk.CTkButton(sidebar, text="🚪 Cerrar Sesión", fg_color="transparent", text_color="#EF4444", 
+        ctk.CTkButton(self.sidebar_frame, text="🚪 Cerrar Sesión", fg_color="transparent", text_color="#EF4444", 
                       font=("Inter", 14, "bold"), command=self.on_back).pack(side="bottom", pady=30, padx=20, fill="x")
 
     def create_stat_card(self, master, title, value, color, index):

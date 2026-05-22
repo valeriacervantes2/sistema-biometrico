@@ -47,6 +47,8 @@ def obtener_todos_usuarios():
         conn.close()
 
 def usuario_activo(id_usuario):
+    if id_usuario is None:
+        return False
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -58,13 +60,13 @@ def usuario_activo(id_usuario):
     """, (id_usuario,))
 
     row = cursor.fetchone()
-
     conn.close()
 
-    if row:
-        return row[0] == 1
+    if not row:
+        return False
+    
+    return int(row[0]) == 1
 
-    return False
 
 def obtener_usuario_por_id(id_usuario):
     conn = get_connection()
@@ -221,6 +223,59 @@ def obtener_carreras_por_facultad(id_facultad):
         return {f[0]: f[1] for f in cursor.fetchall()}
     finally:
         conn.close()
+
+from app.database.database import get_connection
+
+def existe_cuenta(cuenta, excluir_id=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    if excluir_id:
+        cursor.execute("""
+            SELECT id_usuario
+            FROM usuario
+            WHERE cuenta = ? AND id_usuario != ?
+        """, (cuenta, excluir_id))
+    else:
+        cursor.execute("""
+            SELECT id_usuario
+            FROM usuario
+            WHERE cuenta = ?
+        """, (cuenta,))
+
+    resultado = cursor.fetchone()
+
+    conn.close()
+
+    return resultado is not None
+
+
+def existe_correo(correo, excluir_id=None):
+
+    if not correo:
+        return False
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    if excluir_id:
+        cursor.execute("""
+            SELECT id_usuario
+            FROM usuario
+            WHERE correo = ? AND id_usuario != ?
+        """, (correo, excluir_id))
+    else:
+        cursor.execute("""
+            SELECT id_usuario
+            FROM usuario
+            WHERE correo = ?
+        """, (correo,))
+
+    resultado = cursor.fetchone()
+
+    conn.close()
+
+    return resultado is not None
 
 def obtener_usuario_por_cuenta(cuenta):
     conn = get_connection()
