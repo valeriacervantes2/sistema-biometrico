@@ -172,36 +172,56 @@ class TerminalView(ctk.CTkFrame):
     # ══════════════════════════════════════════════════════════════════════════
     # Construcción de la UI
     # ══════════════════════════════════════════════════════════════════════════
+    
+    
+    
+    def _is_compact_mode(self):
+        self.update_idletasks()
 
+        w = self.winfo_width()
+        h = self.winfo_height()
+
+        screen_w = self.winfo_screenwidth()
+        screen_h = self.winfo_screenheight()
+
+        return (
+            w <= 700
+            or h <= 900
+            or min(screen_w, screen_h) <= 500
+        )
+    
+    
     def _build_ui(self):
+        compact = self._is_compact_mode()
         ctk.CTkFrame(self, fg_color=ACCENT_PURPLE, height=2).pack(fill="x", side="top")
 
         hdr = ctk.CTkFrame(self, fg_color="transparent")
-        hdr.pack(pady=(20, 4))
+        hdr.pack(pady=(10, 4) if compact else (20, 4))
         # 🔥 SOLO mostrar botón salir en modo normal
         if self.modo != "registro":
             self.btn_salir = ctk.CTkButton(
-                self, text="🚪", width=42, height=42,
+                self, text="🚪", width=36 if compact else 42,
+                height=36 if compact else 42,
                 corner_radius=8,
                 fg_color=BG_PANEL, hover_color="#1e1860",
                 text_color=TEXT_SECONDARY,
-                font=("Segoe UI Emoji", 18),
+                font=("Segoe UI Emoji", -14 if compact else 18),
                 border_width=1, border_color=BORDER_IDLE,
                 command=self.cerrar_y_volver,
             )
-            self.btn_salir.place(relx=0.974, rely=0.046, anchor="ne")
+            self.btn_salir.place(relx=0.965 if compact else 0.974,rely=0.035 if compact else 0.046,anchor="ne")
             # 🔥 BOTÓN CERRAR SOLO PARA MODO REGISTRO
         if self.modo == "registro":
             self.btn_cerrar = ctk.CTkButton(
                 self,
                 text="✖",
-                width=40,
-                height=40,
+                width=36 if compact else 40,
+                height=36 if compact else 40,
                 corner_radius=10,
                 fg_color="#1e1e3f",
                 hover_color="#ff4d5e",
                 text_color="white",
-                font=("Segoe UI", 16, "bold"),
+                font=("Segoe UI", -14 if compact else 16, "bold"),
                 border_width=1,
                 border_color=BORDER_IDLE,
                 command=self.cerrar_y_volver
@@ -211,22 +231,21 @@ class TerminalView(ctk.CTkFrame):
 
         ctk.CTkLabel(
             hdr, text="K O D A",
-            font=("Courier New", 43, "bold"),
+            font=("Courier New", -24 if compact else 43, "bold"),
             text_color=TEXT_PRIMARY,
         ).pack()
 
         ctk.CTkLabel(
             hdr,
             text=AppContext.t("▸  RECONOCIMIENTO FACIAL  ◂") if self.modo == "registro" else AppContext.t("▸  RECONOCIMIENTO FACIAL  ◂"),
-            font=("Courier New", 23),
+            font=("Courier New", -11 if compact else 23),
             text_color=TEXT_MUTED,
         ).pack(pady=(4, 0))
 
         
 
         main = ctk.CTkFrame(self, fg_color="transparent")
-        main.pack(expand=True, fill="both", padx=44, pady=(8, 28))
-
+        main.pack(expand=True,fill="both",padx=12 if compact else 44,pady=(6, 12) if compact else (8, 28))
         self.video_container = ctk.CTkFrame(
             main, fg_color=BG_PANEL, corner_radius=16,
             border_width=2, border_color=BORDER_IDLE,
@@ -262,7 +281,7 @@ class TerminalView(ctk.CTkFrame):
         self.status_label = ctk.CTkLabel(
             row,
             text=AppContext.t("SISTEMA ACTIVO"),
-            font=("Courier New", 25, "bold"),
+            font=("Courier New", -20 if compact else 25, "bold"),
             text_color=TEXT_PRIMARY,
         )
         self.status_label.pack(side="left")
@@ -274,9 +293,11 @@ class TerminalView(ctk.CTkFrame):
         self.lbl_nombre = ctk.CTkLabel(
             center,
             text=AppContext.t("ESPERANDO DETECCIÓN..."),
-            font=("Courier New", 20),
+            font=("Courier New", -17 if compact else 20),
             text_color=TEXT_SECONDARY,
             anchor="w",
+            justify="left",
+            wraplength=260 if compact else 900,
         )
         self.lbl_nombre.pack(fill="x", padx=24, pady=(5, 0))
 
@@ -289,7 +310,7 @@ class TerminalView(ctk.CTkFrame):
         self.badge_label = ctk.CTkLabel(
             self.data_banner,
             text=AppContext.t("LISTO"),
-            font=("Courier New", 19, "bold"),
+            font=("Courier New", 15 if compact else 19, "bold"),
             text_color=ACCENT_PURPLE,
             fg_color="transparent",   # sin cuadro
         )
@@ -308,7 +329,7 @@ class TerminalView(ctk.CTkFrame):
         ctk.CTkLabel(
             self,
             text=AppContext.t("Sistema Biométrico v2.0") + "  //  " + AppContext.t("Acceso Seguro") + "  //  " + AppContext.t("Cifrado AES-256"),
-            font=("Courier New", 9),
+            font=("Courier New", -8 if compact else 9),
             text_color=TEXT_MUTED,
         ).pack(side="bottom", pady=(0, 10))
         ctk.CTkFrame(self, fg_color=BORDER_IDLE, height=1).pack(fill="x", side="bottom")
