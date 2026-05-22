@@ -2,7 +2,7 @@ import json
 import os
 import shutil
 import customtkinter as ctk
-from PIL import Image
+from PIL import Image, ImageDraw
 from tkinter import filedialog
 from app.services.theme import COLORS
 from app.views.app_context import AppContext
@@ -44,9 +44,10 @@ def _guardar_datos(datos: dict) -> None:
 
 
 class AccountView(ctk.CTkFrame):
-    def __init__(self, master, on_logout):
+    def __init__(self, master, on_logout, on_profile_updated=None):  # ← NUEVO parámetro
         super().__init__(master, fg_color=COLORS["bg"])
         self.on_logout = on_logout
+        self.on_profile_updated = on_profile_updated  # ← NUEVO
 
         self.is_compact = False
         self.current_view = "read"
@@ -179,7 +180,6 @@ class AccountView(ctk.CTkFrame):
 
                 mask_size = (size[0] * 2, size[1] * 2)
                 mask = Image.new("L", mask_size, 0)
-                from PIL import ImageDraw
                 draw = ImageDraw.Draw(mask)
                 draw.ellipse((0, 0, mask_size[0], mask_size[1]), fill=255)
                 mask = mask.resize(size, Image.LANCZOS)
@@ -532,7 +532,6 @@ class AccountView(ctk.CTkFrame):
         self.create_edit_field(form_scroll, AppContext.t("Nombres"), "👤", "Nombre completo", self.var_nombre)
 
         if self.is_compact:
-            # En 480x800 se apilan para que no se aplasten.
             self.create_edit_field(form_scroll, AppContext.t("Correo"), "📧", "correo@dominio.com", self.var_correo)
             self.create_edit_field(form_scroll, AppContext.t("Teléfono"), "📞", "10 dígitos", self.var_tel)
         else:
@@ -622,7 +621,9 @@ class AccountView(ctk.CTkFrame):
 
         _guardar_datos(self.datos)
 
-        # actualizar_usuario(cuenta_id, nombre, correo, tel, facultad)  # BD real
+        # ← NUEVO: notificar al dashboard para que refresque el sidebar
+        if self.on_profile_updated:
+            self.on_profile_updated()
 
         self._mostrar_toast(AppContext.t("Cambios guardados correctamente."), error=False)
         self.crear_vista_lectura()
