@@ -259,7 +259,7 @@ class DashboardView(ctk.CTkFrame):
         header.pack(fill="x", padx=padx_main, pady=(10, 20))
         ctk.CTkLabel(
             header,
-            text="??  " + AppContext.t("Panel de Control"),
+            text="🏠  " + AppContext.t("Panel de Control"),
             font=("Inter", 28, "bold"), text_color=COLORS["text"]
         ).pack(anchor="w")
         ctk.CTkLabel(
@@ -461,6 +461,18 @@ class DashboardView(ctk.CTkFrame):
             _, fecha_hora, resultado, motivo, nombre, ap, am, cuenta, correo = reg
             ok = int(resultado) == 1
 
+            # ?? colores seg�n estado
+            if ok:
+                card_color = "#ECFDF5"
+                border_color = "#10B981"
+                title_color = "#065F46"
+                sub_color = "#047857"
+            else:
+                card_color = "#FEF2F2"
+                border_color = "#EF4444"
+                title_color = "#991B1B"
+                sub_color = "#B91C1C"
+
             nombre_completo = (
                 f"{nombre or ''} {ap or ''} {am or ''}".strip().upper()
                 if nombre else AppContext.t("USUARIO NO REGISTRADO")
@@ -477,26 +489,39 @@ class DashboardView(ctk.CTkFrame):
                 )
 
             card = ctk.CTkFrame(
-                self.contenedor_tabla, fg_color=row_color,
-                corner_radius=12, border_width=1, border_color=border_color
+                self.contenedor_tabla,
+                fg_color=card_color,
+                corner_radius=12,
+                border_width=2,
+                border_color=border_color
             )
             card.pack(fill="x", padx=16, pady=8)
 
             top = ctk.CTkFrame(card, fg_color="transparent")
             top.pack(fill="x", padx=14, pady=(12, 4))
 
-            ctk.CTkLabel(top, text="?" if ok else "??", font=("Inter", 22)).pack(side="left", padx=(0, 10))
+            icono = "✔" if ok else "❌"
+            ctk.CTkLabel(
+                top,
+                text=icono,
+                font=("Inter", 20),
+                text_color=border_color
+            ).pack(side="left", padx=(0, 10))
 
             info = ctk.CTkFrame(top, fg_color="transparent")
             info.pack(side="left", fill="x", expand=True)
 
             ctk.CTkLabel(
-                info, text=nombre_completo,
-                font=("Inter", 13, "bold"), text_color=text_color, anchor="w"
+                info,
+                text=nombre_completo,
+                font=("Inter", 13, "bold"),
+                text_color=title_color
             ).pack(anchor="w", fill="x")
             ctk.CTkLabel(
-                info, text=f"ID: {cuenta_txt}  �  {correo_txt}",
-                font=("Inter", 11), text_color=subtext_color, anchor="w"
+                info,
+                text=f"ID: {cuenta_txt}  �  {correo_txt}",
+                font=("Inter", 11),
+                text_color=sub_color
             ).pack(anchor="w", fill="x")
 
             badge = ctk.CTkFrame(top, fg_color="#D1FAE5" if ok else "#FEE2E2", corner_radius=16)
@@ -574,7 +599,7 @@ class DashboardView(ctk.CTkFrame):
                 ).place(relx=0.5, rely=0.5, anchor="center")
             else:
                 # Sin foto: mostrar emoji de persona
-                ctk.CTkLabel(profile, text="??", font=("Arial", 35)).pack(side="left")
+                ctk.CTkLabel(profile, text="👤", font=("Arial", 35)).pack(side="left")
 
             txt_info = ctk.CTkFrame(profile, fg_color="transparent")
             txt_info.pack(side="left", padx=10)
@@ -594,7 +619,7 @@ class DashboardView(ctk.CTkFrame):
                 font=("Inter", 11), text_color=COLORS["subtext"]
             ).pack(anchor="w")
 
-        self.btn_panel      = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Panel de Control"),      self.mostrar_panel_control)
+        self.btn_panel      = self.crear_btn_sidebar(self.sidebar_frame, "🏠   " + AppContext.t("Panel de Control"),      self.mostrar_panel_control)
         self.btn_users      = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gestión de Usuarios"),    self.mostrar_gestion_usuarios)
         self.btn_facultades = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gestión de Facultades"),  self.mostrar_gestion_facultades)
         self.btn_carreras   = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gestión de Carreras"),    self.mostrar_gestion_carreras)
