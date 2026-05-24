@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import re
+
 from app.services.theme import COLORS
 from app.views.app_context import AppContext
 from app.services.carrera_service import (
@@ -141,7 +142,7 @@ class CarreraManagementView(ctk.CTkFrame):
                 badge.pack(side="left")
                 ctk.CTkLabel(
                     badge,
-                    text="● ACTIVA" if es_activa else "● INACTIVA",
+                    text="● " + (AppContext.t("ACTIVA") if es_activa else AppContext.t("INACTIVA")),
                     font=("Inter", 9, "bold"),
                     text_color="#065F46" if es_activa else "#991B1B"
                 ).pack(padx=10, pady=4)
@@ -150,20 +151,20 @@ class CarreraManagementView(ctk.CTkFrame):
                 actions.pack(fill="x", padx=14, pady=(0, 14))
 
                 ctk.CTkButton(
-                    actions, text="✏️ Editar", height=36,
+                    actions, text="✏️ " + AppContext.t("Editar"), height=36,
                     fg_color=COLORS["hover"], text_color=COLORS["text"],
                     command=lambda cid=c["id"]: self.abrir_formulario(cid)
                 ).pack(side="left", expand=True, fill="x", padx=(0, 6))
 
                 if es_activa:
                     ctk.CTkButton(
-                        actions, text="🗑️ Desactivar", height=36,
+                        actions, text=AppContext.t("Desactivar"), height=36,
                         fg_color="#FFF1F2", text_color="#E11D48",
                         command=lambda cid=c["id"], n=c["nombre"]: self.confirmar_cambio_estado(cid, n, desactivar=True)
                     ).pack(side="left", expand=True, fill="x", padx=(6, 0))
                 else:
                     ctk.CTkButton(
-                        actions, text="🔄 Activar", height=36,
+                        actions, text=AppContext.t("Activar"), height=36,
                         fg_color="#10B981", text_color="white",
                         command=lambda cid=c["id"], n=c["nombre"]: self.confirmar_cambio_estado(cid, n, desactivar=False)
                     ).pack(side="left", expand=True, fill="x", padx=(6, 0))
@@ -338,14 +339,14 @@ class CarreraManagementView(ctk.CTkFrame):
             c = obtener_carrera_por_id(id_carrera)
             titulo         = "✏️ " + AppContext.t("Editar Carrera")
             nombre_ini     = c["nombre"] if c else ""
-            estado_ini     = AppContext.t("Activa") if c and c["estado"] == 1 else AppContext.t("Inactiva")
+            estado_ini = AppContext.t("Activa") if c and c["estado"] == 1 else AppContext.t("Inactiva")
             fac_id         = c["id_facultad"] if c else None
             fac_nombre_ini = self.facultades_dict.get(fac_id, AppContext.t("Seleccionar facultad"))
         else:
             self.modo_edicion      = False
             titulo         = "➕ " + AppContext.t("Nueva Carrera")
             nombre_ini     = ""
-            estado_ini     = "Activa"
+            estado_ini = AppContext.t("Activa")
             fac_nombre_ini = facultades_lista[0] if facultades_lista else "Seleccionar facultad"
 
         self.form_base = ctk.CTkFrame(self, fg_color=COLORS["bg"])
@@ -373,6 +374,13 @@ class CarreraManagementView(ctk.CTkFrame):
         )
         self.input_nombre.insert(0, nombre_ini)
         self.input_nombre.pack(fill="x", padx=25, pady=(0, 20))
+        self.label_error = ctk.CTkLabel(
+            form_card,
+            text="",
+            font=("Inter", 11, "bold"),
+            text_color="#EF4444"
+        )
+        self.label_error.pack(anchor="w", padx=25, pady=(0, 10))
 
         ctk.CTkLabel(
             form_card, text="🏫 " + AppContext.t("Facultad"),
@@ -431,16 +439,36 @@ class CarreraManagementView(ctk.CTkFrame):
             (id for id, n in self.facultades_dict.items() if n == fac_nombre), None
         )
 
-        if not nombre or not id_facultad:
+        self.label_error.configure(text="")
+
+        if not nombre:
+            self.label_error.configure(
+                text=AppContext.t("❌ El nombre no puede estar vacío")
+            )
             return
+
+        if not id_facultad:
+            self.label_error.configure(
+                text="? Debes seleccionar una facultad"
+            )
+            return
+
         if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre):
-            print("❌ Carrera inválida")
+            self.label_error.configure(
+                text=AppContext.t("❌ El nombre contiene caracteres inválidos")
+            )
             return
+
         if len(nombre) < 4:
-            print("❌ Nombre de carrera demasiado corto")
+            self.label_error.configure(
+                text=AppContext.t("❌ El nombre es demasiado corto")
+            )
             return
+
         if self.carrera_existe(nombre) and not self.modo_edicion:
-            print("❌ Carrera duplicada")
+            self.label_error.configure(
+                text=AppContext.t("❌ La carrera ya existe")
+            )
             return
 
         if self.modo_edicion:
@@ -476,7 +504,7 @@ class CarreraManagementView(ctk.CTkFrame):
             ).pack(fill="x", padx=10)
         else:
             ctk.CTkLabel(
-                h, text=AppContext.t("🎓   Gestión de Carreras"),
+                h, text=AppContext.t("🎓 Gestión de Carreras"),
                 font=self.font_header, text_color=COLORS["text"]
             ).pack(side="left")
             ctk.CTkButton(

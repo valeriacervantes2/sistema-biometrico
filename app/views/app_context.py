@@ -3,7 +3,7 @@ TRADUCCIONES = {
     
         # Agregar en la seccion TERMINAL BIOMoTRICA
     "ESCANEANDO":                           {"en": "SCANNING"},
-    "ANALIZANDO RASGOS BIOMETRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
+    "ANALIZANDO RASGOS BIOMÉTRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
     "ACCESO AUTORIZADO":                    {"en": "ACCESS AUTHORIZED"},   # ya existe
     "ACCESO DENEGADO":                      {"en": "ACCESS DENIED"},        # ya existe
     "USUARIO NO REGISTRADO":                {"en": "UNREGISTERED USER"},    # ya existe
@@ -19,7 +19,7 @@ TRADUCCIONES = {
     "MIRANDO HACIA LA CAMARA":              {"en": "LOOKING AT THE CAMERA"},
     "BIENVENIDO":                           {"en": "WELCOME"},
     "ACCESO CONCEDIDO":                     {"en": "ACCESS GRANTED"},
-    "REGISTRANDO BIOMETRIA":                {"en": "REGISTERING BIOMETRICS"},
+    "REGISTRANDO BIOMETRÍA":                {"en": "REGISTERING BIOMETRICS"},
     "COLOQUE SU ROSTRO FRENTE A LA CAMARA": {"en": "PLACE YOUR FACE IN FRONT OF THE CAMERA"},
     "USUARIO YA REGISTRADO":                {"en": "USER ALREADY REGISTERED"},
     "ESTE ROSTRO YA EXISTE EN EL SISTEMA":  {"en": "THIS FACE ALREADY EXISTS IN THE SYSTEM"},
@@ -27,13 +27,14 @@ TRADUCCIONES = {
     "Iniciando camara...":                  {"en": "Starting camera..."},
     "Sistema Biometrico v2.0":              {"en": "Biometric System v2.0"},
     "RECONOCIMIENTO FACIAL":                {"en": "FACIAL RECOGNITION"},
-    "ANALIZANDO RASGOS BIOMETRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
-    "ANALIZANDO RASGOS BIOMETRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
+    "ANALIZANDO RASGOS BIOMÉTRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
+    "ANALIZANDO RASGOS BIOMÉTRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
 
     # --------------------------------------------------------------
     # TABLA DE ACCESOS  motivos y resultados
     # --------------------------------------------------
     "Acceso denegado":              {"en": "Access denied"},
+    "Acceso autorizado":              {"en": "Access authorized"},
     "Usuario inactivo":             {"en": "Inactive user"},
     "Usuario no identificado":      {"en": "User not identified"},
     "AUTORIZADO":                   {"en": "AUTHORIZED"},
@@ -53,8 +54,8 @@ TRADUCCIONES = {
     "TRABAJADOR":                   {"en": "WORKER"},
 
     # Cat�logo usuarios � estado
-    "? ACTIVO":                     {"en": "? ACTIVE"},
-    "? INACTIVO":                   {"en": "? INACTIVE"},
+    "ACTIVO":                     {"en": "ACTIVE"},
+    "INACTIVO":                   {"en": "INACTIVE"},
     "ACTIVO":                       {"en": "ACTIVE"},
     "INACTIVO":                     {"en": "INACTIVE"},
 
@@ -73,13 +74,13 @@ TRADUCCIONES = {
     "??   Gestión de Facultades":                   {"en": "??   Faculty Management"},
     "?? Gestion de Facultades":                     {"en": "?? Faculty Management"},
     "Gestión de Carreras":                          {"en": "Career Management"},
-    "Gestion de Carreras":                          {"en": "Career Management"},
-    "??   Gestión de Carreras":                     {"en": "??   Career Management"},
-    "?? Gestion de Carreras":                       {"en": "?? Career Management"},
+    "🎓 Gestion de Carreras":                          {"en": "🎓 Career Management"},
+    "🎓 Gestión de Carreras":                     {"en": "🎓   Career Management"},
+    "🎓 Gestion de Carreras":                       {"en": "🎓 Career Management"},
     "Configuración":                                {"en": "Settings"},
     "Configuración Cuenta":                         {"en": "Account Settings"},
-    "??   Configuración Cuenta":                    {"en": "??   Account Settings"},
-    "?? Configuración Cuenta":                      {"en": "?? Account Settings"},
+    "Configuración Cuenta":                    {"en": "Account Settings"},
+    "Configuración Cuenta":                      {"en": "Account Settings"},
     "Cerrar Sesión":                                {"en": "Log Out"},
     "?? Cerrar Sesión":                             {"en": "?? Log Out"},
     "ADMINISTRADOR":                                {"en": "ADMINISTRATOR"},
@@ -106,12 +107,13 @@ TRADUCCIONES = {
     "Sin accesos registrados":                      {"en": "No access records found"},
 
     # DASHBOARD � filtro roles
-    "?? Rol:":                                      {"en": "?? Role:"},
+    "👤 Rol":                                       {"en": "👤 Role"},
     "Todos":                                        {"en": "All"},
-    "?? Filtrar ?":                                 {"en": "?? Filter ?"},
-    "?? Filtrar ?":                                 {"en": "?? Filter ?"},
-    "Filtrar ?":                                    {"en": "Filter ?"},
-    "Filtrar ?":                                    {"en": "Filter ?"},
+    "⚙️ Filtrar":                                   {"en": "⚙️ Filter"},
+    "⚙️ Filtrar":                                   {"en": "⚙️ Filter"},
+    "Filtrar":                                      {"en": "Filter"},
+    "Filtrar":                                      {"en": "Filter"},
+    "⚙️ Ocultar filtros":                            {"en": "⚙️ Hide filter"},
 
 
     # --------------------------------------------------------------
@@ -122,14 +124,14 @@ TRADUCCIONES = {
     "? Agregar Usuario":                           {"en": "? Add User"},
     "Buscar usuario...":                            {"en": "Search user..."},
     "No hay usuarios registrados":                  {"en": "No registered users"},
-    "FOTOGRAFA":                                   {"en": "PHOTO"},
+    "FOTOGRAFÍA":                                   {"en": "PHOTO"},
     "INFORMACIÓN":                                  {"en": "INFORMATION"},
     "ESTADO":                                       {"en": "STATUS"},
     "ACCIONES":                                     {"en": "ACTIONS"},
 
     # GESTI�N DE USUARIOS � formulario secciones
     "Editar Registro":                              {"en": "Edit Record"},
-    "?? Editar Registro":                           {"en": "?? Edit Record"},
+    "Editar Registro":                           {"en": "?? Edit Record"},
     "Nuevo Registro":                               {"en": "New Record"},
     "? Nuevo Registro":                            {"en": "? New Record"},
     "?? Información Personal":                      {"en": "?? Personal Information"},
@@ -149,6 +151,7 @@ TRADUCCIONES = {
     # GESTI�N DE USUARIOS � biometr�a
     "Registrar Biometría":                          {"en": "Register Biometrics"},
     "?? Registrar Biometría":                       {"en": "?? Register Biometrics"},
+    "Actualizar Biometría":                         {"en": "Update biometrics"},
     "Abriendo cámara...":                           {"en": "Opening camera..."},
     "?? Abriendo cámara...":                        {"en": "?? Opening camera..."},
     "Biometría registrada":                         {"en": "Biometrics registered"},
@@ -156,19 +159,48 @@ TRADUCCIONES = {
     "Biometría requerida":                          {"en": "Biometrics required"},
     "? Biometría requerida":                        {"en": "? Biometrics required"},
     "Corrige los datos primero":                    {"en": "Fix the data first"},
-    "? Corrige los datos primero":                  {"en": "? Fix the data first"},
+
+
 
     # GESTI�N DE USUARIOS � modal
-    "🗑️Desactivar este usuario?":                    {"en": "Desactivate this user?"},
+    "Desactivar este usuario?":                    {"en": "Desactivate this user?"},
     "El usuario perderá acceso al sistema.":        {"en": "The user will lose system access."},
     "Desactivar":                                   {"en": "Desactivate"},
     "??? Desactivar":                                {"en": "??? Desactivate"},
-    "🔄Activar este usuario?":                       {"en": "Activate this user?"},
+    "Activar este usuario?":                       {"en": "Activate this user?"},
     "El usuario recuperará acceso al sistema.":     {"en": "The user will regain system access."},
     "Activar":                                      {"en": "Activate"},
     "?? Activar":                                   {"en": "?? Activate"},
     "Cancelar":                                     {"en": "Cancel"},
-    "? Cancelar":                                  {"en": "? Cancel"},
+    "❌ Cancelar":                                  {"en": "❌ Cancel"},
+    "❌ El nombre es obligatorio":                   {"en": "❌ Name is required"},
+    "❌ La cuenta es obligatoria":                   {"en": "❌ Account is required"},
+    "❌ La cuenta solo debe contener números":       {"en": "❌ Account must contain only numbers"},
+    "❌ La cuenta debe tener 8 dígitos":             {"en": "❌ Account must have 8 digits"},
+    "❌ El correo es obligatorio":                   {"en": "❌ Email is required"},
+    "❌ El correo debe contener @":                  {"en": "❌ Email must contain @"},
+    "❌ La cuenta ya está registrada":               {"en": "❌ Account is already registered"},
+    "❌ El correo ya está registrado":               {"en": "❌ Email is already registered"},
+    "❌ Correo inválido":                            {"en": "❌ Invalid email"},
+    "❌ Nombre inválido":                            {"en": "❌ Invalid name"},
+    "❌ Apellido paterno inválido":                  {"en": "❌ Invalid last name (paternal)"},
+    "❌ Apellido materno inválido":                  {"en": "❌ Invalid last name (maternal)"},
+    "❌ Error al actualizar biometría":              {"en": "❌ Error updating biometrics"},
+    "❌ Debes registrar biometría antes de guardar":                 {"en": "❌ You must register biometrics before saving"},
+    "❌ No se pudo crear el usuario":                {"en": "❌ User could not be created"},
+    "❌ Este rostro ya pertenece al usuario ID ":    {"en": "❌ This face already belongs to user ID "},
+    "❌ Este usuario ya tiene biometría":            {"en": "❌ This user already has biometrics"},
+    "❌ Error al guardar biometra":                  {"en": "❌ Error saving biometrics"},
+    "❌ Error al guardar. No se registró el usuario.":       {"en": "❌ Error saving. User was not registered."},
+    "❌ El nombre solo debe contener letras":         {"en": "❌ Name must contain only letters"},
+    "❌ Apellido paterno inválido":                  {"en": "❌ Invalid paternal last name"},
+    "❌ Apellido materno inválido":                 {"en": "❌ Invalid maternal last name"},
+    "❌ La cuenta es obligatoria":                  {"en": "❌ Account is required"},
+    "❌ La cuenta solo debe contener números":      {"en": "❌ Account must contain only numbers"},
+    "❌ La cuenta debe tener exactamente 8 números":            {"en": "❌ Account must be exactly 8 digits"},
+    "❌ El correo es obligatorio":                   {"en": "❌ Email is required"},
+    "❌ El correo ya está registrado":               {"en": "❌ Email is already registered"},
+    "❌ Corrige los datos primero":                  {"en": "❌ Fix the data first"},
 
     # --------------------------------------------------------------
     # GESTI�N DE FACULTADES � tabla
@@ -184,12 +216,11 @@ TRADUCCIONES = {
     "NOMBRE DE LA FACULTAD":                        {"en": "FACULTY NAME"},
     "ACTIVA":                                       {"en": "ACTIVE"},
     "INACTIVA":                                     {"en": "INACTIVE"},
-
     # GESTI�N DE FACULTADES � modal
-    "🗑️Desactivar esta facultad?":                   {"en": "Desactivate this faculty?"},
+    "¿Desactivar esta facultad?":                   {"en": "Desactivate this faculty?"},
     "La facultad dejará de estar disponible.":      {"en": "The faculty will no longer be available."},
-    "Activar esta facultad?":                      {"en": "Activate this faculty?"},
-    "La facultad volver a estar disponible.":      {"en": "The faculty will be available again."},
+    "¿Activar esta facultad?":                      {"en": "Activate this faculty?"},
+    "La facultad volverá a estar disponible.":      {"en": "The faculty will be available again."},
 
     # GESTI�N DE FACULTADES � formulario
     "Editar Facultad":                              {"en": "Edit Faculty"},
@@ -204,12 +235,16 @@ TRADUCCIONES = {
     "Inactiva":                                     {"en": "Inactive"},
     "Guardar Facultad":                             {"en": "Save Faculty"},
     "?? Guardar Facultad":                          {"en": "?? Save Faculty"},
+    "❌ El nombre de la facultad no puede estar vacío":       {"en": "❌ The name of the faculty cannot be empty"},
+    "❌ El nombre contiene caracteres inválidos":     {"en": "❌ The name contains invalid characters"},    
+    "❌ El nombre de la facultad es demasiado corto":    {"en": "❌ The name of the faculty is too short"},
+    "❌ La facultad ya existe":                      {"en": "❌ The faculty already exists"},
 
     # --------------------------------------------------------------
     # GESTI�N DE CARRERAS � tabla
     # --------------------------------------------------------------
-    "?? Gestión de Carreras":                       {"en": "?? Career Management"},
-    "??   Gestión de Carreras":                     {"en": "??   Career Management"},
+    "Gestión de Carreras":                       {"en": "Career Management"},
+    "?? Gestión de Carreras":                     {"en": "??   Career Management"},
     "Agregar Carrera":                              {"en": "Add Career"},
     "? Agregar Carrera":                           {"en": "? Add Career"},
     "Buscar carrera por nombre...":                 {"en": "Search career by name..."},
@@ -218,9 +253,9 @@ TRADUCCIONES = {
     "FACULTAD":                                     {"en": "FACULTY"},
 
     # GESTI�N DE CARRERAS � modal
-    "Desactivar esta carrera?":                    {"en": "Desactivate this career?"},
-    "La carrera dejar de estar disponible.":       {"en": "The career will no longer be available."},
-    "🔄Activar esta carrera?":                       {"en": "Activate this career?"},
+    "¿Desactivar esta carrera?":                    {"en": "Desactivate this career?"},
+    "La carrera dejará de estar disponible.":       {"en": "The career will no longer be available."},
+    "¿Activar esta carrera?":                       {"en": "Activate this career?"},
     "La carrera volverá a estar disponible.":       {"en": "The career will be available again."},
 
     # GESTI�N DE CARRERAS � formulario
@@ -235,6 +270,12 @@ TRADUCCIONES = {
     "Seleccionar facultad":                         {"en": "Select faculty"},
     "Guardar Carrera":                              {"en": "Save Career"},
     "?? Guardar Carrera":                           {"en": "?? Save Career"},
+    "ACTIVA":                                       {"en": "ACTIVE"},
+    "INACTIVA":                                     {"en": "INACTIVE"},
+    "❌ El nombre no puede estar vacío":       {"en": "❌ The name cannot be empty"},
+    "❌ El nombre contiene caracteres inválidos":     {"en": "❌ The name contains invalid characters"},    
+    "❌ El nombre es demasiado corto":    {"en": "❌ The name is too short"},
+    "❌ La carrera ya existe":                      {"en": "❌ The career already exists"},
 
     # --------------------------------------------------------------
     # CUENTA / PERFIL
@@ -247,13 +288,13 @@ TRADUCCIONES = {
     "Detalles de la Cuenta":                        {"en": "Account Details"},
     "?? Detalles de la Cuenta":                     {"en": "?? Account Details"},
     "Correo":                                       {"en": "Email"},
-    "Telofono":                                     {"en": "Phone"},
+    "Teléfono":                                     {"en": "Phone"},
     "?? Personalizacin":                           {"en": "?? Customization"},
     "Personalización":                              {"en": "Customization"},
     "Idioma del Sistema":                           {"en": "System Language"},
     "?? Idioma del Sistema":                        {"en": "?? System Language"},
     "ADMINISTRADOR DEL SISTEMA":                    {"en": "SYSTEM ADMINISTRATOR"},
-    "??   Editar Registro":                         {"en": "??   Edit Record"},
+    "Editar Registro":                         {"en": "??   Edit Record"},
     "Modifica tu información personal":             {"en": "Modify your personal information"},
     "?? Información Personal":                      {"en": "?? Personal Information"},
     "Guardar Cambios":                              {"en": "Save Changes"},
@@ -263,13 +304,20 @@ TRADUCCIONES = {
     "?? Actualizar Foto":                           {"en": "?? Update Photo"},
     "Actualizar Foto":                              {"en": "Update Photo"},
     "Editar Registro...":                           {"en": "Edit Record..."},
-
+    "❌ El nombre es obligatorio.":       {"en": "❌ The name is required."},
+    "❌ El nombre contiene caracteres inválidos":     {"en": "❌ The name contains invalid characters"},    
+    "❌ El nombre es demasiado corto":    {"en": "❌ The name is too short"},
+    "❌ La facultad ya existe":                      {"en": "❌ The faculty already exists"},
+    "❌ El correo es obligatorio.":       {"en": "❌ The email is required."},
+    "❌ Correo electrónico inválido":     {"en": "❌ Invalid email"},    
+    "❌ El teléfono solo debe contener números.":    {"en": "❌ The phone should only contain numbers."},
+    "❌ El teléfono debe tener 10 dígitos.":                      {"en": "❌ The phone number must have 10 digits."},
     # --------------------------------------------------------------
     # LOGIN
     # --------------------------------------------------------------
     "Sistema de Reconocimiento\nFacial":            {"en": "Facial Recognition\nSystem"},
     "Ingresa tus credenciales para continuar":      {"en": "Enter your credentials to continue"},
-    "CORREO ÓNICO":                           {"en": "EMAIL ADDRESS"},
+    "CORREO ELECTRÓNICO":                           {"en": "EMAIL ADDRESS"},
     "Escribe tu correo":                            {"en": "Enter your email"},
     "CONTRASEÑA":                                   {"en": "PASSWORD"},
     "Escribe tu contraseña":                        {"en": "Enter your password"},

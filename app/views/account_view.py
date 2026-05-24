@@ -1,4 +1,5 @@
 import json
+import re
 import os
 import shutil
 import customtkinter as ctk
@@ -204,7 +205,7 @@ class AccountView(ctk.CTkFrame):
 
         self._pack_header(
             self,
-            AppContext.t("⚙️ Configuración Cuenta") if self.is_compact else AppContext.t("⚙️   Configuración Cuenta"),
+            "⚙️ " + AppContext.t("Configuración Cuenta") if self.is_compact else AppContext.t("Configuración Cuenta"),
             AppContext.t("Configura tu perfil y preferencias"),
             "✏️ " + AppContext.t("Editar" if self.is_compact else "Editar Perfil"),
             self.abrir_formulario_edicion,
@@ -225,7 +226,7 @@ class AccountView(ctk.CTkFrame):
 
         self.create_read_only_field(AppContext.t("Nombres"),  self.datos["nombre"],   "??")
         self.create_read_only_field(AppContext.t("Correo"),   self.datos["correo"],   "??")
-        self.create_read_only_field(AppContext.t("Telófono"), self.datos["tel"],      "??")
+        self.create_read_only_field(AppContext.t("Teléfono"), self.datos["tel"],      "??")
         self.create_read_only_field(AppContext.t("Facultad"), self.datos["facultad"], "???")
 
         ctk.CTkButton(
@@ -483,7 +484,7 @@ class AccountView(ctk.CTkFrame):
 
         self._pack_header(
             self,
-            AppContext.t("?? Editar Registro") if self.is_compact else AppContext.t("??   Editar Registro"),
+            AppContext.t("Editar Registro") if self.is_compact else AppContext.t("Editar Registro"),
             AppContext.t("Modifica tu información personal"),
         )
 
@@ -500,25 +501,30 @@ class AccountView(ctk.CTkFrame):
 
         ctk.CTkLabel(
             form_scroll,
-            text="?? " + AppContext.t("Información Personal"),
+            text="👤" + AppContext.t("Información Personal"),
             font=self.font_sub,
             text_color=COLORS["text"],
         ).pack(anchor="w", padx=l["card_pad"], pady=(14, 8))
 
-        self.create_edit_field(form_scroll, AppContext.t("Nombres"), "??", "Nombre completo", self.var_nombre)
-
+        self.create_edit_field(
+            form_scroll,
+            AppContext.t("Nombres"),
+            "",
+            "Nombre completo",
+            self.var_nombre
+        )
         if self.is_compact:
-            self.create_edit_field(form_scroll, AppContext.t("Correo"), "??", "correo@dominio.com", self.var_correo)
-            self.create_edit_field(form_scroll, AppContext.t("Telófono"), "??", "10 dígitos", self.var_tel)
+            self.create_edit_field(form_scroll, AppContext.t("Correo"), "", "correo@dominio.com", self.var_correo)
+            self.create_edit_field(form_scroll, AppContext.t("Teléfono"), "", "10 dígitos", self.var_tel)
         else:
             row2 = ctk.CTkFrame(form_scroll, fg_color="transparent")
             row2.pack(fill="x", padx=l["card_pad"], pady=0)
             row2.columnconfigure(0, weight=1)
             row2.columnconfigure(1, weight=1)
-            self.create_edit_field_grid(row2, AppContext.t("Correo"), "??", "correo@dominio.com", self.var_correo, col=0)
-            self.create_edit_field_grid(row2, AppContext.t("Telófono"), "??", "10 dígitos", self.var_tel, col=1)
+            self.create_edit_field_grid(row2, AppContext.t("Correo"), "correo@dominio.com", self.var_correo, col=0)
+            self.create_edit_field_grid(row2, AppContext.t("Teléfono"), "10 dígitos", self.var_tel, col=1)
 
-        self.create_edit_field(form_scroll, AppContext.t("Facultad"), "???", "Nombre de la facultad", self.var_facultad)
+        self.create_edit_field(form_scroll, AppContext.t("Facultad"), "", "Nombre de la facultad", self.var_facultad)
 
         btn_row = ctk.CTkFrame(form_scroll, fg_color="transparent")
         btn_row.pack(fill="x", padx=l["card_pad"], pady=(16, 40))
@@ -526,7 +532,7 @@ class AccountView(ctk.CTkFrame):
         if self.is_compact:
             ctk.CTkButton(
                 btn_row,
-                text="?? " + AppContext.t("Guardar Cambios"),
+                text="💾 " + AppContext.t("Guardar Cambios"),
                 fg_color=COLORS["primary"],
                 text_color="#FFFFFF",
                 hover_color=COLORS.get("primary_hover", COLORS["primary"]),
@@ -552,7 +558,7 @@ class AccountView(ctk.CTkFrame):
         else:
             ctk.CTkButton(
                 btn_row,
-                text="?? " + AppContext.t("Guardar Cambios"),
+                text="💾 " + AppContext.t("Guardar Cambios"),
                 fg_color=COLORS["primary"],
                 text_color="#FFFFFF",
                 hover_color=COLORS.get("primary_hover", COLORS["primary"]),
@@ -576,15 +582,81 @@ class AccountView(ctk.CTkFrame):
                 command=self.crear_vista_lectura,
             ).pack(side="left", expand=True, fill="x", padx=(8, 0))
 
+
     def guardar_cambios(self):
         nombre = self.var_nombre.get().strip()
         correo = self.var_correo.get().strip()
         tel = self.var_tel.get().strip()
         facultad = self.var_facultad.get().strip()
 
-        if not nombre or not correo:
-            self._mostrar_toast(AppContext.t("El nombre y correo son obligatorios."), error=True)
+        # --------- VALIDACIONES ---------
+
+        # Nombre obligatorio
+        if not nombre:
+            self._mostrar_toast(
+                AppContext.t("❌ El nombre es obligatorio."),
+                error=True
+            )
             return
+
+        # Nombre solo letras y espacios
+        if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre):
+            self._mostrar_toast(
+                AppContext.t("❌ El nombre contiene caracteres inválidos."),
+                error=True
+            )
+            return
+
+        # Nombre m�nimo
+        if len(nombre) < 5:
+            self._mostrar_toast(
+                AppContext.t("❌ El nombre es demasiado corto."),
+                error=True
+            )
+            return
+
+        # Correo obligatorio
+        if not correo:
+            self._mostrar_toast(
+                AppContext.t("❌ El correo es obligatorio."),
+                error=True
+            )
+            return
+
+        # Validar correo
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo):
+            self._mostrar_toast(
+                AppContext.t("❌ Correo electrónico inválido"),
+                error=True
+            )
+            return
+
+        # Validar tel�fono
+        if tel:
+            if not tel.isdigit():
+                self._mostrar_toast(
+                    AppContext.t("❌ El teléfono solo debe contener números."),
+                    error=True
+                )
+                return
+
+            if len(tel) != 10:
+                self._mostrar_toast(
+                    AppContext.t("❌ El teléfono debe tener 10 dígitos."),
+                    error=True
+                )
+                return
+
+        # Validar facultad
+        if facultad:
+            if len(facultad) < 4:
+                self._mostrar_toast(
+                    AppContext.t("❌ La facultad es demasiado corta."),
+                    error=True
+                )
+                return
+
+        # --------- GUARDAR ---------
 
         self.datos["nombre"] = nombre
         self.datos["correo"] = correo
@@ -593,11 +665,15 @@ class AccountView(ctk.CTkFrame):
 
         _guardar_datos(self.datos)
 
-        # ? NUEVO: notificar al dashboard para que refresque el sidebar
+        # refrescar sidebar
         if self.on_profile_updated:
             self.on_profile_updated()
 
-        self._mostrar_toast(AppContext.t("Cambios guardados correctamente."), error=False)
+        self._mostrar_toast(
+            AppContext.t("Cambios guardados correctamente."),
+            error=False
+        )
+
         self.crear_vista_lectura()
 
     # ---------------------------------------------------------------------

@@ -217,7 +217,7 @@ class UserManagementView(ctk.CTkFrame):
                 badge_e.pack(side="left")
                 ctk.CTkLabel(
                     badge_e,
-                    text=AppContext.t("? ACTIVO") if es_activo else AppContext.t("? INACTIVO"),
+                    text="● " + AppContext.t("ACTIVO") if es_activo else AppContext.t("INACTIVO"),
                     font=("Inter", 9, "bold"),
                     text_color="#065F46" if es_activo else "#991B1B"
                 ).pack(padx=8, pady=3)
@@ -227,7 +227,7 @@ class UserManagementView(ctk.CTkFrame):
 
                 ctk.CTkButton(
                     actions,
-                    text="?? " + AppContext.t("Editar"),
+                    text="✏️ " + AppContext.t("Editar"),
                     height=34,
                     fg_color=COLORS["hover"], text_color=COLORS["text"],
                     command=lambda d=u: self.abrir_formulario(d)
@@ -339,7 +339,7 @@ class UserManagementView(ctk.CTkFrame):
                 badge_e.pack(expand=True)
                 ctk.CTkLabel(
                     badge_e,
-                    text=AppContext.t("? ACTIVO") if es_activo else AppContext.t("? INACTIVO"),
+                    text="● " + AppContext.t("ACTIVO") if es_activo else AppContext.t("INACTIVO"),
                     font=("Inter", 9, "bold"),
                     text_color="#065F46" if es_activo else "#991B1B"
                 ).pack(padx=10, pady=3)
@@ -385,14 +385,14 @@ class UserManagementView(ctk.CTkFrame):
 
         if desactivar:
             icono     = "???"
-            titulo    = AppContext.t("�Desactivar este usuario?")
-            sub       = AppContext.t("El usuario perder� acceso al sistema.")
+            titulo    = AppContext.t("Desactivar este usuario?")
+            sub       = AppContext.t("El usuario perderá acceso al sistema.")
             btn_txt   = AppContext.t("Desactivar")
             btn_color = "#EF4444"
             btn_hover = "#DC2626"
         else:
             icono     = "??"
-            titulo    = AppContext.t("�Activar este usuario?")
+            titulo    = AppContext.t("Activar este usuario?")
             sub       = AppContext.t("El usuario recuperará acceso al sistema.")
             btn_txt   = AppContext.t("Activar")
             btn_color = "#10B981"
@@ -441,8 +441,9 @@ class UserManagementView(ctk.CTkFrame):
             self.biometria_temp = None
 
         self.usuario_editando_id = usuario["id"] if usuario else None
-        self.rol_var.set(usuario["r"] if usuario else "ESTUDIANTE")
-
+        self.rol_var.set(
+            AppContext.t(usuario["r"]) if usuario else AppContext.t("ESTUDIANTE")
+        )
         self.estado_var = ctk.BooleanVar(value=True)
         if usuario:
             self.estado_var.set(usuario.get("estado", 1) == 1)
@@ -468,7 +469,7 @@ class UserManagementView(ctk.CTkFrame):
 
         ctk.CTkLabel(
             self.form_container,
-            text=("?? " + AppContext.t("Editar Registro")) if usuario else ("? " + AppContext.t("Nuevo Registro")),
+            text=("✏️ " + AppContext.t("Editar Registro")) if usuario else ("? " + AppContext.t("Nuevo Registro")),
             font=self.font_header, text_color=COLORS["text"]
         ).pack(anchor="w", padx=padx_form, pady=(30, 10))
 
@@ -482,10 +483,19 @@ class UserManagementView(ctk.CTkFrame):
         grid.pack(fill="x", padx=20, pady=20)
 
         self.rol_menu = ctk.CTkOptionMenu(
-            grid, values=["ESTUDIANTE", "DOCENTE", "TRABAJADOR"],
-            variable=self.rol_var, height=40,
-            text_color=COLORS["text"], fg_color=COLORS["hover"], button_color=COLORS["border"]
+            grid,
+            values=[
+                AppContext.t("ESTUDIANTE"),
+                AppContext.t("DOCENTE"),
+                AppContext.t("TRABAJADOR")
+            ],
+            variable=self.rol_var,
+            height=40,
+            text_color=COLORS["text"],
+            fg_color=COLORS["hover"],
+            button_color=COLORS["border"]
         )
+
         self.plantel_menu = ctk.CTkOptionMenu(
             grid, values=nombres_f,
             command=self.update_carreras_dinamicas, height=40,
@@ -560,9 +570,14 @@ class UserManagementView(ctk.CTkFrame):
         if entrada:
             entrada.configure(validate="key", validatecommand=vcmd)
 
+        texto_biometria = (
+            "?? " + AppContext.t("Actualizar Biometría")
+            if usuario
+            else "?? " + AppContext.t("Registrar Biometría")
+        )
         self.btn_biometria = ctk.CTkButton(
             self.form_container,
-            text="?? " + AppContext.t("Registrar Biometría"),
+            text=texto_biometria,
             height=50, fg_color="#0EA5E9", text_color="white",
             font=self.font_sub, command=self.abrir_terminal_biometrica
         )
@@ -579,16 +594,16 @@ class UserManagementView(ctk.CTkFrame):
 
         self.btn_guardar = ctk.CTkButton(
             btns,
-            text="?? " + AppContext.t("Guardar"),
-            font=self.font_sub, fg_color="#10B981", text_color="white",
-            hover_color="#059669", height=50,
+            text="💾 " + AppContext.t("Guardar"),
+            font=self.font_sub, fg_color="#D1FAE5", text_color="#065F46",
+            height=55,
             command=self.validar_y_guardar
         )
         btn_cancelar = ctk.CTkButton(
             btns,
-            text="? " + AppContext.t("Cancelar"),
+            text="❌ " + AppContext.t("Cancelar"),
             font=self.font_sub, fg_color="#FEE2E2",
-            text_color=COLORS["text"], height=50,
+            text_color="#991B1B", height=55,
             command=self.cerrar_formulario
         )
 
@@ -644,7 +659,7 @@ class UserManagementView(ctk.CTkFrame):
         if entry:
             entry.configure(border_width=2, border_color="#EF4444")
         if hasattr(self, "label_estado"):
-            self.label_estado.configure(text=f"? {mensaje}", text_color="#EF4444")
+            self.label_estado.configure(text=f"{mensaje}", text_color="#EF4444")
 
     def validar_y_guardar(self):
         self._limpiar_errores()
@@ -665,32 +680,35 @@ class UserManagementView(ctk.CTkFrame):
         hay_error = False
 
         if not n:
-            self._mostrar_error("Nombres", "El nombre es obligatorio")
+            self._mostrar_error("Nombres", AppContext.t("❌ El nombre es obligatorio"))
             hay_error = True
 
         if not cta:
-            self._mostrar_error("cuenta", "La cuenta es obligatoria")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta es obligatoria"))
             hay_error = True
         elif not cta.isdigit():
-            self._mostrar_error("cuenta", "La cuenta solo debe contener números")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta solo debe contener números"))
             hay_error = True
         elif len(cta) != 8:
-            self._mostrar_error("cuenta", f"La cuenta debe tener 8 dígitos (actualmente tiene {len(cta)})")
+            self._mostrar_error("cuenta", AppContext.t(f"❌ La cuenta debe tener 8 dígitos"))
             hay_error = True
 
-        if em and "@" not in em:
-            self._mostrar_error("correo", "El correo debe contener @")
+        if not em:
+            self._mostrar_error("correo", AppContext.t("❌ El correo es obligatorio"))
+            hay_error = True
+        elif "@" not in em:
+            self._mostrar_error("correo", AppContext.t("❌ El correo debe contener @"))
             hay_error = True
 
         if hay_error:
             return
 
         if existe_cuenta(cta, self.usuario_editando_id):
-            self._mostrar_error("cuenta", "La cuenta ya está registrada")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta ya está registrada"))
             return
         
         if em and existe_correo(em, self.usuario_editando_id):
-            self._mostrar_error("correo", "El correo ya está registrado")
+            self._mostrar_error("correo", AppContext.t("❌ El correo ya está registrado"))
             return
 
         try:
@@ -702,7 +720,7 @@ class UserManagementView(ctk.CTkFrame):
 
             if em:
                 if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", em):
-                    self._mostrar_error("correo", "Correo inválido")
+                    self._mostrar_error("correo", AppContext.T("❌ Correo inválido"))
                     return
 
             if not self.usuario_editando_id and len(cta) != 8:
@@ -712,13 +730,13 @@ class UserManagementView(ctk.CTkFrame):
             am = self.inputs_apellidos["Apellido Materno"].get().strip()
 
             if not self.validar_texto_real(n):
-                self._mostrar_error("Nombres", "Nombre inválido")
+                self._mostrar_error("Nombres", "❌ Nombre inválido")
                 return
             if not self.validar_texto_real(ap):
-                self._mostrar_error("Apellido Paterno", "Apellido paterno inválido")
+                self._mostrar_error("Apellido Paterno", "❌ Apellido paterno inválido")
                 return
             if am and not self.validar_texto_real(am):
-                self._mostrar_error("Apellido Materno", "Apellido materno inválido")
+                self._mostrar_error("Apellido Materno", "❌ Apellido materno inválido")
                 return
 
             n  = n.title()
@@ -765,7 +783,7 @@ class UserManagementView(ctk.CTkFrame):
             else:
                 if not hasattr(self, "biometria_temp") or self.biometria_temp is None:
                     self.label_estado.configure(
-                        text="? Debes registrar biometría antes de guardar",
+                        text="❌ Debes registrar biometría antes de guardar",
                         text_color="#EF4444"
                     )
                     return
@@ -775,7 +793,7 @@ class UserManagementView(ctk.CTkFrame):
                     usuario_id = crear_usuario(n, ap, am, tipo_usuario, id_fac, id_carrera, cta, em)
                     if not usuario_id:
                         self.label_estado.configure(
-                            text="? No se pudo crear el usuario",
+                            text="❌ No se pudo crear el usuario",
                             text_color="#EF4444"
                         )
                         return
@@ -793,17 +811,17 @@ class UserManagementView(ctk.CTkFrame):
                         if error == "rostro_duplicado":
                             dup = resultado.get("usuario_duplicado")
                             self.label_estado.configure(
-                                text=f"? Este rostro ya pertenece al usuario ID {dup}",
+                                text=f"❌ Este rostro ya pertenece al usuario ID {dup}",
                                 text_color="#EF4444"
                             )
                         elif error == "usuario_duplicado":
                             self.label_estado.configure(
-                                text="? Este usuario ya tiene biometría",
+                                text="❌ Este usuario ya tiene biometría",
                                 text_color="#EF4444"
                             )
                         else:
                             self.label_estado.configure(
-                                text="? Error al guardar biometra",
+                                text="❌ Error al guardar biometra",
                                 text_color="#EF4444"
                             )
 
@@ -824,7 +842,7 @@ class UserManagementView(ctk.CTkFrame):
                         conn.commit()
                         conn.close()
                     self.label_estado.configure(
-                        text="? Error al guardar. No se registró el usuario.",
+                        text="❌ Error al guardar. No se registró el usuario.",
                         text_color="#EF4444"
                     )
                     return
@@ -895,27 +913,47 @@ class UserManagementView(ctk.CTkFrame):
             ).pack(side="right")
 
     def create_search_bar(self, master):
+        padx_bar = 12 if self.is_compact else 30
+
         bar = ctk.CTkFrame(master, fg_color="transparent")
-        bar.pack(fill="x", padx=30, pady=10)
+        bar.pack(fill="x", padx=padx_bar, pady=10)
+
         self.entry_busqueda = ctk.CTkEntry(
             bar,
-            placeholder_text="?? " + AppContext.t("Buscar usuario..."),
-            height=42, corner_radius=10,
+            placeholder_text="🔍 " + AppContext.t("Buscar usuario..."),
+            height=42,
+            corner_radius=10,
             fg_color=COLORS["hover"],
             border_color=COLORS["border"],
             text_color=COLORS["text"]
         )
-        self.entry_busqueda.pack(side="left", fill="x", expand=True, padx=(0, 15))
+
         self.entry_busqueda.bind("<KeyRelease>", self.buscar_usuarios)
+
         self.btn_filter = ctk.CTkButton(
             bar,
-            text="?? " + AppContext.t("Filtrar ?"),
-            width=110, height=42, corner_radius=10,
-            fg_color=COLORS["card"], text_color=COLORS["text"],
+            text="⚙️ " + AppContext.t("Filtrar"),
+            width=110,
+            height=42,
+            corner_radius=10,
+            fg_color=COLORS["card"],
+            text_color=COLORS["text"],
             border_color=COLORS["border"],
             command=self.toggle_filter
         )
-        self.btn_filter.pack(side="left")
+
+        if self.is_compact:
+            self.entry_busqueda.pack(fill="x", pady=(0, 10))
+            self.btn_filter.pack(fill="x")
+        else:
+            self.entry_busqueda.pack(
+                side="left",
+                fill="x",
+                expand=True,
+                padx=(0, 15)
+            )
+
+            self.btn_filter.pack(side="left")
 
     def buscar_usuarios(self, event=None):
         texto = self.entry_busqueda.get().strip().lower()
@@ -949,34 +987,67 @@ class UserManagementView(ctk.CTkFrame):
         if not self.filter_visible:
             self.draw_tags()
             self.filter_container.pack(fill="x", padx=30, pady=(0, 15), before=self.main_card)
-            self.btn_filter.configure(text="?? " + AppContext.t("Filtrar ?"))
+
+            # cuando el filtro est� abierto
+            self.btn_filter.configure(
+                text="⚙️ " + AppContext.t("Ocultar filtros")
+            )
+
             self.filter_visible = True
+
         else:
             self.filter_container.pack_forget()
-            self.btn_filter.configure(text="?? " + AppContext.t("Filtrar ?"))
+
+            # cuando el filtro est� cerrado
+            self.btn_filter.configure(
+                text="⚙️ " + AppContext.t("Filtrar")
+            )
+
             self.filter_visible = False
+        self.after(50, self.buscar_usuarios)
 
     def draw_tags(self):
         for w in self.filter_container.winfo_children():
             w.destroy()
+
         r1 = ctk.CTkFrame(self.filter_container, fg_color="transparent")
         r1.pack(fill="x", padx=20)
+
         ctk.CTkLabel(
             r1,
-            text=AppContext.t("?? Rol:"),
-            font=self.font_small, text_color=COLORS["text"], width=80
-        ).pack(side="left")
-        # -- CORRECCI�N: todos los roles pasan por AppContext.t() --
-        for t in ["Todos", "ESTUDIANTE", "DOCENTE", "TRABAJADOR"]:
+            text="👤 " + AppContext.t("Rol"),
+            font=self.font_small,
+            text_color=COLORS["text"]
+        ).pack(anchor="w", pady=(0, 8))
+
+        tags_frame = ctk.CTkFrame(r1, fg_color="transparent")
+        tags_frame.pack(fill="x")
+
+        roles = ["Todos", "ESTUDIANTE", "DOCENTE", "TRABAJADOR"]
+
+        for t in roles:
             act = self.filtro_rol_actual == t
-            ctk.CTkButton(
-                r1,
+
+            btn = ctk.CTkButton(
+                tags_frame,
                 text=AppContext.t(t),
-                height=28, corner_radius=10,
-                fg_color=COLORS["hover"] if act else "white",
-                text_color=COLORS["text"], border_color=COLORS["border"],
+                height=32,
+                corner_radius=10,
+
+                fg_color=COLORS["hover"] if act else COLORS["card"],
+
+                hover_color=COLORS["hover"],
+                text_color=COLORS["text"],
+                border_color=COLORS["border"],
+                border_width=1,
+
                 command=lambda v=t: self.aplicar_filtro_visual(v)
-            ).pack(side="left", padx=3)
+            )
+
+            if self.is_compact:
+                btn.pack(fill="x", pady=4)
+            else:
+                btn.pack(side="left", padx=3)
 
     def aplicar_filtro_visual(self, v):
         self.filtro_rol_actual = v
@@ -1000,36 +1071,42 @@ class UserManagementView(ctk.CTkFrame):
         hay_error = False
 
         if not self.validar_texto_real(nombres):
-            self._mostrar_error("Nombres", "El nombre solo debe contener letras")
+            self._mostrar_error("Nombres", AppContext.t("❌ El nombre solo debe contener letras"))
             hay_error = True
         if not self.validar_texto_real(ap):
-            self._mostrar_error("Apellido Paterno", "Apellido paterno inválido")
+            self._mostrar_error("Apellido Paterno", AppContext.t("❌ Apellido paterno inválido"))
             hay_error = True
         if am and not self.validar_texto_real(am):
-            self._mostrar_error("Apellido Materno", "Apellido materno inválido")
+            self._mostrar_error("Apellido Materno", AppContext.t("❌ Apellido materno inválido"))
             hay_error = True
         if not cuenta:
-            self._mostrar_error("cuenta", "La cuenta es obligatoria")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta es obligatoria"))
             hay_error = True
         elif not cuenta.isdigit():
-            self._mostrar_error("cuenta", "La cuenta solo debe contener números")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta solo debe contener números"))
             hay_error = True
         elif len(cuenta) != 8:
-            self._mostrar_error("cuenta", "La cuenta debe tener exactamente 8 números")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta debe tener exactamente 8 números"))
             hay_error = True
-        if correo and not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo):
-            self._mostrar_error("correo", "Correo electrónico inválido")
+        if not correo:
+            self._mostrar_error("correo", AppContext.t("❌ El correo es obligatorio"))
+            hay_error = True
+        elif not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo):
+            self._mostrar_error("correo", AppContext.t("❌ Correo inválido"))
+            hay_error = True
+        elif existe_correo(correo, self.usuario_editando_id):
+            self._mostrar_error(AppContext.t("❌ El correo ya está registrado"))
             hay_error = True
 
         if hay_error:
             self.btn_biometria.configure(
-                text="? " + AppContext.t("Corrige los datos primero"),
+                text=AppContext.t("❌ Corrige los datos primero"),
                 fg_color="#EF4444", hover_color="#DC2626"
             )
             return
 
         self.btn_biometria.configure(
-            text="?? " + AppContext.t("Abriendo cámara..."),
+            text=AppContext.t("Abriendo cámara..."),
             fg_color="#0EA5E9"
         )
         self.form_base.pack_forget()
@@ -1039,7 +1116,7 @@ class UserManagementView(ctk.CTkFrame):
 
         self.terminal_view = TerminalView(
             self.terminal_container,
-            user_id=None,
+            user_id=self.usuario_editando_id,
             on_back=self.cerrar_terminal_biometrica,
             on_capture=self.recibir_biometria,
             modo="registro"
