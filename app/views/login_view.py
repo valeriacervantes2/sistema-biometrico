@@ -28,22 +28,46 @@ class LoginView(ctk.CTkFrame):
         self.controls_wrapper.pack(side="right", padx=15, pady=15)
 
         # 1. Control de Tema
-        self.theme_control = ctk.CTkFrame(self.controls_wrapper, fg_color="#E2E8F0", corner_radius=20, width=110, height=38)
-        self.theme_control.pack(side="left", padx=8)
+        # Switch de Tema
+        self.theme_control = ctk.CTkFrame(
+            self.controls_wrapper,
+            fg_color="#E2E8F0",
+            corner_radius=20,
+            width=100,
+            height=38
+        )
+        self.theme_control.pack(side="left", padx=10)
         self.theme_control.pack_propagate(False)
-        self.theme_icon = ctk.CTkLabel(self.theme_control, text="??", font=("Inter", 16), text_color="black")
-        self.theme_icon.place(x=22, y=19, anchor="center")
+
+        self.theme_icon = ctk.CTkLabel(
+            self.theme_control,
+            text="☀️",
+            font=("Inter", 16)
+        )
+        self.theme_icon.place(x=20, y=19, anchor="center")
+
         self.theme_switch = ctk.CTkSwitch(
-            self.theme_control, text="", width=45,
-            progress_color="#1D1D1F", button_color="#1D1D1F",
+            self.theme_control,
+            text="",
+            width=40,
+            fg_color="gray",
+            progress_color="#3B82F6",
+            button_color="#FACC15",
             command=self.actualizar_icono_tema
         )
-        self.theme_switch.place(x=72, y=19, anchor="center")
 
+        if ctk.get_appearance_mode() == "Dark":
+            self.theme_switch.select()
+            self.theme_icon.configure(text="☽", text_color="#60A5FA")
+        else:
+            self.theme_switch.deselect()
+            self.theme_icon.configure(text="☀️", text_color="#FACC15")
+
+        self.theme_switch.place(x=65, y=19, anchor="center")
         # 2. Selector de Idioma
         self.lang_control = ctk.CTkFrame(self.controls_wrapper, fg_color="#E2E8F0", corner_radius=20, height=38)
         self.lang_control.pack(side="left", padx=8)
-        ctk.CTkLabel(self.lang_control, text="??", font=("Inter", 16), text_color="black").pack(side="left", padx=(12, 5))
+        ctk.CTkLabel(self.lang_control, text="🌐", font=("Inter", 16), text_color="black").pack(side="left", padx=(12, 5))
 
         # Ambos botones se crean neutros; _sincronizar_botones_idioma pinta el correcto
         self.es_btn = ctk.CTkButton(
@@ -164,11 +188,20 @@ class LoginView(ctk.CTkFrame):
 
     def actualizar_icono_tema(self):
         if self.theme_switch.get() == 1:
-            self.theme_icon.configure(text="??")
             ctk.set_appearance_mode("dark")
+            self.theme_icon.configure(text="☽", text_color="#60A5FA")
+            self.theme_switch.configure(
+                progress_color="#3B82F6",
+                button_color="#93C5FD"
+            )
         else:
-            self.theme_icon.configure(text="??")
             ctk.set_appearance_mode("light")
+            self.theme_icon.configure(text="☀️", text_color="#FACC15")
+            self.theme_switch.configure(
+                progress_color="#F59E0B",
+                button_color="#FACC15"
+            )
+
         self.recargar_vista()
 
     # --------------------------------------------------------------
