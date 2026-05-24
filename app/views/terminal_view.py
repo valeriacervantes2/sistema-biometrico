@@ -268,10 +268,11 @@ class TerminalView(ctk.CTkFrame):
         self.lbl_nombre = ctk.CTkLabel(
             center,
             text=AppContext.t("ESPERANDO DETECCION..."),
-            font=("Courier New", 18),
+            font=("Courier New", 16),
             text_color=TEXT_SECONDARY,
             anchor="w",
-            wraplength=400,
+            justify="left",
+            wraplength=300,
         )
         self.lbl_nombre.pack(fill="x", padx=12, pady=(4, 0))
 
@@ -335,9 +336,13 @@ class TerminalView(ctk.CTkFrame):
                 text_color=ACCENT_AMBER
             )
             self.lbl_nombre.configure(
-                text=AppContext.t("COLOQUE SU ROSTRO FRENTE A LA CAMARA"),
-                text_color=ACCENT_AMBER
-            )
+            text=AppContext.t("COLOQUE SU ROSTRO\nFRENTE A LA CAMARA"),
+            text_color=ACCENT_AMBER,
+            font=("Courier New", 16),
+            anchor="w",
+            justify="left",
+            wraplength=300
+)
         
     def detectar_rostros(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
