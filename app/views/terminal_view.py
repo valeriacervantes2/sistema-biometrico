@@ -28,7 +28,7 @@ TEXT_PRIMARY   = "#ffffff"
 TEXT_SECONDARY = "#a090d0"
 TEXT_MUTED     = "#5a52a0"
 
-BANNER_H = 100
+BANNER_H = 132# Ajustado para Raspberry Pi 5 vertical 480x800
 
 TEMAS = {
     "escaneando": {
@@ -139,6 +139,14 @@ class TerminalView(ctk.CTkFrame):
         if self.modo != "registro":
             self.cerradura = Cerradura()
 
+        # Tamaño recomendado para Raspberry Pi 5 en orientación vertical.
+        # Si se ejecuta en PC, la ventana sigue pudiendo redimensionarse.
+        try:
+            self.master.geometry("480x800")
+            self.master.minsize(480, 800)
+        except Exception:
+            pass
+
         self.escaneando = False
         self.inicio_escaneo = 0.0
         self.pos_linea = 0
@@ -162,55 +170,55 @@ class TerminalView(ctk.CTkFrame):
         ctk.CTkFrame(self, fg_color=ACCENT_PURPLE, height=2).pack(fill="x", side="top")
 
         hdr = ctk.CTkFrame(self, fg_color="transparent")
-        hdr.pack(pady=(20, 4))
+        hdr.pack(pady=(8, 2))
 
         if self.modo != "registro":
             self.btn_salir = ctk.CTkButton(
-                self, text="??", width=42, height=42,
+                self, text="←", width=34, height=34,
                 corner_radius=8,
                 fg_color=BG_PANEL, hover_color="#1e1860",
                 text_color=TEXT_SECONDARY,
-                font=("Segoe UI Emoji", 18),
+                font=("Segoe UI", 14, "bold"),
                 border_width=1, border_color=BORDER_IDLE,
                 command=self.cerrar_y_volver,
             )
-            self.btn_salir.place(relx=0.974, rely=0.046, anchor="ne")
+            self.btn_salir.place(relx=0.97, rely=0.025, anchor="ne")
 
         if self.modo == "registro":
             self.btn_cerrar = ctk.CTkButton(
                 self,
                 text="X",
-                width=40,
-                height=40,
+                width=34,
+                height=34,
                 corner_radius=10,
                 fg_color="#1e1e3f",
                 hover_color="#ff4d5e",
                 text_color="white",
-                font=("Segoe UI", 16, "bold"),
+                font=("Segoe UI", 14, "bold"),
                 border_width=1,
                 border_color=BORDER_IDLE,
                 command=self.cerrar_y_volver
             )
-            self.btn_cerrar.place(relx=0.974, rely=0.046, anchor="ne")
+            self.btn_cerrar.place(relx=0.97, rely=0.025, anchor="ne")
 
         ctk.CTkLabel(
             hdr, text="K O D A",
-            font=("Courier New", 43, "bold"),
+            font=("Courier New", 49, "bold"),
             text_color=TEXT_PRIMARY,
         ).pack()
 
         ctk.CTkLabel(
             hdr,
             text=AppContext.t("RECONOCIMIENTO FACIAL"),
-            font=("Courier New", 23),
+            font=("Courier New", 20),
             text_color=TEXT_MUTED,
         ).pack(pady=(4, 0))
 
         main = ctk.CTkFrame(self, fg_color="transparent")
-        main.pack(expand=True, fill="both", padx=44, pady=(8, 28))
+        main.pack(expand=True, fill="both", padx=12, pady=(4, 8))
 
         self.video_container = ctk.CTkFrame(
-            main, fg_color=BG_PANEL, corner_radius=16,
+            main, fg_color=BG_PANEL, corner_radius=14,
             border_width=2, border_color=BORDER_IDLE,
         )
         self.video_container.pack(expand=True, fill="both")
@@ -234,33 +242,39 @@ class TerminalView(ctk.CTkFrame):
         center.pack(side="left", fill="both", expand=True)
 
         row = ctk.CTkFrame(center, fg_color="transparent")
-        row.pack(fill="x", padx=20, pady=(18, 0))
+        row.pack(fill="x", padx=10, pady=(9, 0))
+        row.grid_columnconfigure(0, weight=0)
+        row.grid_columnconfigure(1, weight=1)
 
         self.dot_indicator = ctk.CTkLabel(
-            row, text="?", font=("Courier New", 14), text_color=ACCENT_PURPLE
+            row, text="●", font=("Courier New", 20, "bold"), text_color=ACCENT_PURPLE
         )
-        self.dot_indicator.pack(side="left", padx=(0, 10))
+        self.dot_indicator.grid(row=0, column=0, sticky="w", padx=(15, 8))
 
         self.status_label = ctk.CTkLabel(
             row,
             text=AppContext.t("SISTEMA ACTIVO"),
-            font=("Courier New", 25, "bold"),
+            font=("Courier New", 21, "bold"),
             text_color=TEXT_PRIMARY,
+            anchor="e",
+            justify="right"
         )
-        self.status_label.pack(side="left")
+        self.status_label.grid(row=0, column=1, sticky="e", padx=(0, 10))
 
         ctk.CTkFrame(center, fg_color=BORDER_IDLE, height=1).pack(
-            fill="x", padx=20, pady=(8, 0)
+            fill="x", padx=10, pady=(5, 0)
         )
 
         self.lbl_nombre = ctk.CTkLabel(
             center,
             text=AppContext.t("ESPERANDO DETECCION..."),
-            font=("Courier New", 20),
+            font=("Courier New", 16),
             text_color=TEXT_SECONDARY,
             anchor="w",
+            justify="left",
+            wraplength=300,
         )
-        self.lbl_nombre.pack(fill="x", padx=24, pady=(5, 0))
+        self.lbl_nombre.pack(fill="x", padx=12, pady=(4, 0))
 
         self.accent_line = ctk.CTkFrame(
             self.data_banner, fg_color=ACCENT_PURPLE, height=2, corner_radius=0
@@ -272,7 +286,7 @@ class TerminalView(ctk.CTkFrame):
             self.video_container,
             text=AppContext.t("Iniciando camara..."),
             text_color=TEXT_MUTED,
-            font=("Courier New", 13),
+            font=("Courier New", 15),
         )
         self.video_display.pack(side="bottom", fill="both", expand=True)
 
@@ -284,9 +298,9 @@ class TerminalView(ctk.CTkFrame):
                 AppContext.t("Acceso Seguro") + "  //  " +
                 AppContext.t("Cifrado AES-256")
             ),
-            font=("Courier New", 9),
+            font=("Courier New", 13),
             text_color=TEXT_MUTED,
-        ).pack(side="bottom", pady=(0, 10))
+        ).pack(side="bottom", pady=(0, 5))
         ctk.CTkFrame(self, fg_color=BORDER_IDLE, height=1).pack(fill="x", side="bottom")
 
     def aplicar_estilo_visual(self, estado: str, usuario: str = ""):
@@ -303,7 +317,7 @@ class TerminalView(ctk.CTkFrame):
 
         nombre = AppContext.t(t["name"])
         if estado == "autorizado":
-            nombre = f"{AppContext.t('BIENVENIDO')}:  {usuario}" if usuario else AppContext.t("ACCESO CONCEDIDO")
+            nombre = usuario if usuario else AppContext.t("ACCESO CONCEDIDO")
         elif estado == "inactivo":
             nombre = f"{usuario}\n{AppContext.t('USUARIO INACTIVO')}" if usuario else AppContext.t("USUARIO INACTIVO")
 
@@ -322,9 +336,13 @@ class TerminalView(ctk.CTkFrame):
                 text_color=ACCENT_AMBER
             )
             self.lbl_nombre.configure(
-                text=AppContext.t("COLOQUE SU ROSTRO FRENTE A LA CAMARA"),
-                text_color=ACCENT_AMBER
-            )
+            text=AppContext.t("COLOQUE SU ROSTRO\nFRENTE A LA CAMARA"),
+            text_color=ACCENT_AMBER,
+            font=("Courier New", 16),
+            anchor="w",
+            justify="left",
+            wraplength=300
+)
         
     def detectar_rostros(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -390,7 +408,14 @@ class TerminalView(ctk.CTkFrame):
             cw = self.winfo_width() or 900
         if ch < 10:
             ch = self.winfo_height() or 600
-        ch = max(ch - BANNER_H, 80)
+        ch = max(ch - BANNER_H, 260)
+
+        # Ajusta el texto del banner al ancho real para que no se corte en 480 px.
+        try:
+            self.lbl_nombre.configure(wraplength=max(cw - 50, 260))
+        except Exception:
+            pass
+
         return cw, ch
 
     def actualizar_video(self):
@@ -585,7 +610,7 @@ class TerminalView(ctk.CTkFrame):
                 color_esq = (
                     ACCENT_AMBER if self.escaneando else
                     ACCENT_GREEN if self.estado_actual == "autorizado" else
-                    ACCENT_RED   if self.estado_actual == "negado"     else
+                    ACCENT_RED   if self.estado_actual in ("negado", "inactivo") else
                     ACCENT_PURPLE
                 )
                 self._dibujar_esquinas(frame_dibujado, fx, fy, fw, fh, color_esq)

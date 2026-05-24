@@ -403,7 +403,30 @@ class DashboardView(ctk.CTkFrame):
             ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "23:00"],
             fontsize=9, color=text_color
         )
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        # Escala vertical inteligente y entendible
+        if max_y <= 10:
+            step = 1
+        elif max_y <= 100:
+            step = 10
+        else:
+            step = 20
+
+        top_limit = (
+            ((max_y // step) + 1) * step
+            if max_y > 0 else step
+        )
+
+        ax.set_ylim(0, top_limit)
+
+        yticks = np.arange(0, top_limit + step, step)
+
+        ax.set_yticks(yticks)
+        ax.set_yticklabels(
+            [str(int(y)) for y in yticks],
+            fontsize=9,
+            color=text_color
+        )  
+
         ax.tick_params(axis="y", colors=text_color, labelsize=9)
         ax.grid(axis="y", linestyle="--", alpha=0.25, color=grid_color)
         ax.grid(axis="x", visible=False)
@@ -462,17 +485,37 @@ class DashboardView(ctk.CTkFrame):
             ok = int(resultado) == 1
 
             # ?? colores seg�n estado
-            if ok:
-                card_color = "#ECFDF5"
-                border_color = "#10B981"
-                title_color = "#065F46"
-                sub_color = "#047857"
+            if mode == "Dark":
+                if ok:
+                    card_color = "#0b1736"
+                    border_color = "#3B82F6"
+                    title_color = "#60A5FA"
+                    sub_color = "#BFDBFE"
+                    badge_bg = "#1E3A8A"
+                    badge_text = "#93C5FD"
+                else:
+                    card_color = "#2a0b0f"
+                    border_color = "#EF4444"
+                    title_color = "#ff4d5e"
+                    sub_color = "#fecaca"
+                    badge_bg = "#450a0a"
+                    badge_text = "#ff4d5e"
             else:
-                card_color = "#FEF2F2"
-                border_color = "#EF4444"
-                title_color = "#991B1B"
-                sub_color = "#B91C1C"
-
+                if ok:
+                    card_color = "#EFF6FF"
+                    border_color = "#3B82F6"
+                    title_color = "#1D4ED8"
+                    sub_color = "#2563EB"
+                    badge_bg = "#DBEAFE"
+                    badge_text = "#1D4ED8"
+                else:
+                    card_color = "#FEF2F2"
+                    border_color = "#EF4444"
+                    title_color = "#991B1B"
+                    sub_color = "#B91C1C"
+                    badge_bg = "#FEE2E2"
+                    badge_text = "#991B1B"
+                 
             nombre_completo = (
                 f"{nombre or ''} {ap or ''} {am or ''}".strip().upper()
                 if nombre else AppContext.t("USUARIO NO REGISTRADO")
@@ -524,13 +567,13 @@ class DashboardView(ctk.CTkFrame):
                 text_color=sub_color
             ).pack(anchor="w", fill="x")
 
-            badge = ctk.CTkFrame(top, fg_color="#D1FAE5" if ok else "#FEE2E2", corner_radius=16)
+            badge = ctk.CTkFrame(top, fg_color=badge_bg, corner_radius=16)
             badge.pack(side="right")
             ctk.CTkLabel(
                 badge,
                 text=AppContext.t("AUTORIZADO") if ok else AppContext.t("DENEGADO"),
                 font=("Inter", 9, "bold"),
-                text_color="#065F46" if ok else "#991B1B"
+                text_color=badge_text
             ).pack(padx=10, pady=4)
 
             bottom = ctk.CTkFrame(card, fg_color="transparent")
