@@ -204,7 +204,7 @@ class AccountView(ctk.CTkFrame):
 
         self._pack_header(
             self,
-            AppContext.t("⚙️ Configuración Cuenta") if self.is_compact else AppContext.t("⚙️   Configuración Cuenta"),
+            "⚙️ " + AppContext.t("Configuración Cuenta") if self.is_compact else AppContext.t("Configuración Cuenta"),
             AppContext.t("Configura tu perfil y preferencias"),
             "✏️ " + AppContext.t("Editar" if self.is_compact else "Editar Perfil"),
             self.abrir_formulario_edicion,
@@ -225,7 +225,7 @@ class AccountView(ctk.CTkFrame):
 
         self.create_read_only_field(AppContext.t("Nombres"),  self.datos["nombre"],   "??")
         self.create_read_only_field(AppContext.t("Correo"),   self.datos["correo"],   "??")
-        self.create_read_only_field(AppContext.t("Telófono"), self.datos["tel"],      "??")
+        self.create_read_only_field(AppContext.t("Teléfono"), self.datos["tel"],      "??")
         self.create_read_only_field(AppContext.t("Facultad"), self.datos["facultad"], "???")
 
         ctk.CTkButton(
@@ -483,7 +483,7 @@ class AccountView(ctk.CTkFrame):
 
         self._pack_header(
             self,
-            AppContext.t("?? Editar Registro") if self.is_compact else AppContext.t("??   Editar Registro"),
+            AppContext.t("Editar Registro") if self.is_compact else AppContext.t("Editar Registro"),
             AppContext.t("Modifica tu información personal"),
         )
 
@@ -500,25 +500,30 @@ class AccountView(ctk.CTkFrame):
 
         ctk.CTkLabel(
             form_scroll,
-            text="?? " + AppContext.t("Información Personal"),
+            text="👤" + AppContext.t("Información Personal"),
             font=self.font_sub,
             text_color=COLORS["text"],
         ).pack(anchor="w", padx=l["card_pad"], pady=(14, 8))
 
-        self.create_edit_field(form_scroll, AppContext.t("Nombres"), "??", "Nombre completo", self.var_nombre)
-
+        self.create_edit_field(
+            form_scroll,
+            AppContext.t("Nombres"),
+            "Nombre completo",
+            "",
+            self.var_nombre
+        )
         if self.is_compact:
-            self.create_edit_field(form_scroll, AppContext.t("Correo"), "??", "correo@dominio.com", self.var_correo)
-            self.create_edit_field(form_scroll, AppContext.t("Telófono"), "??", "10 dígitos", self.var_tel)
+            self.create_edit_field(form_scroll, AppContext.t("Correo"), "", "correo@dominio.com", self.var_correo)
+            self.create_edit_field(form_scroll, AppContext.t("Teléfono"), "", "10 dígitos", self.var_tel)
         else:
             row2 = ctk.CTkFrame(form_scroll, fg_color="transparent")
             row2.pack(fill="x", padx=l["card_pad"], pady=0)
             row2.columnconfigure(0, weight=1)
             row2.columnconfigure(1, weight=1)
-            self.create_edit_field_grid(row2, AppContext.t("Correo"), "??", "correo@dominio.com", self.var_correo, col=0)
-            self.create_edit_field_grid(row2, AppContext.t("Telófono"), "??", "10 dígitos", self.var_tel, col=1)
+            self.create_edit_field_grid(row2, AppContext.t("Correo"), "correo@dominio.com", self.var_correo, col=0)
+            self.create_edit_field_grid(row2, AppContext.t("Teléfono"), "10 dígitos", self.var_tel, col=1)
 
-        self.create_edit_field(form_scroll, AppContext.t("Facultad"), "???", "Nombre de la facultad", self.var_facultad)
+        self.create_edit_field(form_scroll, AppContext.t("Facultad"), "", "Nombre de la facultad", self.var_facultad)
 
         btn_row = ctk.CTkFrame(form_scroll, fg_color="transparent")
         btn_row.pack(fill="x", padx=l["card_pad"], pady=(16, 40))
@@ -526,7 +531,7 @@ class AccountView(ctk.CTkFrame):
         if self.is_compact:
             ctk.CTkButton(
                 btn_row,
-                text="?? " + AppContext.t("Guardar Cambios"),
+                text="💾 " + AppContext.t("Guardar Cambios"),
                 fg_color=COLORS["primary"],
                 text_color="#FFFFFF",
                 hover_color=COLORS.get("primary_hover", COLORS["primary"]),
@@ -552,7 +557,7 @@ class AccountView(ctk.CTkFrame):
         else:
             ctk.CTkButton(
                 btn_row,
-                text="?? " + AppContext.t("Guardar Cambios"),
+                text="💾 " + AppContext.t("Guardar Cambios"),
                 fg_color=COLORS["primary"],
                 text_color="#FFFFFF",
                 hover_color=COLORS.get("primary_hover", COLORS["primary"]),

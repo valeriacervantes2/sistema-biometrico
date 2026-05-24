@@ -138,9 +138,6 @@ def guardar_encoding(
             str(existente["usuario"]) == str(usuario)
         )
 
-        print("USUARIO ACTUAL:", usuario)
-        print("EXISTENTE:", existente["usuario"])
-
         # ? IGNORAR SU PROPIO ROSTRO
         if mismo_usuario:
             continue
@@ -154,11 +151,6 @@ def guardar_encoding(
             encoding
         )[0]
 
-        print(
-            f"Comparando con {existente['usuario']} "
-            f"-> distancia: {distancia}"
-        )
-
         if distancia < 0.45:
 
             return {
@@ -169,7 +161,7 @@ def guardar_encoding(
             }
 
     # ============================================
-    # REEMPLAZAR BIOMETR�A
+    # REEMPLAZAR BIOMETRIA
     # ============================================
 
     if reemplazar:
@@ -183,8 +175,6 @@ def guardar_encoding(
 
     with open(archivo, "w") as f:
         json.dump(datos, f, indent=4)
-
-    print(f"? Encoding guardado como usuario {usuario}")
 
     return {
         "ok": True

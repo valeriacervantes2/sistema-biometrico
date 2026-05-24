@@ -34,6 +34,7 @@ TRADUCCIONES = {
     # TABLA DE ACCESOS  motivos y resultados
     # --------------------------------------------------
     "Acceso denegado":              {"en": "Access denied"},
+    "Acceso autorizado":              {"en": "Access authorized"},
     "Usuario inactivo":             {"en": "Inactive user"},
     "Usuario no identificado":      {"en": "User not identified"},
     "AUTORIZADO":                   {"en": "AUTHORIZED"},
@@ -74,12 +75,12 @@ TRADUCCIONES = {
     "?? Gestion de Facultades":                     {"en": "?? Faculty Management"},
     "Gestión de Carreras":                          {"en": "Career Management"},
     "Gestion de Carreras":                          {"en": "Career Management"},
-    "??   Gestión de Carreras":                     {"en": "??   Career Management"},
-    "?? Gestion de Carreras":                       {"en": "?? Career Management"},
+    "🎓 Gestión de Carreras":                     {"en": "🎓   Career Management"},
+    "🎓 Gestion de Carreras":                       {"en": "🎓 Career Management"},
     "Configuración":                                {"en": "Settings"},
     "Configuración Cuenta":                         {"en": "Account Settings"},
-    "??   Configuración Cuenta":                    {"en": "??   Account Settings"},
-    "?? Configuración Cuenta":                      {"en": "?? Account Settings"},
+    "Configuración Cuenta":                    {"en": "Account Settings"},
+    "Configuración Cuenta":                      {"en": "Account Settings"},
     "Cerrar Sesión":                                {"en": "Log Out"},
     "?? Cerrar Sesión":                             {"en": "?? Log Out"},
     "ADMINISTRADOR":                                {"en": "ADMINISTRATOR"},
@@ -106,12 +107,13 @@ TRADUCCIONES = {
     "Sin accesos registrados":                      {"en": "No access records found"},
 
     # DASHBOARD � filtro roles
-    "?? Rol:":                                      {"en": "?? Role:"},
+    "👤 Rol":                                       {"en": "👤 Role"},
     "Todos":                                        {"en": "All"},
-    "?? Filtrar ?":                                 {"en": "?? Filter ?"},
-    "?? Filtrar ?":                                 {"en": "?? Filter ?"},
-    "Filtrar ?":                                    {"en": "Filter ?"},
-    "Filtrar ?":                                    {"en": "Filter ?"},
+    "⚙️ Filtrar":                                   {"en": "⚙️ Filter"},
+    "⚙️ Filtrar":                                   {"en": "⚙️ Filter"},
+    "Filtrar":                                      {"en": "Filter"},
+    "Filtrar":                                      {"en": "Filter"},
+    "⚙️ Ocultar filtros":                            {"en": "⚙️ Hide filter"},
 
 
     # --------------------------------------------------------------
@@ -122,14 +124,14 @@ TRADUCCIONES = {
     "? Agregar Usuario":                           {"en": "? Add User"},
     "Buscar usuario...":                            {"en": "Search user..."},
     "No hay usuarios registrados":                  {"en": "No registered users"},
-    "FOTOGRAFA":                                   {"en": "PHOTO"},
+    "FOTOGRAFÍA":                                   {"en": "PHOTO"},
     "INFORMACIÓN":                                  {"en": "INFORMATION"},
     "ESTADO":                                       {"en": "STATUS"},
     "ACCIONES":                                     {"en": "ACTIONS"},
 
     # GESTI�N DE USUARIOS � formulario secciones
     "Editar Registro":                              {"en": "Edit Record"},
-    "?? Editar Registro":                           {"en": "?? Edit Record"},
+    "Editar Registro":                           {"en": "?? Edit Record"},
     "Nuevo Registro":                               {"en": "New Record"},
     "? Nuevo Registro":                            {"en": "? New Record"},
     "?? Información Personal":                      {"en": "?? Personal Information"},
@@ -168,7 +170,7 @@ TRADUCCIONES = {
     "Activar":                                      {"en": "Activate"},
     "?? Activar":                                   {"en": "?? Activate"},
     "Cancelar":                                     {"en": "Cancel"},
-    "? Cancelar":                                  {"en": "? Cancel"},
+    "❌ Cancelar":                                  {"en": "❌ Cancel"},
 
     # --------------------------------------------------------------
     # GESTI�N DE FACULTADES � tabla
@@ -184,7 +186,6 @@ TRADUCCIONES = {
     "NOMBRE DE LA FACULTAD":                        {"en": "FACULTY NAME"},
     "ACTIVA":                                       {"en": "ACTIVE"},
     "INACTIVA":                                     {"en": "INACTIVE"},
-
     # GESTI�N DE FACULTADES � modal
     "🗑️Desactivar esta facultad?":                   {"en": "Desactivate this faculty?"},
     "La facultad dejará de estar disponible.":      {"en": "The faculty will no longer be available."},
@@ -235,6 +236,8 @@ TRADUCCIONES = {
     "Seleccionar facultad":                         {"en": "Select faculty"},
     "Guardar Carrera":                              {"en": "Save Career"},
     "?? Guardar Carrera":                           {"en": "?? Save Career"},
+    "ACTIVA":                                       {"en": "ACTIVE"},
+    "INACTIVA":                                     {"en": "INACTIVE"},
 
     # --------------------------------------------------------------
     # CUENTA / PERFIL
@@ -247,13 +250,13 @@ TRADUCCIONES = {
     "Detalles de la Cuenta":                        {"en": "Account Details"},
     "?? Detalles de la Cuenta":                     {"en": "?? Account Details"},
     "Correo":                                       {"en": "Email"},
-    "Telofono":                                     {"en": "Phone"},
+    "Teléfono":                                     {"en": "Phone"},
     "?? Personalizacin":                           {"en": "?? Customization"},
     "Personalización":                              {"en": "Customization"},
     "Idioma del Sistema":                           {"en": "System Language"},
     "?? Idioma del Sistema":                        {"en": "?? System Language"},
     "ADMINISTRADOR DEL SISTEMA":                    {"en": "SYSTEM ADMINISTRATOR"},
-    "??   Editar Registro":                         {"en": "??   Edit Record"},
+    "Editar Registro":                         {"en": "??   Edit Record"},
     "Modifica tu información personal":             {"en": "Modify your personal information"},
     "?? Información Personal":                      {"en": "?? Personal Information"},
     "Guardar Cambios":                              {"en": "Save Changes"},
@@ -269,7 +272,7 @@ TRADUCCIONES = {
     # --------------------------------------------------------------
     "Sistema de Reconocimiento\nFacial":            {"en": "Facial Recognition\nSystem"},
     "Ingresa tus credenciales para continuar":      {"en": "Enter your credentials to continue"},
-    "CORREO ÓNICO":                           {"en": "EMAIL ADDRESS"},
+    "CORREO ELECTRÓNICO":                           {"en": "EMAIL ADDRESS"},
     "Escribe tu correo":                            {"en": "Enter your email"},
     "CONTRASEÑA":                                   {"en": "PASSWORD"},
     "Escribe tu contraseña":                        {"en": "Enter your password"},

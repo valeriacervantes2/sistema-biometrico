@@ -319,7 +319,7 @@ class DashboardView(ctk.CTkFrame):
         header_tabla.pack(fill="x", padx=75, pady=(20, 10))
         ctk.CTkLabel(
             header_tabla,
-            text=AppContext.t("Registro de �ltimos accesos"),
+            text=AppContext.t("Registro de últimos accesos"),
             font=("Inter", 18, "bold"), text_color=COLORS["text"]
         ).pack(anchor="w")
 
@@ -467,9 +467,14 @@ class DashboardView(ctk.CTkFrame):
             )
             cuenta_txt = cuenta if cuenta else AppContext.t("Sin cuenta")
             correo_txt = correo if correo else AppContext.t("Sin correo")
-            motivo_txt = motivo if motivo else (
-                AppContext.t("Acceso autorizado") if ok else AppContext.t("Acceso denegado")
-            )
+            if motivo:
+                motivo_txt = AppContext.t(motivo)
+            else:
+                motivo_txt = (
+                    AppContext.t("Acceso autorizado")
+                    if ok
+                    else AppContext.t("Acceso denegado")
+                )
 
             card = ctk.CTkFrame(
                 self.contenedor_tabla, fg_color=row_color,
@@ -585,19 +590,19 @@ class DashboardView(ctk.CTkFrame):
             ).pack(anchor="w")
 
             ctk.CTkLabel(
-                txt_info, text=AppContext.t("Control Biom�trico"),
+                txt_info, text=AppContext.t("Control Biométrico"),
                 font=("Inter", 11), text_color=COLORS["subtext"]
             ).pack(anchor="w")
 
         self.btn_panel      = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Panel de Control"),      self.mostrar_panel_control)
-        self.btn_users      = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gesti�n de Usuarios"),    self.mostrar_gestion_usuarios)
-        self.btn_facultades = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gesti�n de Facultades"),  self.mostrar_gestion_facultades)
-        self.btn_carreras   = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gesti�n de Carreras"),    self.mostrar_gestion_carreras)
-        self.btn_account    = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Configuraci�n Cuenta"),   self.mostrar_cuenta)
+        self.btn_users      = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gestión de Usuarios"),    self.mostrar_gestion_usuarios)
+        self.btn_facultades = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gestión de Facultades"),  self.mostrar_gestion_facultades)
+        self.btn_carreras   = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Gestión de Carreras"),    self.mostrar_gestion_carreras)
+        self.btn_account    = self.crear_btn_sidebar(self.sidebar_frame, "??   " + AppContext.t("Configuración Cuenta"),   self.mostrar_cuenta)
 
         ctk.CTkButton(
             self.sidebar_frame,
-            text="?? " + AppContext.t("Cerrar Sesi�n"),
+            text="?? " + AppContext.t("Cerrar Sesión"),
             fg_color="transparent", text_color="#EF4444",
             font=("Inter", 14, "bold"), command=self.on_back
         ).pack(side="bottom", pady=30, padx=20, fill="x")

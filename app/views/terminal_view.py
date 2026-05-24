@@ -498,12 +498,21 @@ class TerminalView(ctk.CTkFrame):
                                 cargar_encodings()[1]
                             )
 
-                            if match_id is not None and distancia < 0.45:
+                            mismo_usuario = (
+                                str(match_id) == str(self.user_id)
+                            )
+
+                            if (
+                                match_id is not None
+                                and distancia < 0.45
+                                and not mismo_usuario
+                            ):
 
                                 self.status_label.configure(
                                     text=AppContext.t("USUARIO YA REGISTRADO"),
                                     text_color=ACCENT_RED
                                 )
+
                                 self.lbl_nombre.configure(
                                     text=AppContext.t("ESTE ROSTRO YA EXISTE EN EL SISTEMA"),
                                     text_color=ACCENT_RED
@@ -513,9 +522,12 @@ class TerminalView(ctk.CTkFrame):
                                 self.escaneando = False
                                 self.pos_linea = 0
 
-                                self.loop_id = self.after(1500, self.actualizar_video)
-                                return
+                                self.loop_id = self.after(
+                                    1500,
+                                    self.actualizar_video
+                                )
 
+                                return
                             self.running = False
 
                             if self.on_capture:

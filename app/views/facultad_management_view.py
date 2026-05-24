@@ -189,7 +189,7 @@ class FacultadManagementView(ctk.CTkFrame):
                 badge_est.pack(side="left")
                 ctk.CTkLabel(
                     badge_est,
-                    text="● ACTIVA" if es_activa else "● INACTIVA",
+                    text="● " + (AppContext.t("ACTIVA") if es_activa else AppContext.t("INACTIVA")),
                     font=("Inter", 9, "bold"),
                     text_color="#065F46" if es_activa else "#991B1B"
                 ).pack(padx=10, pady=4)
@@ -198,14 +198,14 @@ class FacultadManagementView(ctk.CTkFrame):
                 actions.pack(fill="x", padx=14, pady=(0, 14))
 
                 ctk.CTkButton(
-                    actions, text="✏️ Editar", height=36,
+                    actions, text="✏️ " + AppContext.t("Editar"), height=36,
                     fg_color=COLORS["hover"], text_color=COLORS["text"],
                     command=lambda id_f=f["id"]: self.abrir_formulario(id_f)
                 ).pack(side="left", expand=True, fill="x", padx=(0, 6))
 
                 if es_activa:
                     ctk.CTkButton(
-                        actions, text="🗑️ Desactivar", height=36,
+                        actions, text="🗑️ " + AppContext.t( "Desactivar"), height=36,
                         fg_color="#FFF1F2", text_color="#E11D48",
                         command=lambda id_f=f["id"], n=f["nombre"]: self.confirmar_cambio_estado(id_f, n, desactivar=True)
                     ).pack(side="left", expand=True, fill="x", padx=(6, 0))
@@ -265,7 +265,8 @@ class FacultadManagementView(ctk.CTkFrame):
                     text="● " + (AppContext.t("ACTIVA") if es_activa else AppContext.t("INACTIVA")),
                     font=("Inter", 9, "bold"),
                     text_color="#065F46" if es_activa else "#991B1B"
-                ).pack(padx=12, pady=4)
+                ).pack(padx=10, pady=4)
+
 
                 act_outer = ctk.CTkFrame(tabla, fg_color="transparent")
                 act_outer.grid(row=data_row, column=2, sticky="nsew", padx=4, pady=6)

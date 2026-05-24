@@ -227,7 +227,7 @@ class UserManagementView(ctk.CTkFrame):
 
                 ctk.CTkButton(
                     actions,
-                    text="?? " + AppContext.t("Editar"),
+                    text="✏️ " + AppContext.t("Editar"),
                     height=34,
                     fg_color=COLORS["hover"], text_color=COLORS["text"],
                     command=lambda d=u: self.abrir_formulario(d)
@@ -441,8 +441,9 @@ class UserManagementView(ctk.CTkFrame):
             self.biometria_temp = None
 
         self.usuario_editando_id = usuario["id"] if usuario else None
-        self.rol_var.set(usuario["r"] if usuario else "ESTUDIANTE")
-
+        self.rol_var.set(
+            AppContext.t(usuario["r"]) if usuario else AppContext.t("ESTUDIANTE")
+        )
         self.estado_var = ctk.BooleanVar(value=True)
         if usuario:
             self.estado_var.set(usuario.get("estado", 1) == 1)
@@ -468,7 +469,7 @@ class UserManagementView(ctk.CTkFrame):
 
         ctk.CTkLabel(
             self.form_container,
-            text=("?? " + AppContext.t("Editar Registro")) if usuario else ("? " + AppContext.t("Nuevo Registro")),
+            text=("✏️ " + AppContext.t("Editar Registro")) if usuario else ("? " + AppContext.t("Nuevo Registro")),
             font=self.font_header, text_color=COLORS["text"]
         ).pack(anchor="w", padx=padx_form, pady=(30, 10))
 
@@ -482,10 +483,19 @@ class UserManagementView(ctk.CTkFrame):
         grid.pack(fill="x", padx=20, pady=20)
 
         self.rol_menu = ctk.CTkOptionMenu(
-            grid, values=["ESTUDIANTE", "DOCENTE", "TRABAJADOR"],
-            variable=self.rol_var, height=40,
-            text_color=COLORS["text"], fg_color=COLORS["hover"], button_color=COLORS["border"]
+            grid,
+            values=[
+                AppContext.t("ESTUDIANTE"),
+                AppContext.t("DOCENTE"),
+                AppContext.t("TRABAJADOR")
+            ],
+            variable=self.rol_var,
+            height=40,
+            text_color=COLORS["text"],
+            fg_color=COLORS["hover"],
+            button_color=COLORS["border"]
         )
+
         self.plantel_menu = ctk.CTkOptionMenu(
             grid, values=nombres_f,
             command=self.update_carreras_dinamicas, height=40,
@@ -560,9 +570,14 @@ class UserManagementView(ctk.CTkFrame):
         if entrada:
             entrada.configure(validate="key", validatecommand=vcmd)
 
+        texto_biometria = (
+            "?? " + AppContext.t("Retomar Biometría")
+            if usuario
+            else "?? " + AppContext.t("Registrar Biometría")
+        )
         self.btn_biometria = ctk.CTkButton(
             self.form_container,
-            text="?? " + AppContext.t("Registrar Biometría"),
+            text=texto_biometria,
             height=50, fg_color="#0EA5E9", text_color="white",
             font=self.font_sub, command=self.abrir_terminal_biometrica
         )
@@ -579,16 +594,16 @@ class UserManagementView(ctk.CTkFrame):
 
         self.btn_guardar = ctk.CTkButton(
             btns,
-            text="?? " + AppContext.t("Guardar"),
-            font=self.font_sub, fg_color="#10B981", text_color="white",
-            hover_color="#059669", height=50,
+            text="💾 " + AppContext.t("Guardar"),
+            font=self.font_sub, fg_color="#D1FAE5", text_color="#065F46",
+            height=55,
             command=self.validar_y_guardar
         )
         btn_cancelar = ctk.CTkButton(
             btns,
-            text="? " + AppContext.t("Cancelar"),
+            text="❌ " + AppContext.t("Cancelar"),
             font=self.font_sub, fg_color="#FEE2E2",
-            text_color=COLORS["text"], height=50,
+            text_color="#991B1B", height=55,
             command=self.cerrar_formulario
         )
 
@@ -895,27 +910,47 @@ class UserManagementView(ctk.CTkFrame):
             ).pack(side="right")
 
     def create_search_bar(self, master):
+        padx_bar = 12 if self.is_compact else 30
+
         bar = ctk.CTkFrame(master, fg_color="transparent")
-        bar.pack(fill="x", padx=30, pady=10)
+        bar.pack(fill="x", padx=padx_bar, pady=10)
+
         self.entry_busqueda = ctk.CTkEntry(
             bar,
-            placeholder_text="?? " + AppContext.t("Buscar usuario..."),
-            height=42, corner_radius=10,
+            placeholder_text="🔍 " + AppContext.t("Buscar usuario..."),
+            height=42,
+            corner_radius=10,
             fg_color=COLORS["hover"],
             border_color=COLORS["border"],
             text_color=COLORS["text"]
         )
-        self.entry_busqueda.pack(side="left", fill="x", expand=True, padx=(0, 15))
+
         self.entry_busqueda.bind("<KeyRelease>", self.buscar_usuarios)
+
         self.btn_filter = ctk.CTkButton(
             bar,
-            text="?? " + AppContext.t("Filtrar ?"),
-            width=110, height=42, corner_radius=10,
-            fg_color=COLORS["card"], text_color=COLORS["text"],
+            text="⚙️ " + AppContext.t("Filtrar"),
+            width=110,
+            height=42,
+            corner_radius=10,
+            fg_color=COLORS["card"],
+            text_color=COLORS["text"],
             border_color=COLORS["border"],
             command=self.toggle_filter
         )
-        self.btn_filter.pack(side="left")
+
+        if self.is_compact:
+            self.entry_busqueda.pack(fill="x", pady=(0, 10))
+            self.btn_filter.pack(fill="x")
+        else:
+            self.entry_busqueda.pack(
+                side="left",
+                fill="x",
+                expand=True,
+                padx=(0, 15)
+            )
+
+            self.btn_filter.pack(side="left")
 
     def buscar_usuarios(self, event=None):
         texto = self.entry_busqueda.get().strip().lower()
@@ -949,34 +984,67 @@ class UserManagementView(ctk.CTkFrame):
         if not self.filter_visible:
             self.draw_tags()
             self.filter_container.pack(fill="x", padx=30, pady=(0, 15), before=self.main_card)
-            self.btn_filter.configure(text="?? " + AppContext.t("Filtrar ?"))
+
+            # cuando el filtro est� abierto
+            self.btn_filter.configure(
+                text="⚙️ " + AppContext.t("Ocultar filtros")
+            )
+
             self.filter_visible = True
+
         else:
             self.filter_container.pack_forget()
-            self.btn_filter.configure(text="?? " + AppContext.t("Filtrar ?"))
+
+            # cuando el filtro est� cerrado
+            self.btn_filter.configure(
+                text="⚙️ " + AppContext.t("Filtrar")
+            )
+
             self.filter_visible = False
+        self.after(50, self.buscar_usuarios)
 
     def draw_tags(self):
         for w in self.filter_container.winfo_children():
             w.destroy()
+
         r1 = ctk.CTkFrame(self.filter_container, fg_color="transparent")
         r1.pack(fill="x", padx=20)
+
         ctk.CTkLabel(
             r1,
-            text=AppContext.t("?? Rol:"),
-            font=self.font_small, text_color=COLORS["text"], width=80
-        ).pack(side="left")
-        # -- CORRECCI�N: todos los roles pasan por AppContext.t() --
-        for t in ["Todos", "ESTUDIANTE", "DOCENTE", "TRABAJADOR"]:
+            text="👤 " + AppContext.t("Rol"),
+            font=self.font_small,
+            text_color=COLORS["text"]
+        ).pack(anchor="w", pady=(0, 8))
+
+        tags_frame = ctk.CTkFrame(r1, fg_color="transparent")
+        tags_frame.pack(fill="x")
+
+        roles = ["Todos", "ESTUDIANTE", "DOCENTE", "TRABAJADOR"]
+
+        for t in roles:
             act = self.filtro_rol_actual == t
-            ctk.CTkButton(
-                r1,
+
+            btn = ctk.CTkButton(
+                tags_frame,
                 text=AppContext.t(t),
-                height=28, corner_radius=10,
-                fg_color=COLORS["hover"] if act else "white",
-                text_color=COLORS["text"], border_color=COLORS["border"],
+                height=32,
+                corner_radius=10,
+
+                fg_color=COLORS["hover"] if act else COLORS["card"],
+
+                hover_color=COLORS["hover"],
+                text_color=COLORS["text"],
+                border_color=COLORS["border"],
+                border_width=1,
+
                 command=lambda v=t: self.aplicar_filtro_visual(v)
-            ).pack(side="left", padx=3)
+            )
+
+            if self.is_compact:
+                btn.pack(fill="x", pady=4)
+            else:
+                btn.pack(side="left", padx=3)
 
     def aplicar_filtro_visual(self, v):
         self.filtro_rol_actual = v
@@ -1039,7 +1107,7 @@ class UserManagementView(ctk.CTkFrame):
 
         self.terminal_view = TerminalView(
             self.terminal_container,
-            user_id=None,
+            user_id=self.usuario_editando_id,
             on_back=self.cerrar_terminal_biometrica,
             on_capture=self.recibir_biometria,
             modo="registro"
