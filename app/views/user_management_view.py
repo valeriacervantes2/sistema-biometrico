@@ -217,7 +217,7 @@ class UserManagementView(ctk.CTkFrame):
                 badge_e.pack(side="left")
                 ctk.CTkLabel(
                     badge_e,
-                    text=AppContext.t("? ACTIVO") if es_activo else AppContext.t("? INACTIVO"),
+                    text="● " + AppContext.t("ACTIVO") if es_activo else AppContext.t("INACTIVO"),
                     font=("Inter", 9, "bold"),
                     text_color="#065F46" if es_activo else "#991B1B"
                 ).pack(padx=8, pady=3)
@@ -339,7 +339,7 @@ class UserManagementView(ctk.CTkFrame):
                 badge_e.pack(expand=True)
                 ctk.CTkLabel(
                     badge_e,
-                    text=AppContext.t("? ACTIVO") if es_activo else AppContext.t("? INACTIVO"),
+                    text="● " + AppContext.t("ACTIVO") if es_activo else AppContext.t("INACTIVO"),
                     font=("Inter", 9, "bold"),
                     text_color="#065F46" if es_activo else "#991B1B"
                 ).pack(padx=10, pady=3)
@@ -385,14 +385,14 @@ class UserManagementView(ctk.CTkFrame):
 
         if desactivar:
             icono     = "???"
-            titulo    = AppContext.t("�Desactivar este usuario?")
-            sub       = AppContext.t("El usuario perder� acceso al sistema.")
+            titulo    = AppContext.t("Desactivar este usuario?")
+            sub       = AppContext.t("El usuario perderá acceso al sistema.")
             btn_txt   = AppContext.t("Desactivar")
             btn_color = "#EF4444"
             btn_hover = "#DC2626"
         else:
             icono     = "??"
-            titulo    = AppContext.t("�Activar este usuario?")
+            titulo    = AppContext.t("Activar este usuario?")
             sub       = AppContext.t("El usuario recuperará acceso al sistema.")
             btn_txt   = AppContext.t("Activar")
             btn_color = "#10B981"
@@ -571,7 +571,7 @@ class UserManagementView(ctk.CTkFrame):
             entrada.configure(validate="key", validatecommand=vcmd)
 
         texto_biometria = (
-            "?? " + AppContext.t("Retomar Biometría")
+            "?? " + AppContext.t("Actualizar Biometría")
             if usuario
             else "?? " + AppContext.t("Registrar Biometría")
         )
@@ -684,28 +684,31 @@ class UserManagementView(ctk.CTkFrame):
             hay_error = True
 
         if not cta:
-            self._mostrar_error("cuenta", "La cuenta es obligatoria")
+            self._mostrar_error("cuenta","❌" + AppContext.t("La cuenta es obligatoria"))
             hay_error = True
         elif not cta.isdigit():
-            self._mostrar_error("cuenta", "La cuenta solo debe contener números")
+            self._mostrar_error("cuenta", AppContext.t("La cuenta solo debe contener números"))
             hay_error = True
         elif len(cta) != 8:
             self._mostrar_error("cuenta", f"La cuenta debe tener 8 dígitos (actualmente tiene {len(cta)})")
             hay_error = True
 
-        if em and "@" not in em:
-            self._mostrar_error("correo", "El correo debe contener @")
+        if not em:
+            self._mostrar_error("correo", AppContext.t("El correo es obligatorio"))
+            hay_error = True
+        elif "@" not in em:
+            self._mostrar_error("correo", AppContext.t("El correo debe contener @"))
             hay_error = True
 
         if hay_error:
             return
 
         if existe_cuenta(cta, self.usuario_editando_id):
-            self._mostrar_error("cuenta", "La cuenta ya está registrada")
+            self._mostrar_error("cuenta", AppContext.t("La cuenta ya está registrada"))
             return
         
         if em and existe_correo(em, self.usuario_editando_id):
-            self._mostrar_error("correo", "El correo ya está registrado")
+            self._mostrar_error("correo","❌" + AppContext.t("El correo ya está registrado"))
             return
 
         try:
@@ -717,7 +720,7 @@ class UserManagementView(ctk.CTkFrame):
 
             if em:
                 if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", em):
-                    self._mostrar_error("correo", "Correo inválido")
+                    self._mostrar_error("correo", AppContext.T("Correo inválido"))
                     return
 
             if not self.usuario_editando_id and len(cta) != 8:
@@ -1085,13 +1088,19 @@ class UserManagementView(ctk.CTkFrame):
         elif len(cuenta) != 8:
             self._mostrar_error("cuenta", "La cuenta debe tener exactamente 8 números")
             hay_error = True
-        if correo and not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo):
-            self._mostrar_error("correo", "Correo electrónico inválido")
+        if not correo:
+            self._mostrar_error("correo", "El correo es obligatorio")
+            hay_error = True
+        elif not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo):
+            self._mostrar_error("correo", "Correo electr�nico inv�lido")
+            hay_error = True
+        elif existe_correo(correo, self.usuario_editando_id):
+            self._mostrar_error("correo", "El correo ya est� registrado")
             hay_error = True
 
         if hay_error:
             self.btn_biometria.configure(
-                text="? " + AppContext.t("Corrige los datos primero"),
+                text="❌" + AppContext.t("Corrige los datos primero"),
                 fg_color="#EF4444", hover_color="#DC2626"
             )
             return

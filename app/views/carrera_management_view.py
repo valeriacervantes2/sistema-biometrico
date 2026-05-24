@@ -157,13 +157,13 @@ class CarreraManagementView(ctk.CTkFrame):
 
                 if es_activa:
                     ctk.CTkButton(
-                        actions, text="🗑️ " + AppContext.t("Desactivar"), height=36,
+                        actions, text=AppContext.t("Desactivar"), height=36,
                         fg_color="#FFF1F2", text_color="#E11D48",
                         command=lambda cid=c["id"], n=c["nombre"]: self.confirmar_cambio_estado(cid, n, desactivar=True)
                     ).pack(side="left", expand=True, fill="x", padx=(6, 0))
                 else:
                     ctk.CTkButton(
-                        actions, text="🔄 Activar", height=36,
+                        actions, text=AppContext.t("Activar"), height=36,
                         fg_color="#10B981", text_color="white",
                         command=lambda cid=c["id"], n=c["nombre"]: self.confirmar_cambio_estado(cid, n, desactivar=False)
                     ).pack(side="left", expand=True, fill="x", padx=(6, 0))
@@ -338,14 +338,14 @@ class CarreraManagementView(ctk.CTkFrame):
             c = obtener_carrera_por_id(id_carrera)
             titulo         = "✏️ " + AppContext.t("Editar Carrera")
             nombre_ini     = c["nombre"] if c else ""
-            estado_ini     = AppContext.t("Activa") if c and c["estado"] == 1 else AppContext.t("Inactiva")
+            estado_ini = AppContext.t("Activa") if c and c["estado"] == 1 else AppContext.t("Inactiva")
             fac_id         = c["id_facultad"] if c else None
             fac_nombre_ini = self.facultades_dict.get(fac_id, AppContext.t("Seleccionar facultad"))
         else:
             self.modo_edicion      = False
             titulo         = "➕ " + AppContext.t("Nueva Carrera")
             nombre_ini     = ""
-            estado_ini     = "Activa"
+            estado_ini = AppContext.t("Activa")
             fac_nombre_ini = facultades_lista[0] if facultades_lista else "Seleccionar facultad"
 
         self.form_base = ctk.CTkFrame(self, fg_color=COLORS["bg"])

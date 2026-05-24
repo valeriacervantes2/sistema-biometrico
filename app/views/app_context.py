@@ -3,7 +3,7 @@ TRADUCCIONES = {
     
         # Agregar en la seccion TERMINAL BIOMoTRICA
     "ESCANEANDO":                           {"en": "SCANNING"},
-    "ANALIZANDO RASGOS BIOMETRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
+    "ANALIZANDO RASGOS BIOMÉTRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
     "ACCESO AUTORIZADO":                    {"en": "ACCESS AUTHORIZED"},   # ya existe
     "ACCESO DENEGADO":                      {"en": "ACCESS DENIED"},        # ya existe
     "USUARIO NO REGISTRADO":                {"en": "UNREGISTERED USER"},    # ya existe
@@ -19,7 +19,7 @@ TRADUCCIONES = {
     "MIRANDO HACIA LA CAMARA":              {"en": "LOOKING AT THE CAMERA"},
     "BIENVENIDO":                           {"en": "WELCOME"},
     "ACCESO CONCEDIDO":                     {"en": "ACCESS GRANTED"},
-    "REGISTRANDO BIOMETRIA":                {"en": "REGISTERING BIOMETRICS"},
+    "REGISTRANDO BIOMETRÍA":                {"en": "REGISTERING BIOMETRICS"},
     "COLOQUE SU ROSTRO FRENTE A LA CAMARA": {"en": "PLACE YOUR FACE IN FRONT OF THE CAMERA"},
     "USUARIO YA REGISTRADO":                {"en": "USER ALREADY REGISTERED"},
     "ESTE ROSTRO YA EXISTE EN EL SISTEMA":  {"en": "THIS FACE ALREADY EXISTS IN THE SYSTEM"},
@@ -27,8 +27,8 @@ TRADUCCIONES = {
     "Iniciando camara...":                  {"en": "Starting camera..."},
     "Sistema Biometrico v2.0":              {"en": "Biometric System v2.0"},
     "RECONOCIMIENTO FACIAL":                {"en": "FACIAL RECOGNITION"},
-    "ANALIZANDO RASGOS BIOMETRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
-    "ANALIZANDO RASGOS BIOMETRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
+    "ANALIZANDO RASGOS BIOMÉTRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
+    "ANALIZANDO RASGOS BIOMÉTRICOS":        {"en": "ANALYZING BIOMETRIC FEATURES"},
 
     # --------------------------------------------------------------
     # TABLA DE ACCESOS  motivos y resultados
@@ -54,8 +54,8 @@ TRADUCCIONES = {
     "TRABAJADOR":                   {"en": "WORKER"},
 
     # Cat�logo usuarios � estado
-    "? ACTIVO":                     {"en": "? ACTIVE"},
-    "? INACTIVO":                   {"en": "? INACTIVE"},
+    "ACTIVO":                     {"en": "ACTIVE"},
+    "INACTIVO":                   {"en": "INACTIVE"},
     "ACTIVO":                       {"en": "ACTIVE"},
     "INACTIVO":                     {"en": "INACTIVE"},
 
@@ -74,7 +74,7 @@ TRADUCCIONES = {
     "??   Gestión de Facultades":                   {"en": "??   Faculty Management"},
     "?? Gestion de Facultades":                     {"en": "?? Faculty Management"},
     "Gestión de Carreras":                          {"en": "Career Management"},
-    "Gestion de Carreras":                          {"en": "Career Management"},
+    "🎓 Gestion de Carreras":                          {"en": "🎓 Career Management"},
     "🎓 Gestión de Carreras":                     {"en": "🎓   Career Management"},
     "🎓 Gestion de Carreras":                       {"en": "🎓 Career Management"},
     "Configuración":                                {"en": "Settings"},
@@ -151,6 +151,7 @@ TRADUCCIONES = {
     # GESTI�N DE USUARIOS � biometr�a
     "Registrar Biometría":                          {"en": "Register Biometrics"},
     "?? Registrar Biometría":                       {"en": "?? Register Biometrics"},
+    "Actualizar Biometría":                         {"en": "Update biometrics"},
     "Abriendo cámara...":                           {"en": "Opening camera..."},
     "?? Abriendo cámara...":                        {"en": "?? Opening camera..."},
     "Biometría registrada":                         {"en": "Biometrics registered"},
@@ -158,14 +159,15 @@ TRADUCCIONES = {
     "Biometría requerida":                          {"en": "Biometrics required"},
     "? Biometría requerida":                        {"en": "? Biometrics required"},
     "Corrige los datos primero":                    {"en": "Fix the data first"},
-    "? Corrige los datos primero":                  {"en": "? Fix the data first"},
+
+
 
     # GESTI�N DE USUARIOS � modal
-    "🗑️Desactivar este usuario?":                    {"en": "Desactivate this user?"},
+    "Desactivar este usuario?":                    {"en": "Desactivate this user?"},
     "El usuario perderá acceso al sistema.":        {"en": "The user will lose system access."},
     "Desactivar":                                   {"en": "Desactivate"},
     "??? Desactivar":                                {"en": "??? Desactivate"},
-    "🔄Activar este usuario?":                       {"en": "Activate this user?"},
+    "Activar este usuario?":                       {"en": "Activate this user?"},
     "El usuario recuperará acceso al sistema.":     {"en": "The user will regain system access."},
     "Activar":                                      {"en": "Activate"},
     "?? Activar":                                   {"en": "?? Activate"},
@@ -187,10 +189,10 @@ TRADUCCIONES = {
     "ACTIVA":                                       {"en": "ACTIVE"},
     "INACTIVA":                                     {"en": "INACTIVE"},
     # GESTI�N DE FACULTADES � modal
-    "🗑️Desactivar esta facultad?":                   {"en": "Desactivate this faculty?"},
+    "¿Desactivar esta facultad?":                   {"en": "Desactivate this faculty?"},
     "La facultad dejará de estar disponible.":      {"en": "The faculty will no longer be available."},
-    "Activar esta facultad?":                      {"en": "Activate this faculty?"},
-    "La facultad volver a estar disponible.":      {"en": "The faculty will be available again."},
+    "¿Activar esta facultad?":                      {"en": "Activate this faculty?"},
+    "La facultad volverá a estar disponible.":      {"en": "The faculty will be available again."},
 
     # GESTI�N DE FACULTADES � formulario
     "Editar Facultad":                              {"en": "Edit Faculty"},
@@ -219,9 +221,9 @@ TRADUCCIONES = {
     "FACULTAD":                                     {"en": "FACULTY"},
 
     # GESTI�N DE CARRERAS � modal
-    "Desactivar esta carrera?":                    {"en": "Desactivate this career?"},
-    "La carrera dejar de estar disponible.":       {"en": "The career will no longer be available."},
-    "🔄Activar esta carrera?":                       {"en": "Activate this career?"},
+    "¿Desactivar esta carrera?":                    {"en": "Desactivate this career?"},
+    "La carrera dejará de estar disponible.":       {"en": "The career will no longer be available."},
+    "¿Activar esta carrera?":                       {"en": "Activate this career?"},
     "La carrera volverá a estar disponible.":       {"en": "The career will be available again."},
 
     # GESTI�N DE CARRERAS � formulario

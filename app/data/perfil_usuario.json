@@ -1,7 +1,7 @@
 {
-  "nombre": "ADMINISTRADOR DEL SISTEM",
+  "nombre": "ADMINISTRADOR",
   "correo": "admin@universidad.edu.mx",
-  "tel": "5512345678",
+  "tel": "5512316243",
   "facultad": "ADMINISTRACIÓN CENTRAL",
-  "foto": "C:\\Users\\Colibecas\\Documents\\sistema-biometrico\\app\\views\\..\\data\\fotos\\avatar.jpg"
+  "foto": "/home/valeria/sistema-biometrico/app/views/../data/fotos/avatar.jpg"
 }

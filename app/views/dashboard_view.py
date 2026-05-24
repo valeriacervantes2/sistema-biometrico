@@ -57,7 +57,7 @@ class DashboardView(ctk.CTkFrame):
         self.crear_btn_overlay(parent, "👥" + AppContext.t("Gestion de Usuarios"),   self.mostrar_gestion_usuarios)
         self.crear_btn_overlay(parent, "🏫" + AppContext.t("Gestion de Facultades"), self.mostrar_gestion_facultades)
         self.crear_btn_overlay(parent, "💼" + AppContext.t("Gestion de Carreras"),   self.mostrar_gestion_carreras)
-        self.crear_btn_overlay(parent, "⚙️" + AppContext.t("Configuración"),         self.mostrar_cuenta)
+        self.crear_btn_overlay(parent, "⚙️" + AppContext.t("Configuración Cuenta"),         self.mostrar_cuenta)
 
         ctk.CTkButton(
             parent,

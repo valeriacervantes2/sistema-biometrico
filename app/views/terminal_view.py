@@ -38,7 +38,7 @@ TEMAS = {
         "dot":      ACCENT_AMBER,
         "status":   "ESCANEANDO",
         "st_color": ACCENT_AMBER,
-        "name":     "ANALIZANDO RASGOS BIOM�TRICOS",
+        "name":     "ANALIZANDO RASGOS BIOMÉTRICOS",
         "b_color":  ACCENT_AMBER,
     },
     "autorizado": {

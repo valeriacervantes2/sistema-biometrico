@@ -1,4 +1,5 @@
 import json
+import re
 import os
 import shutil
 import customtkinter as ctk
@@ -508,8 +509,8 @@ class AccountView(ctk.CTkFrame):
         self.create_edit_field(
             form_scroll,
             AppContext.t("Nombres"),
-            "Nombre completo",
             "",
+            "Nombre completo",
             self.var_nombre
         )
         if self.is_compact:
@@ -581,15 +582,81 @@ class AccountView(ctk.CTkFrame):
                 command=self.crear_vista_lectura,
             ).pack(side="left", expand=True, fill="x", padx=(8, 0))
 
+
     def guardar_cambios(self):
         nombre = self.var_nombre.get().strip()
         correo = self.var_correo.get().strip()
         tel = self.var_tel.get().strip()
         facultad = self.var_facultad.get().strip()
 
-        if not nombre or not correo:
-            self._mostrar_toast(AppContext.t("El nombre y correo son obligatorios."), error=True)
+        # --------- VALIDACIONES ---------
+
+        # Nombre obligatorio
+        if not nombre:
+            self._mostrar_toast(
+                AppContext.t("El nombre es obligatorio."),
+                error=True
+            )
             return
+
+        # Nombre solo letras y espacios
+        if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre):
+            self._mostrar_toast(
+                AppContext.t("El nombre contiene caracteres inv�lidos."),
+                error=True
+            )
+            return
+
+        # Nombre m�nimo
+        if len(nombre) < 5:
+            self._mostrar_toast(
+                AppContext.t("El nombre es demasiado corto."),
+                error=True
+            )
+            return
+
+        # Correo obligatorio
+        if not correo:
+            self._mostrar_toast(
+                AppContext.t("El correo es obligatorio."),
+                error=True
+            )
+            return
+
+        # Validar correo
+        if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo):
+            self._mostrar_toast(
+                AppContext.t("Correo electr�nico inv�lido."),
+                error=True
+            )
+            return
+
+        # Validar tel�fono
+        if tel:
+            if not tel.isdigit():
+                self._mostrar_toast(
+                    AppContext.t("El tel�fono solo debe contener n�meros."),
+                    error=True
+                )
+                return
+
+            if len(tel) != 10:
+                self._mostrar_toast(
+                    AppContext.t("El tel�fono debe tener 10 d�gitos."),
+                    error=True
+                )
+                return
+
+        # Validar facultad
+        if facultad:
+            if len(facultad) < 4:
+                self._mostrar_toast(
+                    AppContext.t("La facultad es demasiado corta."),
+                    error=True
+                )
+                return
+
+        # --------- GUARDAR ---------
 
         self.datos["nombre"] = nombre
         self.datos["correo"] = correo
@@ -598,11 +665,15 @@ class AccountView(ctk.CTkFrame):
 
         _guardar_datos(self.datos)
 
-        # ? NUEVO: notificar al dashboard para que refresque el sidebar
+        # refrescar sidebar
         if self.on_profile_updated:
             self.on_profile_updated()
 
-        self._mostrar_toast(AppContext.t("Cambios guardados correctamente."), error=False)
+        self._mostrar_toast(
+            AppContext.t("Cambios guardados correctamente."),
+            error=False
+        )
+
         self.crear_vista_lectura()
 
     # ---------------------------------------------------------------------
