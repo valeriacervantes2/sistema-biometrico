@@ -594,7 +594,7 @@ class AccountView(ctk.CTkFrame):
         # Nombre obligatorio
         if not nombre:
             self._mostrar_toast(
-                AppContext.t("El nombre es obligatorio."),
+                AppContext.t("❌ El nombre es obligatorio."),
                 error=True
             )
             return
@@ -602,7 +602,7 @@ class AccountView(ctk.CTkFrame):
         # Nombre solo letras y espacios
         if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre):
             self._mostrar_toast(
-                AppContext.t("El nombre contiene caracteres inv�lidos."),
+                AppContext.t("❌ El nombre contiene caracteres inválidos."),
                 error=True
             )
             return
@@ -610,7 +610,7 @@ class AccountView(ctk.CTkFrame):
         # Nombre m�nimo
         if len(nombre) < 5:
             self._mostrar_toast(
-                AppContext.t("El nombre es demasiado corto."),
+                AppContext.t("❌ El nombre es demasiado corto."),
                 error=True
             )
             return
@@ -618,7 +618,7 @@ class AccountView(ctk.CTkFrame):
         # Correo obligatorio
         if not correo:
             self._mostrar_toast(
-                AppContext.t("El correo es obligatorio."),
+                AppContext.t("❌ El correo es obligatorio."),
                 error=True
             )
             return
@@ -626,7 +626,7 @@ class AccountView(ctk.CTkFrame):
         # Validar correo
         if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo):
             self._mostrar_toast(
-                AppContext.t("Correo electr�nico inv�lido."),
+                AppContext.t("❌ Correo electrónico inválido"),
                 error=True
             )
             return
@@ -635,14 +635,14 @@ class AccountView(ctk.CTkFrame):
         if tel:
             if not tel.isdigit():
                 self._mostrar_toast(
-                    AppContext.t("El tel�fono solo debe contener n�meros."),
+                    AppContext.t("❌ El teléfono solo debe contener números."),
                     error=True
                 )
                 return
 
             if len(tel) != 10:
                 self._mostrar_toast(
-                    AppContext.t("El tel�fono debe tener 10 d�gitos."),
+                    AppContext.t("❌ El teléfono debe tener 10 dígitos."),
                     error=True
                 )
                 return
@@ -651,7 +651,7 @@ class AccountView(ctk.CTkFrame):
         if facultad:
             if len(facultad) < 4:
                 self._mostrar_toast(
-                    AppContext.t("La facultad es demasiado corta."),
+                    AppContext.t("❌ La facultad es demasiado corta."),
                     error=True
                 )
                 return

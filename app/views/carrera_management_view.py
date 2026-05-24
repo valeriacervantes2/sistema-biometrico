@@ -443,7 +443,7 @@ class CarreraManagementView(ctk.CTkFrame):
 
         if not nombre:
             self.label_error.configure(
-                text="? El nombre de la carrera no puede estar vac�o"
+                text=AppContext.t("❌ El nombre no puede estar vacío")
             )
             return
 
@@ -453,21 +453,21 @@ class CarreraManagementView(ctk.CTkFrame):
             )
             return
 
-        if not re.match(r"^[A-Za-z������������\s]+$", nombre):
+        if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre):
             self.label_error.configure(
-                text="? El nombre contiene caracteres inv�lidos"
+                text=AppContext.t("❌ El nombre contiene caracteres inválidos")
             )
             return
 
         if len(nombre) < 4:
             self.label_error.configure(
-                text="? El nombre es demasiado corto"
+                text=AppContext.t("❌ El nombre es demasiado corto")
             )
             return
 
         if self.carrera_existe(nombre) and not self.modo_edicion:
             self.label_error.configure(
-                text="? La carrera ya existe"
+                text=AppContext.t("❌ La carrera ya existe")
             )
             return
 

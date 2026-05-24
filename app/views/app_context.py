@@ -173,6 +173,34 @@ TRADUCCIONES = {
     "?? Activar":                                   {"en": "?? Activate"},
     "Cancelar":                                     {"en": "Cancel"},
     "❌ Cancelar":                                  {"en": "❌ Cancel"},
+    "❌ El nombre es obligatorio":                   {"en": "❌ Name is required"},
+    "❌ La cuenta es obligatoria":                   {"en": "❌ Account is required"},
+    "❌ La cuenta solo debe contener números":       {"en": "❌ Account must contain only numbers"},
+    "❌ La cuenta debe tener 8 dígitos":             {"en": "❌ Account must have 8 digits"},
+    "❌ El correo es obligatorio":                   {"en": "❌ Email is required"},
+    "❌ El correo debe contener @":                  {"en": "❌ Email must contain @"},
+    "❌ La cuenta ya está registrada":               {"en": "❌ Account is already registered"},
+    "❌ El correo ya está registrado":               {"en": "❌ Email is already registered"},
+    "❌ Correo inválido":                            {"en": "❌ Invalid email"},
+    "❌ Nombre inválido":                            {"en": "❌ Invalid name"},
+    "❌ Apellido paterno inválido":                  {"en": "❌ Invalid last name (paternal)"},
+    "❌ Apellido materno inválido":                  {"en": "❌ Invalid last name (maternal)"},
+    "❌ Error al actualizar biometría":              {"en": "❌ Error updating biometrics"},
+    "❌ Debes registrar biometría antes de guardar":                 {"en": "❌ You must register biometrics before saving"},
+    "❌ No se pudo crear el usuario":                {"en": "❌ User could not be created"},
+    "❌ Este rostro ya pertenece al usuario ID ":    {"en": "❌ This face already belongs to user ID "},
+    "❌ Este usuario ya tiene biometría":            {"en": "❌ This user already has biometrics"},
+    "❌ Error al guardar biometra":                  {"en": "❌ Error saving biometrics"},
+    "❌ Error al guardar. No se registró el usuario.":       {"en": "❌ Error saving. User was not registered."},
+    "❌ El nombre solo debe contener letras":         {"en": "❌ Name must contain only letters"},
+    "❌ Apellido paterno inválido":                  {"en": "❌ Invalid paternal last name"},
+    "❌ Apellido materno inválido":                 {"en": "❌ Invalid maternal last name"},
+    "❌ La cuenta es obligatoria":                  {"en": "❌ Account is required"},
+    "❌ La cuenta solo debe contener números":      {"en": "❌ Account must contain only numbers"},
+    "❌ La cuenta debe tener exactamente 8 números":            {"en": "❌ Account must be exactly 8 digits"},
+    "❌ El correo es obligatorio":                   {"en": "❌ Email is required"},
+    "❌ El correo ya está registrado":               {"en": "❌ Email is already registered"},
+    "❌ Corrige los datos primero":                  {"en": "❌ Fix the data first"},
 
     # --------------------------------------------------------------
     # GESTI�N DE FACULTADES � tabla
@@ -207,12 +235,16 @@ TRADUCCIONES = {
     "Inactiva":                                     {"en": "Inactive"},
     "Guardar Facultad":                             {"en": "Save Faculty"},
     "?? Guardar Facultad":                          {"en": "?? Save Faculty"},
+    "❌ El nombre de la facultad no puede estar vacío":       {"en": "❌ The name of the faculty cannot be empty"},
+    "❌ El nombre contiene caracteres inválidos":     {"en": "❌ The name contains invalid characters"},    
+    "❌ El nombre de la facultad es demasiado corto":    {"en": "❌ The name of the faculty is too short"},
+    "❌ La facultad ya existe":                      {"en": "❌ The faculty already exists"},
 
     # --------------------------------------------------------------
     # GESTI�N DE CARRERAS � tabla
     # --------------------------------------------------------------
-    "?? Gestión de Carreras":                       {"en": "?? Career Management"},
-    "??   Gestión de Carreras":                     {"en": "??   Career Management"},
+    "Gestión de Carreras":                       {"en": "Career Management"},
+    "?? Gestión de Carreras":                     {"en": "??   Career Management"},
     "Agregar Carrera":                              {"en": "Add Career"},
     "? Agregar Carrera":                           {"en": "? Add Career"},
     "Buscar carrera por nombre...":                 {"en": "Search career by name..."},
@@ -240,6 +272,10 @@ TRADUCCIONES = {
     "?? Guardar Carrera":                           {"en": "?? Save Career"},
     "ACTIVA":                                       {"en": "ACTIVE"},
     "INACTIVA":                                     {"en": "INACTIVE"},
+    "❌ El nombre no puede estar vacío":       {"en": "❌ The name cannot be empty"},
+    "❌ El nombre contiene caracteres inválidos":     {"en": "❌ The name contains invalid characters"},    
+    "❌ El nombre es demasiado corto":    {"en": "❌ The name is too short"},
+    "❌ La carrera ya existe":                      {"en": "❌ The career already exists"},
 
     # --------------------------------------------------------------
     # CUENTA / PERFIL
@@ -268,7 +304,14 @@ TRADUCCIONES = {
     "?? Actualizar Foto":                           {"en": "?? Update Photo"},
     "Actualizar Foto":                              {"en": "Update Photo"},
     "Editar Registro...":                           {"en": "Edit Record..."},
-
+    "❌ El nombre es obligatorio.":       {"en": "❌ The name is required."},
+    "❌ El nombre contiene caracteres inválidos":     {"en": "❌ The name contains invalid characters"},    
+    "❌ El nombre es demasiado corto":    {"en": "❌ The name is too short"},
+    "❌ La facultad ya existe":                      {"en": "❌ The faculty already exists"},
+    "❌ El correo es obligatorio.":       {"en": "❌ The email is required."},
+    "❌ Correo electrónico inválido":     {"en": "❌ Invalid email"},    
+    "❌ El teléfono solo debe contener números.":    {"en": "❌ The phone should only contain numbers."},
+    "❌ El teléfono debe tener 10 dígitos.":                      {"en": "❌ The phone number must have 10 digits."},
     # --------------------------------------------------------------
     # LOGIN
     # --------------------------------------------------------------

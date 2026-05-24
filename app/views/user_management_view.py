@@ -659,7 +659,7 @@ class UserManagementView(ctk.CTkFrame):
         if entry:
             entry.configure(border_width=2, border_color="#EF4444")
         if hasattr(self, "label_estado"):
-            self.label_estado.configure(text=f"? {mensaje}", text_color="#EF4444")
+            self.label_estado.configure(text=f"{mensaje}", text_color="#EF4444")
 
     def validar_y_guardar(self):
         self._limpiar_errores()
@@ -680,35 +680,35 @@ class UserManagementView(ctk.CTkFrame):
         hay_error = False
 
         if not n:
-            self._mostrar_error("Nombres", "El nombre es obligatorio")
+            self._mostrar_error("Nombres", AppContext.t("❌ El nombre es obligatorio"))
             hay_error = True
 
         if not cta:
-            self._mostrar_error("cuenta","❌" + AppContext.t("La cuenta es obligatoria"))
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta es obligatoria"))
             hay_error = True
         elif not cta.isdigit():
-            self._mostrar_error("cuenta", AppContext.t("La cuenta solo debe contener números"))
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta solo debe contener números"))
             hay_error = True
         elif len(cta) != 8:
-            self._mostrar_error("cuenta", f"La cuenta debe tener 8 dígitos (actualmente tiene {len(cta)})")
+            self._mostrar_error("cuenta", AppContext.t(f"❌ La cuenta debe tener 8 dígitos"))
             hay_error = True
 
         if not em:
-            self._mostrar_error("correo", AppContext.t("El correo es obligatorio"))
+            self._mostrar_error("correo", AppContext.t("❌ El correo es obligatorio"))
             hay_error = True
         elif "@" not in em:
-            self._mostrar_error("correo", AppContext.t("El correo debe contener @"))
+            self._mostrar_error("correo", AppContext.t("❌ El correo debe contener @"))
             hay_error = True
 
         if hay_error:
             return
 
         if existe_cuenta(cta, self.usuario_editando_id):
-            self._mostrar_error("cuenta", AppContext.t("La cuenta ya está registrada"))
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta ya está registrada"))
             return
         
         if em and existe_correo(em, self.usuario_editando_id):
-            self._mostrar_error("correo","❌" + AppContext.t("El correo ya está registrado"))
+            self._mostrar_error("correo", AppContext.t("❌ El correo ya está registrado"))
             return
 
         try:
@@ -720,7 +720,7 @@ class UserManagementView(ctk.CTkFrame):
 
             if em:
                 if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", em):
-                    self._mostrar_error("correo", AppContext.T("Correo inválido"))
+                    self._mostrar_error("correo", AppContext.T("❌ Correo inválido"))
                     return
 
             if not self.usuario_editando_id and len(cta) != 8:
@@ -730,13 +730,13 @@ class UserManagementView(ctk.CTkFrame):
             am = self.inputs_apellidos["Apellido Materno"].get().strip()
 
             if not self.validar_texto_real(n):
-                self._mostrar_error("Nombres", "Nombre inválido")
+                self._mostrar_error("Nombres", "❌ Nombre inválido")
                 return
             if not self.validar_texto_real(ap):
-                self._mostrar_error("Apellido Paterno", "Apellido paterno inválido")
+                self._mostrar_error("Apellido Paterno", "❌ Apellido paterno inválido")
                 return
             if am and not self.validar_texto_real(am):
-                self._mostrar_error("Apellido Materno", "Apellido materno inválido")
+                self._mostrar_error("Apellido Materno", "❌ Apellido materno inválido")
                 return
 
             n  = n.title()
@@ -783,7 +783,7 @@ class UserManagementView(ctk.CTkFrame):
             else:
                 if not hasattr(self, "biometria_temp") or self.biometria_temp is None:
                     self.label_estado.configure(
-                        text="? Debes registrar biometría antes de guardar",
+                        text="❌ Debes registrar biometría antes de guardar",
                         text_color="#EF4444"
                     )
                     return
@@ -793,7 +793,7 @@ class UserManagementView(ctk.CTkFrame):
                     usuario_id = crear_usuario(n, ap, am, tipo_usuario, id_fac, id_carrera, cta, em)
                     if not usuario_id:
                         self.label_estado.configure(
-                            text="? No se pudo crear el usuario",
+                            text="❌ No se pudo crear el usuario",
                             text_color="#EF4444"
                         )
                         return
@@ -811,17 +811,17 @@ class UserManagementView(ctk.CTkFrame):
                         if error == "rostro_duplicado":
                             dup = resultado.get("usuario_duplicado")
                             self.label_estado.configure(
-                                text=f"? Este rostro ya pertenece al usuario ID {dup}",
+                                text=f"❌ Este rostro ya pertenece al usuario ID {dup}",
                                 text_color="#EF4444"
                             )
                         elif error == "usuario_duplicado":
                             self.label_estado.configure(
-                                text="? Este usuario ya tiene biometría",
+                                text="❌ Este usuario ya tiene biometría",
                                 text_color="#EF4444"
                             )
                         else:
                             self.label_estado.configure(
-                                text="? Error al guardar biometra",
+                                text="❌ Error al guardar biometra",
                                 text_color="#EF4444"
                             )
 
@@ -842,7 +842,7 @@ class UserManagementView(ctk.CTkFrame):
                         conn.commit()
                         conn.close()
                     self.label_estado.configure(
-                        text="? Error al guardar. No se registró el usuario.",
+                        text="❌ Error al guardar. No se registró el usuario.",
                         text_color="#EF4444"
                     )
                     return
@@ -1071,42 +1071,42 @@ class UserManagementView(ctk.CTkFrame):
         hay_error = False
 
         if not self.validar_texto_real(nombres):
-            self._mostrar_error("Nombres", "El nombre solo debe contener letras")
+            self._mostrar_error("Nombres", AppContext.t("❌ El nombre solo debe contener letras"))
             hay_error = True
         if not self.validar_texto_real(ap):
-            self._mostrar_error("Apellido Paterno", "Apellido paterno inválido")
+            self._mostrar_error("Apellido Paterno", AppContext.t("❌ Apellido paterno inválido"))
             hay_error = True
         if am and not self.validar_texto_real(am):
-            self._mostrar_error("Apellido Materno", "Apellido materno inválido")
+            self._mostrar_error("Apellido Materno", AppContext.t("❌ Apellido materno inválido"))
             hay_error = True
         if not cuenta:
-            self._mostrar_error("cuenta", "La cuenta es obligatoria")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta es obligatoria"))
             hay_error = True
         elif not cuenta.isdigit():
-            self._mostrar_error("cuenta", "La cuenta solo debe contener números")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta solo debe contener números"))
             hay_error = True
         elif len(cuenta) != 8:
-            self._mostrar_error("cuenta", "La cuenta debe tener exactamente 8 números")
+            self._mostrar_error("cuenta", AppContext.t("❌ La cuenta debe tener exactamente 8 números"))
             hay_error = True
         if not correo:
-            self._mostrar_error("correo", "El correo es obligatorio")
+            self._mostrar_error("correo", AppContext.t("❌ El correo es obligatorio"))
             hay_error = True
         elif not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", correo):
-            self._mostrar_error("correo", "Correo electr�nico inv�lido")
+            self._mostrar_error("correo", AppContext.t("❌ Correo inválido"))
             hay_error = True
         elif existe_correo(correo, self.usuario_editando_id):
-            self._mostrar_error("correo", "El correo ya est� registrado")
+            self._mostrar_error(AppContext.t("❌ El correo ya está registrado"))
             hay_error = True
 
         if hay_error:
             self.btn_biometria.configure(
-                text="❌" + AppContext.t("Corrige los datos primero"),
+                text=AppContext.t("❌ Corrige los datos primero"),
                 fg_color="#EF4444", hover_color="#DC2626"
             )
             return
 
         self.btn_biometria.configure(
-            text="?? " + AppContext.t("Abriendo cámara..."),
+            text=AppContext.t("Abriendo cámara..."),
             fg_color="#0EA5E9"
         )
         self.form_base.pack_forget()

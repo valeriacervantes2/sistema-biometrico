@@ -470,25 +470,25 @@ class FacultadManagementView(ctk.CTkFrame):
 
         if not nombre:
             self.label_error.configure(
-                text="? El nombre de la facultad no puede estar vac�o"
+                text=AppContext.t("❌ El nombre de la facultad no puede estar vacío")
             )
             return
 
         if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre):
             self.label_error.configure(
-                text="? El nombre contiene caracteres inv�lidos"
+                text=AppContext.t("❌ El nombre contiene caracteres inválidos")
             )
             return
 
         if len(nombre) < 5:
             self.label_error.configure(
-                text="? El nombre de la facultad es demasiado corto"
+                text=AppContext.t("❌ El nombre de la facultad es demasiado corto")
             )
             return
 
         if self.facultad_existe(nombre) and not self.modo_edicion:
             self.label_error.configure(
-                text="? La facultad ya existe"
+                text=AppContext.t("❌ La facultad ya existe")
             )
             return
 
