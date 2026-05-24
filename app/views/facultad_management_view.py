@@ -211,7 +211,7 @@ class FacultadManagementView(ctk.CTkFrame):
                     ).pack(side="left", expand=True, fill="x", padx=(6, 0))
                 else:
                     ctk.CTkButton(
-                        actions, text=AppContext.t("Activar"), height=36,
+                        actions,text=AppContext.t( "Activar"), height=36,
                         fg_color="#10B981", text_color="white",
                         command=lambda id_f=f["id"], n=f["nombre"]: self.confirmar_cambio_estado(id_f, n, desactivar=False)
                     ).pack(side="left", expand=True, fill="x", padx=(6, 0))
@@ -409,6 +409,13 @@ class FacultadManagementView(ctk.CTkFrame):
         )
         self.input_nombre.insert(0, nombre_ini)
         self.input_nombre.pack(fill="x", padx=25, pady=(0, 20))
+        self.label_error = ctk.CTkLabel(
+            form_card,
+            text="",
+            font=("Inter", 11, "bold"),
+            text_color="#EF4444"
+        )
+        self.label_error.pack(anchor="w", padx=25, pady=(0, 10))
 
         ctk.CTkLabel(
             form_card, text="⚙️ " + AppContext.t("Estado"),
@@ -459,22 +466,37 @@ class FacultadManagementView(ctk.CTkFrame):
         nombre = self.input_nombre.get().strip()
         estado = 1 if self.combo_estado.get() == AppContext.t("Activa") else 0
 
+        self.label_error.configure(text="")
+
         if not nombre:
+            self.label_error.configure(
+                text="? El nombre de la facultad no puede estar vac�o"
+            )
             return
+
         if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre):
-            print("❌ Nombre de facultad inválido")
+            self.label_error.configure(
+                text="? El nombre contiene caracteres inv�lidos"
+            )
             return
+
         if len(nombre) < 5:
-            print("❌ Facultad demasiado corta")
+            self.label_error.configure(
+                text="? El nombre de la facultad es demasiado corto"
+            )
             return
+
         if self.facultad_existe(nombre) and not self.modo_edicion:
-            print("❌ Facultad duplicada")
+            self.label_error.configure(
+                text="? La facultad ya existe"
+            )
             return
 
         if self.modo_edicion:
             actualizar_facultad(self.facultad_actual_id, nombre, estado)
         else:
             crear_facultad(nombre, estado)
+
         self.volver_a_tabla()
 
     def volver_a_tabla(self):

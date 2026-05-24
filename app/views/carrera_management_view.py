@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import re
+
 from app.services.theme import COLORS
 from app.views.app_context import AppContext
 from app.services.carrera_service import (
@@ -373,6 +374,13 @@ class CarreraManagementView(ctk.CTkFrame):
         )
         self.input_nombre.insert(0, nombre_ini)
         self.input_nombre.pack(fill="x", padx=25, pady=(0, 20))
+        self.label_error = ctk.CTkLabel(
+            form_card,
+            text="",
+            font=("Inter", 11, "bold"),
+            text_color="#EF4444"
+        )
+        self.label_error.pack(anchor="w", padx=25, pady=(0, 10))
 
         ctk.CTkLabel(
             form_card, text="🏫 " + AppContext.t("Facultad"),
@@ -431,16 +439,36 @@ class CarreraManagementView(ctk.CTkFrame):
             (id for id, n in self.facultades_dict.items() if n == fac_nombre), None
         )
 
-        if not nombre or not id_facultad:
+        self.label_error.configure(text="")
+
+        if not nombre:
+            self.label_error.configure(
+                text="? El nombre de la carrera no puede estar vac�o"
+            )
             return
-        if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre):
-            print("❌ Carrera inválida")
+
+        if not id_facultad:
+            self.label_error.configure(
+                text="? Debes seleccionar una facultad"
+            )
             return
+
+        if not re.match(r"^[A-Za-z������������\s]+$", nombre):
+            self.label_error.configure(
+                text="? El nombre contiene caracteres inv�lidos"
+            )
+            return
+
         if len(nombre) < 4:
-            print("❌ Nombre de carrera demasiado corto")
+            self.label_error.configure(
+                text="? El nombre es demasiado corto"
+            )
             return
+
         if self.carrera_existe(nombre) and not self.modo_edicion:
-            print("❌ Carrera duplicada")
+            self.label_error.configure(
+                text="? La carrera ya existe"
+            )
             return
 
         if self.modo_edicion:
