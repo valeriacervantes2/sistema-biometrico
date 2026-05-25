@@ -172,7 +172,7 @@ class UserManagementView(ctk.CTkFrame):
                 top = ctk.CTkFrame(card, fg_color="transparent")
                 top.pack(fill="x", padx=12, pady=(12, 4))
 
-                ctk.CTkLabel(top, text="??", font=("Inter", 28)).pack(side="left", padx=(0, 8))
+                ctk.CTkLabel(top, text="👤", font=("Inter", 28)).pack(side="left", padx=(0, 8))
 
                 info = ctk.CTkFrame(top, fg_color="transparent")
                 info.pack(side="left", fill="x", expand=True)
@@ -236,7 +236,7 @@ class UserManagementView(ctk.CTkFrame):
                 if es_activo:
                     ctk.CTkButton(
                         actions,
-                        text="??? " + AppContext.t("Desactivar"),
+                        text="🗑️ " + AppContext.t("Desactivar"),
                         height=34,
                         fg_color="#FFF1F2", text_color="#E11D48",
                         command=lambda i=u["id"], n=f"{u['nombre_solo']} {u['ap']}": self.confirmar_cambio_estado(i, n, desactivar=True)
@@ -264,7 +264,7 @@ class UserManagementView(ctk.CTkFrame):
             ).pack(side="left")
             ctk.CTkLabel(
                 table_head,
-                text="?? " + AppContext.t("INFORMACIÓN"),
+                text="??" + AppContext.t("INFORMACIÓN"),
                 font=self.font_small, text_color=COLORS["subtext"], width=ancho_info, anchor="w"
             ).pack(side="left")
             ctk.CTkLabel(
@@ -291,7 +291,7 @@ class UserManagementView(ctk.CTkFrame):
                 f_b = ctk.CTkFrame(row, fg_color="transparent", width=ancho_foto)
                 f_b.pack(side="left")
                 f_b.pack_propagate(False)
-                ctk.CTkLabel(f_b, text="??", font=("Inter", 32)).pack(expand=True)
+                ctk.CTkLabel(f_b, text="👤", font=("Inter", 32)).pack(expand=True)
 
                 # Info
                 i_b = ctk.CTkFrame(row, fg_color="transparent", width=ancho_info)
@@ -384,7 +384,7 @@ class UserManagementView(ctk.CTkFrame):
         modal.pack_propagate(False)
 
         if desactivar:
-            icono     = "???"
+            icono     = "🗑️"
             titulo    = AppContext.t("Desactivar este usuario?")
             sub       = AppContext.t("El usuario perderá acceso al sistema.")
             btn_txt   = AppContext.t("Desactivar")
@@ -469,7 +469,7 @@ class UserManagementView(ctk.CTkFrame):
 
         ctk.CTkLabel(
             self.form_container,
-            text=("✏️ " + AppContext.t("Editar Registro")) if usuario else ("? " + AppContext.t("Nuevo Registro")),
+            text=("✏️ " + AppContext.t("Editar Registro")) if usuario else ("➕ " + AppContext.t("Nuevo Registro")),
             font=self.font_header, text_color=COLORS["text"]
         ).pack(anchor="w", padx=padx_form, pady=(30, 10))
 
@@ -535,12 +535,12 @@ class UserManagementView(ctk.CTkFrame):
                 self.update_carreras_dinamicas(nombres_f[0])
                 
         # -- Secciones del formulario ------------------------------
-        self.create_section_card(self.form_container, AppContext.t("?? Información Personal"), [
+        self.create_section_card(self.form_container, AppContext.t("👤 Información Personal"), [
             ("Nombres",          usuario["nombre_solo"] if usuario else ""),
             ("Apellido Paterno", usuario["ap"]          if usuario else ""),
             ("Apellido Materno", usuario["am"]          if usuario else "")
         ])
-        self.create_section_card(self.form_container, AppContext.t("?? Identificación"), [
+        self.create_section_card(self.form_container, AppContext.t("🆔  Identificación"), [
             ("cuenta", str(usuario["cuenta"]) if usuario and usuario["cuenta"] else ""),
             ("correo", str(usuario["correo"]) if usuario and usuario["correo"] else "")
         ])
@@ -886,13 +886,13 @@ class UserManagementView(ctk.CTkFrame):
         if self.is_compact:
             ctk.CTkLabel(
                 h,
-                text="?? " + AppContext.t("Gestión de Usuarios"),
+                text="👥 " + AppContext.t("Gestión de Usuarios"),
                 font=("Inter", 30, "bold"),
                 text_color=COLORS["text"]
             ).pack(anchor="center", pady=(0, 12))
             ctk.CTkButton(
                 h,
-                text="? " + AppContext.t("Agregar Usuario"),
+                text="➕ " + AppContext.t("Agregar Usuario"),
                 font=self.font_sub, fg_color="#000000",
                 height=45, corner_radius=10,
                 command=self.abrir_formulario
@@ -900,13 +900,13 @@ class UserManagementView(ctk.CTkFrame):
         else:
             ctk.CTkLabel(
                 h,
-                text="?? " + AppContext.t("Gestión de Usuarios"),
+                text="👥 " + AppContext.t("Gestión de Usuarios"),
                 font=self.font_header,
                 text_color=COLORS["text"]
             ).pack(side="left")
             ctk.CTkButton(
                 h,
-                text="? " + AppContext.t("Agregar Usuario"),
+                text="➕ " + AppContext.t("Agregar Usuario"),
                 font=self.font_sub, fg_color="#000000",
                 height=45, corner_radius=10,
                 command=self.abrir_formulario

@@ -28,22 +28,46 @@ class LoginView(ctk.CTkFrame):
         self.controls_wrapper.pack(side="right", padx=15, pady=15)
 
         # 1. Control de Tema
-        self.theme_control = ctk.CTkFrame(self.controls_wrapper, fg_color="#E2E8F0", corner_radius=20, width=110, height=38)
-        self.theme_control.pack(side="left", padx=8)
+        # Switch de Tema
+        self.theme_control = ctk.CTkFrame(
+            self.controls_wrapper,
+            fg_color="#E2E8F0",
+            corner_radius=20,
+            width=100,
+            height=38
+        )
+        self.theme_control.pack(side="left", padx=10)
         self.theme_control.pack_propagate(False)
-        self.theme_icon = ctk.CTkLabel(self.theme_control, text="??", font=("Inter", 16), text_color="black")
-        self.theme_icon.place(x=22, y=19, anchor="center")
+
+        self.theme_icon = ctk.CTkLabel(
+            self.theme_control,
+            text="☀️",
+            font=("Inter", 16)
+        )
+        self.theme_icon.place(x=20, y=19, anchor="center")
+
         self.theme_switch = ctk.CTkSwitch(
-            self.theme_control, text="", width=45,
-            progress_color="#1D1D1F", button_color="#1D1D1F",
+            self.theme_control,
+            text="",
+            width=40,
+            fg_color="gray",
+            progress_color="#3B82F6",
+            button_color="#FACC15",
             command=self.actualizar_icono_tema
         )
-        self.theme_switch.place(x=72, y=19, anchor="center")
 
+        if ctk.get_appearance_mode() == "Dark":
+            self.theme_switch.select()
+            self.theme_icon.configure(text="☽", text_color="#60A5FA")
+        else:
+            self.theme_switch.deselect()
+            self.theme_icon.configure(text="☀️", text_color="#FACC15")
+
+        self.theme_switch.place(x=65, y=19, anchor="center")
         # 2. Selector de Idioma
         self.lang_control = ctk.CTkFrame(self.controls_wrapper, fg_color="#E2E8F0", corner_radius=20, height=38)
         self.lang_control.pack(side="left", padx=8)
-        ctk.CTkLabel(self.lang_control, text="??", font=("Inter", 16), text_color="black").pack(side="left", padx=(12, 5))
+        ctk.CTkLabel(self.lang_control, text="🌐", font=("Inter", 16), text_color="black").pack(side="left", padx=(12, 5))
 
         # Ambos botones se crean neutros; _sincronizar_botones_idioma pinta el correcto
         self.es_btn = ctk.CTkButton(
@@ -65,7 +89,7 @@ class LoginView(ctk.CTkFrame):
 
         # 3. Bot�n de C�mara
         self.btn_regresar_terminal = ctk.CTkButton(
-            self.controls_wrapper, text="??", width=45, height=38, corner_radius=15,
+            self.controls_wrapper, text="👁️", width=45, height=38, corner_radius=15,
             fg_color="white", text_color="#1D1D1F", hover_color="#CBD5E1",
             border_width=1, border_color="#E2E8F0", font=("Inter", 18),
             command=self.regresar_a_terminal
@@ -164,11 +188,20 @@ class LoginView(ctk.CTkFrame):
 
     def actualizar_icono_tema(self):
         if self.theme_switch.get() == 1:
-            self.theme_icon.configure(text="??")
             ctk.set_appearance_mode("dark")
+            self.theme_icon.configure(text="☽", text_color="#60A5FA")
+            self.theme_switch.configure(
+                progress_color="#3B82F6",
+                button_color="#93C5FD"
+            )
         else:
-            self.theme_icon.configure(text="??")
             ctk.set_appearance_mode("light")
+            self.theme_icon.configure(text="☀️", text_color="#FACC15")
+            self.theme_switch.configure(
+                progress_color="#F59E0B",
+                button_color="#FACC15"
+            )
+
         self.recargar_vista()
 
     # --------------------------------------------------------------
@@ -178,10 +211,10 @@ class LoginView(ctk.CTkFrame):
     def toggle_password_visibility(self):
         if self.pass_entry.cget("show") == "*":
             self.pass_entry.configure(show="")
-            self.eye_btn.configure(text="??")
+            self.eye_btn.configure(text="❌")
         else:
             self.pass_entry.configure(show="*")
-            self.eye_btn.configure(text="??")
+            self.eye_btn.configure(text="👁️")
 
     def create_input_group(self, label_text, placeholder, is_password=False):
         group_frame = ctk.CTkFrame(self.card, fg_color="transparent")
@@ -200,7 +233,7 @@ class LoginView(ctk.CTkFrame):
             entry.configure(show="*")
             entry.pack(side="left", fill="both", expand=True, padx=(15, 0))
             self.eye_btn = ctk.CTkButton(
-                input_container, text="??", width=35, height=35,
+                input_container, text="👁️", width=35, height=35,
                 fg_color="transparent", text_color="black", hover_color="#CBD5E1",
                 command=self.toggle_password_visibility
             )
@@ -210,7 +243,7 @@ class LoginView(ctk.CTkFrame):
         self.last_entry = entry
 
     def validar_login(self):
-        if self.user_entry.get() == "1" and self.pass_entry.get() == "1":
+        if self.user_entry.get() == "adminuni@unicol.mx" and self.pass_entry.get() == "123456":
             self.on_login_success()
         else:
             self.error_label.configure(text=AppContext.t("Credenciales incorrectas."))

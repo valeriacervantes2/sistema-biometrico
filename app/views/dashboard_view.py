@@ -61,7 +61,7 @@ class DashboardView(ctk.CTkFrame):
 
         ctk.CTkButton(
             parent,
-            text="?? " + AppContext.t("Cerrar Sesión"),
+            text="🚪 " + AppContext.t("Cerrar Sesión"),
             fg_color="transparent",
             text_color="#EF4444",
             command=self.on_back
@@ -91,7 +91,7 @@ class DashboardView(ctk.CTkFrame):
         ).pack(side="left", padx=(5, 0))
 
         ctk.CTkButton(
-            header, text="", width=22, height=22,
+            header, text="❌", width=22, height=22,
             fg_color="transparent", text_color=COLORS["text"],
             hover_color=COLORS["hover"], font=("Inter", 14, "bold"),
             command=self.cerrar_overlay
@@ -152,11 +152,16 @@ class DashboardView(ctk.CTkFrame):
     def toggle_theme(self):
         if self.theme_switch.get() == 1:
             ctk.set_appearance_mode("dark")
+            self.theme_icon.configure(text="☽", text_color="#60A5FA")
+            self.theme_switch.configure(progress_color="#3B82F6", button_color="#93C5FD")
         else:
             ctk.set_appearance_mode("light")
+            self.theme_icon.configure(text="☀️", text_color="#FACC15")
+            self.theme_switch.configure(progress_color="#F59E0B", button_color="#FACC15")
+
         self.actualizar_grafica()
         self.render_mini_tabla_accesos_data()
-
+        
     def limpiar_derecha(self):
         for widget in self.content_container.winfo_children():
             widget.destroy()
@@ -276,10 +281,10 @@ class DashboardView(ctk.CTkFrame):
 
         total_registros, accesos_hoy, autorizados, denegados = self.obtener_estadisticas_dashboard()
 
-        self.create_stat_card(stats_frame, "?? " + AppContext.t("Total Registros"), str(total_registros), "#3B82F6", 0)
-        self.create_stat_card(stats_frame, "?? " + AppContext.t("Accesos Hoy"),     str(accesos_hoy),     "#6366F1", 1)
-        self.create_stat_card(stats_frame, "? " + AppContext.t("Autorizados"),      str(autorizados),     "#10B981", 2)
-        self.create_stat_card(stats_frame, "?? " + AppContext.t("Denegados"),        str(denegados),       "#EF4444", 3)
+        self.create_stat_card(stats_frame, "👥 " + AppContext.t("Total Registros"), str(total_registros), "#3B82F6", 0)
+        self.create_stat_card(stats_frame, "🕒 " + AppContext.t("Accesos Hoy"),     str(accesos_hoy),     "#6366F1", 1)
+        self.create_stat_card(stats_frame, "✅ " + AppContext.t("Autorizados"),      str(autorizados),     "#10B981", 2)
+        self.create_stat_card(stats_frame, "🚫 " + AppContext.t("Denegados"),        str(denegados),       "#EF4444", 3)
 
         graph_box = ctk.CTkFrame(
             main_scroll, fg_color=COLORS["card"],
@@ -290,7 +295,7 @@ class DashboardView(ctk.CTkFrame):
     
         ctk.CTkLabel(
             graph_box,
-            text=AppContext.t("?? Tendencia de Accesos por Hora"),
+            text="📈" + AppContext.t("Tendencia de Accesos por Hora"),
             font=("Inter", 18, "bold"), text_color=COLORS["text"]
         ).pack(anchor="w", padx=30, pady=20)
 
@@ -670,7 +675,7 @@ class DashboardView(ctk.CTkFrame):
 
         ctk.CTkButton(
             self.sidebar_frame,
-            text=" " + AppContext.t("Cerrar Sesión"),
+            text="🚪 " + AppContext.t("Cerrar Sesión"),
             fg_color="transparent", text_color="#EF4444",
             font=("Inter", 14, "bold"), command=self.on_back
         ).pack(side="bottom", pady=30, padx=20, fill="x")
@@ -707,7 +712,7 @@ class DashboardView(ctk.CTkFrame):
 
         if self.is_compact:
             ctk.CTkButton(
-                container, text="?", width=40, height=40,
+                container, text="☰", width=40, height=40,
                 fg_color="transparent", text_color=COLORS["text"],
                 command=self.toggle_sidebar_overlay
             ).pack(side="left", padx=20)
@@ -719,10 +724,11 @@ class DashboardView(ctk.CTkFrame):
         t_f = ctk.CTkFrame(wrapper, fg_color="#E2E8F0", corner_radius=20, width=100, height=38)
         t_f.pack(side="left", padx=10)
         t_f.pack_propagate(False)
-        ctk.CTkLabel(t_f, text="??", font=("Inter", 16)).place(x=20, y=19, anchor="center")
+        self.theme_icon = ctk.CTkLabel(t_f, text="☀️", font=("Inter", 16))
+        self.theme_icon.place(x=20, y=19, anchor="center")
         self.theme_switch = ctk.CTkSwitch(
-            t_f, text="", width=40,
-            progress_color="#1D1D1F", command=self.toggle_theme
+            t_f, text="", width=40, fg_color="gray",
+            progress_color="#3B82F6", button_color="#FACC15", command=self.toggle_theme
         )
         if ctk.get_appearance_mode() == "Dark":
             self.theme_switch.select()
@@ -733,7 +739,7 @@ class DashboardView(ctk.CTkFrame):
         # Selector de Idioma
         l_c = ctk.CTkFrame(wrapper, fg_color="#E2E8F0", corner_radius=20, height=38)
         l_c.pack(side="left", padx=10)
-        ctk.CTkLabel(l_c, text="??", font=("Inter", 16)).pack(side="left", padx=(12, 5))
+        ctk.CTkLabel(l_c, text="🌐", font=("Inter", 16)).pack(side="left", padx=(12, 5))
 
         color_es = "#1D1D1F" if AppContext.idioma_actual == "es" else "transparent"
         txt_es   = "white"   if AppContext.idioma_actual == "es" else COLORS["text"]

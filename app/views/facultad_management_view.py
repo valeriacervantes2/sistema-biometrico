@@ -205,7 +205,7 @@ class FacultadManagementView(ctk.CTkFrame):
 
                 if es_activa:
                     ctk.CTkButton(
-                        actions, text=AppContext.t( "Desactivar"), height=36,
+                        actions, text="🗑️ " + AppContext.t( "Desactivar"), height=36,
                         fg_color="#FFF1F2", text_color="#E11D48",
                         command=lambda id_f=f["id"], n=f["nombre"]: self.confirmar_cambio_estado(id_f, n, desactivar=True)
                     ).pack(side="left", expand=True, fill="x", padx=(6, 0))
