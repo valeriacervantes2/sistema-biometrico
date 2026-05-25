@@ -165,7 +165,7 @@ class LoginView(ctk.CTkFrame):
 
         self.login_btn = ctk.CTkButton(
             self.card,
-            text="?   " + AppContext.t("INICIAR SESIÓN"),
+            text="   " + AppContext.t("INICIAR SESIÓN"),
             fg_color="#000000", hover_color="#262626",
             width=350, height=55, corner_radius=12,
             font=("Inter", 15, "bold"), command=self.validar_login
