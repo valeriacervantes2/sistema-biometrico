@@ -57,6 +57,9 @@ def procesar_frame(frame):
     global encodings_db, usuarios_db, ultimo_resultado, frame_count
     
     frame_count += 1
+
+    # ?? ROTAR IMAGEN 180� (ajusta si es necesario)
+    frame = cv2.rotate(frame, cv2.ROTATE_180)
     # OPTIMIZACIÓN: Solo procesar reconocimiento cada 3 frames para evitar lag
     if frame_count % 3 != 0 and ultimo_resultado[0] is not None:
         top, right, bottom, left = ultimo_resultado[0]

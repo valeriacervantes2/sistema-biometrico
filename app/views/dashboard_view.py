@@ -61,7 +61,7 @@ class DashboardView(ctk.CTkFrame):
 
         ctk.CTkButton(
             parent,
-            text="?? " + AppContext.t("Cerrar Sesión"),
+            text="🚪 " + AppContext.t("Cerrar Sesión"),
             fg_color="transparent",
             text_color="#EF4444",
             command=self.on_back
@@ -91,7 +91,7 @@ class DashboardView(ctk.CTkFrame):
         ).pack(side="left", padx=(5, 0))
 
         ctk.CTkButton(
-            header, text="", width=22, height=22,
+            header, text="❌", width=22, height=22,
             fg_color="transparent", text_color=COLORS["text"],
             hover_color=COLORS["hover"], font=("Inter", 14, "bold"),
             command=self.cerrar_overlay
@@ -675,7 +675,7 @@ class DashboardView(ctk.CTkFrame):
 
         ctk.CTkButton(
             self.sidebar_frame,
-            text=" " + AppContext.t("Cerrar Sesión"),
+            text="🚪 " + AppContext.t("Cerrar Sesión"),
             fg_color="transparent", text_color="#EF4444",
             font=("Inter", 14, "bold"), command=self.on_back
         ).pack(side="bottom", pady=30, padx=20, fill="x")
@@ -712,7 +712,7 @@ class DashboardView(ctk.CTkFrame):
 
         if self.is_compact:
             ctk.CTkButton(
-                container, text="?", width=40, height=40,
+                container, text="☰", width=40, height=40,
                 fg_color="transparent", text_color=COLORS["text"],
                 command=self.toggle_sidebar_overlay
             ).pack(side="left", padx=20)

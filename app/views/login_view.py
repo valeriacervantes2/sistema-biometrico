@@ -89,7 +89,7 @@ class LoginView(ctk.CTkFrame):
 
         # 3. Bot�n de C�mara
         self.btn_regresar_terminal = ctk.CTkButton(
-            self.controls_wrapper, text="??", width=45, height=38, corner_radius=15,
+            self.controls_wrapper, text="👁️", width=45, height=38, corner_radius=15,
             fg_color="white", text_color="#1D1D1F", hover_color="#CBD5E1",
             border_width=1, border_color="#E2E8F0", font=("Inter", 18),
             command=self.regresar_a_terminal
@@ -211,10 +211,10 @@ class LoginView(ctk.CTkFrame):
     def toggle_password_visibility(self):
         if self.pass_entry.cget("show") == "*":
             self.pass_entry.configure(show="")
-            self.eye_btn.configure(text="??")
+            self.eye_btn.configure(text="❌")
         else:
             self.pass_entry.configure(show="*")
-            self.eye_btn.configure(text="??")
+            self.eye_btn.configure(text="👁️")
 
     def create_input_group(self, label_text, placeholder, is_password=False):
         group_frame = ctk.CTkFrame(self.card, fg_color="transparent")
@@ -233,7 +233,7 @@ class LoginView(ctk.CTkFrame):
             entry.configure(show="*")
             entry.pack(side="left", fill="both", expand=True, padx=(15, 0))
             self.eye_btn = ctk.CTkButton(
-                input_container, text="??", width=35, height=35,
+                input_container, text="👁️", width=35, height=35,
                 fg_color="transparent", text_color="black", hover_color="#CBD5E1",
                 command=self.toggle_password_visibility
             )
@@ -243,7 +243,7 @@ class LoginView(ctk.CTkFrame):
         self.last_entry = entry
 
     def validar_login(self):
-        if self.user_entry.get() == "1" and self.pass_entry.get() == "1":
+        if self.user_entry.get() == "adminuni@unicol.mx" and self.pass_entry.get() == "123456":
             self.on_login_success()
         else:
             self.error_label.configure(text=AppContext.t("Credenciales incorrectas."))
