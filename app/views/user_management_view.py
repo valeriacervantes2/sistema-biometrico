@@ -571,9 +571,9 @@ class UserManagementView(ctk.CTkFrame):
             entrada.configure(validate="key", validatecommand=vcmd)
 
         texto_biometria = (
-            "?? " + AppContext.t("Actualizar Biometría")
+            AppContext.t("Actualizar Biometría")
             if usuario
-            else "?? " + AppContext.t("Registrar Biometría")
+            else AppContext.t("Registrar Biometría")
         )
         self.btn_biometria = ctk.CTkButton(
             self.form_container,
